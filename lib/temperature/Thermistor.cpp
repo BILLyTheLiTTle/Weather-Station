@@ -13,7 +13,8 @@ Thermistor::Thermistor(uint8_t analogPin,
       _beta(betaCoefficient) {}
 
 Temperature Thermistor::readTemperatureC() {
-    int adc = analogRead(_pin);
+    const float manualCalibration = 1.0688;
+    uint16_t adc = analogRead(_pin);
 
     if (adc <= 0) {
         _sensorStatus = Temperature::SHORT_TO_GND;
@@ -36,7 +37,7 @@ Temperature Thermistor::readTemperatureC() {
     steinhart -= 273.15;                              // K -> C
 
     _sensorStatus = Temperature::OK;
-    return {steinhart, _sensorStatus};
+    return {steinhart * manualCalibration, _sensorStatus};
 }
 
 Temperature Thermistor::readTemperatureK() {
