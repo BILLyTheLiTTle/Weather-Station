@@ -1,5 +1,8 @@
 #include <float.h>
 #include "Thermistor.h"
+#include "Battery.h"
+
+bool isIntervalElapsed(uint32_t interval);
 
 Thermistor therm(
     A0,        // analog pin
@@ -8,31 +11,44 @@ Thermistor therm(
     25.0,      // nominal temp (25°C) from thermistor datasheet
     ThermistorConstants::BETA_3950   // Beta coefficient (β) of the thermistor
 );
-void updateTemperature(uint32_t interval);
+void printTemperature();
+
+Battery battery(A1, 10.0, 15.0);
+void printBatteryPercentage();
 
 void setup() {
     Serial.begin(9600);
+
+    battery.begin();
 }
 
 void loop() {
-    updateTemperature(10000L);
+    if (isIntervalElapsed(10000L)) {
+        printTemperature();
 
-    //delay(10000);
+        printBatteryPercentage();
+    }
+
+    // delay(10000);
 }
 
-void updateTemperature(uint32_t interval) {
-    static float maxMeasuredTemp = -FLT_MAX;
-    static float minMeasuredTemp = FLT_MAX;
-    static float currentTemp = NAN;
-
+bool isIntervalElapsed(uint32_t interval) {
     static uint32_t lastReadTime = 0;
 
     uint32_t now = millis();
 
     if (lastReadTime != 0 && (now - lastReadTime) < interval) {
-        return;
+        return false;
     }
     lastReadTime = now;
+
+    return true;
+}
+
+void printTemperature() {
+    static float maxMeasuredTemp = -FLT_MAX;
+    static float minMeasuredTemp = FLT_MAX;
+    static float currentTemp = NAN;
 
     Temperature temp = therm.readTemperatureC();
 
@@ -67,4 +83,15 @@ void updateTemperature(uint32_t interval) {
         Serial.print("Error in temperature sensor: ");
         Serial.println(Temperature::getName(temp.status));
     }
+}
+
+void printBatteryPercentage() {
+    float v = battery.readFilteredVoltage();
+    int p = battery.readPercent();
+
+    Serial.print("Battery: ");
+    Serial.print(p);
+    Serial.print("% (");
+    Serial.print(v);
+    Serial.println("V)");
 }
