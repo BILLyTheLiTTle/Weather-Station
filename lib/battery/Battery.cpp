@@ -4,7 +4,7 @@ Battery::Battery(uint8_t pin, float r1, float r2)
 : _pin(pin), _r1(r1), _r2(r2) {}
 
 void Battery::begin() {
-    pinMode(_pin, INPUT);
+    // pinMode(_pin, INPUT);
 
     for (int i = 0; i < N; i++) {
         _samples[i] = 0;
