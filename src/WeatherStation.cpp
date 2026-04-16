@@ -29,8 +29,6 @@ void printRamStats();
 void setup() {
     Serial.begin(9600);
 
-    ram.begin();
-
     battery.begin();
 
     eeprom.begin();
@@ -43,7 +41,7 @@ void loop() {
         printTemperature();
 
         printBatteryPercentage();
-
+        
         printRamStats();
     }
 
