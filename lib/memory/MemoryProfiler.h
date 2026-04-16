@@ -1,60 +1,89 @@
 /*
+====================================================
+ AVR MEMORY MODEL (SIMPLIFIED BUT CORRECT)
+====================================================
+
 ==========================
- AVR MEMORY LAYOUT (SIMPLIFIED)
+ FLASH (PROGRAM MEMORY)
+==========================
+- Non-volatile memory (code storage)
+- CPU executes from here
+
+  .text
+    -> compiled program instructions
+
+  .rodata
+    -> constant data (string literals, const globals)
+    -> e.g. "hello", lookup tables
+
+NOTE:
+- Flash is NOT directly RAM-accessible as normal pointers
+- Special instructions are used to read it
+
+==========================
+ SRAM (NORMAL RAM - 2KB on ATmega328P)
 ==========================
 
 LOW MEMORY (0x0000)
 |
 |  .data
-|    -> initialized global variables
-|    -> copied from flash to RAM at startup
+|    -> global/static variables WITH initial values
+|    -> copied from Flash at startup
 |
 |  .bss
-|    -> uninitialized global/static variables
-|    -> automatically zeroed at startup
+|    -> global/static variables initialized to 0
+|    -> cleared at startup
 |
-|  __bss_end
-|    -> end of all global/static RAM usage
-|    -> start of "free RAM area"
+|  HEAP
+|    -> dynamic memory (malloc/free)
+|    -> grows upward
 |
 |  FREE RAM
-|    -> used by heap + stack
-|
-|  HEAP (malloc)
-|    -> grows upward (towards higher addresses)
-|    -> starts at __heap_start
+|    -> unused SRAM between heap and stack
 |
 |  STACK
-|    -> grows downward (towards lower addresses)
-|    -> contains function frames + local variables
+|    -> function calls + local variables
+|    -> grows downward
 |
-HIGH MEMORY (RAM end)
+HIGH MEMORY (end of SRAM)
+
+==========================
+ POINTER MODEL IN SRAM
+==========================
+- normal pointers live in SRAM:
+    char*, int*, struct*
+- they point to SRAM addresses by default
+
+IMPORTANT:
+- Flash pointers are NOT normal pointers
+- they require special handling (e.g. F(), pgm_read)
 
 ==========================
  LINKER SYMBOLS
 ==========================
-
 __bss_start
     -> start of .bss section
 
 __bss_end
     -> end of .data + .bss
-    -> start boundary for dynamic memory area
+    -> start of heap region
 
 __heap_start
     -> first address available for heap allocation
 
 __brkval
-    -> current end of heap (0 if heap unused)
+    -> current heap end (0 if heap unused)
 
 ==========================
  IMPORTANT RULES
 ==========================
 
-1. Globals are allocated BEFORE main() runs.
-2. Heap and stack share remaining RAM.
-3. Stack overflow can overwrite heap and globals.
-4. Heap fragmentation is possible over time.
+1. FLASH holds code + constants (.text, .rodata)
+2. SRAM holds runtime state (.data, .bss, heap, stack)
+3. .data is copied from FLASH into SRAM at startup
+4. heap and stack share same SRAM space (grow towards each other)
+5. stack overflow can corrupt heap and globals
+6. memory is not protected (no MMU on AVR)
 */
 
 #pragma once

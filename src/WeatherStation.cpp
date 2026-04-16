@@ -76,25 +76,25 @@ void printTemperature() {
         // Print only if changed
         if (isnan(currentTemp) || currentTemp != roundedTemp) {
             currentTemp = roundedTemp;
-            Serial.print("Current temperature: ");
+            Serial.print(F("Current temperature: "));
             Serial.print(currentTemp);
-            Serial.println("°C");
+            Serial.println(F("°C"));
         }
 
         // Max update
         if (roundedTemp > maxMeasuredTemp) {
             maxMeasuredTemp = roundedTemp;
-            Serial.print("Max temperature: ");
+            Serial.print(F("Max temperature: "));
             Serial.print(maxMeasuredTemp);
-            Serial.println("°C");
+            Serial.println(F("°C"));
         }
 
         // Min update (independent!)
         if (roundedTemp < minMeasuredTemp) {
             minMeasuredTemp = roundedTemp;
-            Serial.print("Min temperature: ");
+            Serial.print(F("Min temperature: "));
             Serial.print(minMeasuredTemp);
-            Serial.println("°C");
+            Serial.println(F("°C"));
         }
 
 
@@ -102,15 +102,15 @@ void printTemperature() {
 
         // old and unprecise printing because we do not store something to save the memory hotspots
         eeprom.loadLifetime(l);
-        Serial.print("Min temperature lifetime: ");
+        Serial.print(F("Min temperature lifetime: "));
         Serial.print(l.minTemp);
-        Serial.println("°C");
-        Serial.print("Max temperature lifetime: ");
+        Serial.println(F("°C"));
+        Serial.print(F("Max temperature lifetime: "));
         Serial.print(l.maxTemp);
-        Serial.println("°C");
+        Serial.println(F("°C"));
 
     } else {
-        Serial.print("Error in temperature sensor: ");
+        Serial.print(F("Error in temperature sensor: "));
         Serial.println(Temperature::getName(temp.status));
     }
 }
@@ -148,11 +148,11 @@ void printBatteryPercentage() {
     float v = battery.readFilteredVoltage();
     int p = battery.readPercent();
 
-    Serial.print("Battery: ");
+    Serial.print(F("Battery: "));
     Serial.print(p);
-    Serial.print("% (");
+    Serial.print(F("% ("));
     Serial.print(v);
-    Serial.println("V)");
+    Serial.println(F("V)"));
 }
 
 void printRamStats() {
