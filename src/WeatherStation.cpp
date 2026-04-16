@@ -1,6 +1,7 @@
 #include <float.h>
 #include "Thermistor.h"
 #include "Battery.h"
+#include "../../lib/memory/MemoryProfiler.h"
 #include "../../lib/storage/eeprom/EEPROM_25LC040A.h"
 
 bool isIntervalElapsed(uint32_t interval);
@@ -22,8 +23,13 @@ DailyStats d;
 LifetimeStats l;
 void storeTemperatureStats(float roundedTemp, DailyStats &day, LifetimeStats &life);
 
+MemoryProfiler ram(2048);
+void printRamStats();
+
 void setup() {
     Serial.begin(9600);
+
+    ram.begin();
 
     battery.begin();
 
@@ -37,6 +43,8 @@ void loop() {
         printTemperature();
 
         printBatteryPercentage();
+
+        printRamStats();
     }
 
     // delay(10000);
@@ -145,4 +153,15 @@ void printBatteryPercentage() {
     Serial.print("% (");
     Serial.print(v);
     Serial.println("V)");
+}
+
+void printRamStats() {
+    Serial.print(F("Heap used: "));
+    Serial.println(ram.getHeapUsed());
+
+    Serial.print(F("Free RAM: "));
+    Serial.println(ram.getFreeRam());
+
+    Serial.print(F("Used RAM approx: "));
+    Serial.println(ram.getUsedRamApprox());
 }
