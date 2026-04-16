@@ -18,12 +18,10 @@ size_t MemoryProfiler::getHeapUsed() {
 // ---------------- free RAM ----------------
 // Measures space between heap end and current stack position
 size_t MemoryProfiler::getFreeRam() const {
-    int v;
-
     if (__brkval == 0) {
-        return (size_t)&v - (size_t)&__bss_end;
+        return (size_t)SP - (size_t)&__bss_end;
     } else {
-        return (size_t)&v - (size_t)__brkval;
+        return (size_t)SP - (size_t)__brkval;
     }
 }
 
@@ -35,8 +33,7 @@ size_t MemoryProfiler::getUsedRamApprox() const {
 
 // ---------------- stack pointer (debug helper) ----------------
 size_t MemoryProfiler::getStackPointer() const {
-    int v;
-    return (size_t)&v;
+    return SP;
 }
 
 // ---------------- heap pointer (debug helper) ----------------
