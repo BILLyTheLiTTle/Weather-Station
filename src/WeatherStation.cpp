@@ -38,11 +38,15 @@ void setup() {
 
 void loop() {
     if (isIntervalElapsed(10000L)) {
+        Serial.println(F("=*=*=*= START =*=*=*="));
+
         printTemperature();
 
         printBatteryPercentage();
         
         printRamStats();
+
+        Serial.println(F("=*=*=*= END =*=*=*="));
     }
 
     // delay(10000);
@@ -72,12 +76,12 @@ void printTemperature() {
         float roundedTemp = floorf(temp.value * 2.0f + 0.5f) / 2.0f;
 
         // Print only if changed
-        if (isnan(currentTemp) || currentTemp != roundedTemp) {
+        //if (isnan(currentTemp) || currentTemp != roundedTemp) {
             currentTemp = roundedTemp;
             Serial.print(F("Current temperature: "));
             Serial.print(currentTemp);
             Serial.println(F("°C"));
-        }
+        //}
 
         // Max update
         if (roundedTemp > maxMeasuredTemp) {
