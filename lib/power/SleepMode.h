@@ -9,7 +9,7 @@ public:
 
     void begin();
     void update();
-    void SleepMode::enable();
+    void enable();
 
     SystemState getState();
 
