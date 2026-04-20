@@ -1,6 +1,7 @@
 #include <float.h>
 #include "Thermistor.h"
 #include "Battery.h"
+#include "SleepMode.h"
 #include "../../lib/memory/MemoryProfiler.h"
 #include "../../lib/storage/eeprom/EEPROM_25LC040A.h"
 
@@ -26,6 +27,9 @@ void storeTemperatureStats(float roundedTemp, DailyStats &day, LifetimeStats &li
 MemoryProfiler ram(2048);
 void printRamStats();
 
+SleepMode sleepSwitch(3);
+void enterSleep();
+
 void setup() {
     Serial.begin(9600);
 
@@ -34,22 +38,33 @@ void setup() {
     eeprom.begin();
 
     eeprom.loadLifetime(l);
+
+    sleepSwitch.begin();
 }
 
 void loop() {
-    if (isIntervalElapsed(10000L)) {
-        Serial.println(F("=*=*=*= START =*=*=*="));
+    // 1. Constantly update the switch state to catch real-time changes
+    sleepSwitch.update();
 
-        printTemperature();
-
-        printBatteryPercentage();
+    // If the state is SLEEP, enter low-power mode immediately.
+    // We don't wait for the interval timer to trigger sleep.
+    if (sleepSwitch.getState() == SystemState::SLEEP) {
+        Serial.println(F("System going to sleep..."));
+        sleepSwitch.enable(); 
         
-        printRamStats();
-
-        Serial.println(F("=*=*=*= END =*=*=*="));
+        // Execution resumes here after the interrupt wakes up the MCU.
+        // Update state immediately to reflect the wake-up trigger.
+        sleepSwitch.update();
     }
 
-    // delay(10000);
+    // Only perform measurements if the system is ACTIVE and the interval has elapsed.
+    if (isIntervalElapsed(10000L)) {
+        Serial.println(F("=*=*=*= START =*=*=*="));
+        printTemperature();
+        printBatteryPercentage();
+        printRamStats();
+        Serial.println(F("=*=*=*= END =*=*=*="));
+    }
 }
 
 bool isIntervalElapsed(uint32_t interval) {
