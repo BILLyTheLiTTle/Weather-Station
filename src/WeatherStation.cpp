@@ -5,6 +5,8 @@
 #include "../../lib/memory/MemoryProfiler.h"
 #include "../../lib/storage/eeprom/EEPROM_25LC040A.h"
 
+#define INTERVAL_BETWEEN_ACTIONS 10000L
+
 bool isIntervalElapsed(uint32_t interval);
 
 Thermistor therm(
@@ -60,7 +62,7 @@ void loop() {
     }
 
     // Only perform measurements if the system is ACTIVE and the interval has elapsed.
-    if (isIntervalElapsed(10000L)) {
+    if (isIntervalElapsed(INTERVAL_BETWEEN_ACTIONS)) {
         Serial.println(F("=*=*=*= START =*=*=*="));
         printTemperature();
         printBatteryPercentage();
