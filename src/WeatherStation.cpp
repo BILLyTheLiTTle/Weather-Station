@@ -40,6 +40,8 @@ void setup() {
     eeprom.loadLifetime(l);
 
     sleepSwitch.begin();
+
+    // eeprom.factoryReset();
 }
 
 void loop() {
@@ -81,7 +83,7 @@ bool isIntervalElapsed(uint32_t interval) {
 }
 
 void printTemperature() {
-    static float maxMeasuredTemp = -FLT_MAX;
+    static float maxMeasuredTemp = FLT_MIN;
     static float minMeasuredTemp = FLT_MAX;
     static float currentTemp = NAN;
 
@@ -114,17 +116,34 @@ void printTemperature() {
             Serial.println(F("°C"));
         }
 
-
         // storeTemperatureStats(roundedTemp, d, l);
 
         // old and unprecise printing because we do not store something to save the memory hotspots
         eeprom.loadLifetime(l);
         Serial.print(F("Min temperature lifetime: "));
         Serial.print(l.minTemp);
-        Serial.println(F("°C"));
+        Serial.print(F("°C @ "));
+        Serial.print(l.minDay);
+        Serial.print(F("/"));
+        Serial.print(l.minMonth);
+        Serial.print(F("/"));
+        Serial.print(l.minYear);
+        Serial.print(F(" "));
+        Serial.print(l.minHour);
+        Serial.print(F(":"));
+        Serial.println(l.minMinute);
         Serial.print(F("Max temperature lifetime: "));
         Serial.print(l.maxTemp);
-        Serial.println(F("°C"));
+        Serial.print(F("°°C @ "));
+        Serial.print(l.maxDay);
+        Serial.print(F("/"));
+        Serial.print(l.maxMonth);
+        Serial.print(F("/"));
+        Serial.print(l.maxYear);
+        Serial.print(F(" "));
+        Serial.print(l.maxHour);
+        Serial.print(F(":"));
+        Serial.println(l.maxMinute);
 
     } else {
         Serial.print(F("Error in temperature sensor: "));
@@ -133,32 +152,67 @@ void printTemperature() {
 }
 
 void storeTemperatureStats(float roundedTemp, DailyStats &day, LifetimeStats &life) {
-    // ---------------- DAILY ----------------
-    bool dailyChanged = false; // to be used with RTC
-    if (roundedTemp > day.maxTemp) {
+    bool dailyChanged = false;
+    bool lifetimeChanged = false;
+
+    // ---------------- DAILY STATS ----------------
+    
+    // Check for NEW MAX: If current is NaN (after reset) OR new temp is higher
+    if (isnan(day.maxTemp) || roundedTemp > day.maxTemp) {
         day.maxTemp = roundedTemp;
+        day.maxYear = 2026;
+        day.maxMonth = 12;
+        day.maxDay = 31;
+        day.maxHour = 23;
+        day.maxMinute = 59;
         dailyChanged = true;
     }
 
-    if (roundedTemp < day.minTemp) {
+    // Check for NEW MIN: If current is NaN (after reset) OR new temp is lower
+    if (isnan(day.minTemp) || roundedTemp < day.minTemp) {
         day.minTemp = roundedTemp;
+        day.minYear = 2026;
+        day.minMonth = 12;
+        day.minDay = 31;
+        day.minHour = 23;
+        day.minMinute = 59;
         dailyChanged = true;
     }
 
-    // ---------------- LIFETIME ----------------
-    bool lifetimeChanged = false; // TO be used with RTC
-    if (roundedTemp > life.maxTemp) {
+    // ---------------- LIFETIME STATS ----------------
+    
+    // Lifetime Max check
+    if (isnan(life.maxTemp) || roundedTemp > life.maxTemp) {
         life.maxTemp = roundedTemp;
+        life.maxYear = 2026;
+        life.maxMonth = 12;
+        life.maxDay = 31;
+        life.maxHour = 23;
+        life.maxMinute = 59;
         lifetimeChanged = true;
     }
 
-    if (roundedTemp < life.minTemp) {
+    // Lifetime Min check
+    if (isnan(life.minTemp) || roundedTemp < life.minTemp) {
         life.minTemp = roundedTemp;
+        life.minYear = 2026;
+        life.minMonth = 12;
+        life.minDay = 31;
+        life.minHour = 23;
+        life.minMinute = 59;
         lifetimeChanged = true;
     }
 
-    if (dailyChanged) eeprom.saveDaily(day);
-    if (lifetimeChanged) eeprom.saveLifetime(life);
+    // ---------------- SAVE TO EEPROM ----------------
+    
+    // Save only if a record was broken to protect EEPROM lifespan
+    if (dailyChanged) {
+        eeprom.saveDaily(day);
+    }
+    
+    if (lifetimeChanged) {
+        eeprom.saveLifetime(life);
+    }
 }
 
 void printBatteryPercentage() {

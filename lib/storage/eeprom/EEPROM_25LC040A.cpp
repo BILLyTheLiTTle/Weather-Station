@@ -51,41 +51,82 @@ void EEPROM_25LC040A::waitWrite() {
 
 // -------------------- LOW LEVEL IO --------------------
 
-void EEPROM_25LC040A::writeBytes(uint16_t addr, const void *data, uint16_t len) {
-    writeEnable();
+// --- SINGLE BYTE OPERATIONS (The Foundation) ---
+
+void EEPROM_25LC040A::writeByte(uint16_t addr, uint8_t data) {
+    writeEnable(); // Allow writing
 
     SPI.beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE0));
-
     csLow();
 
-    SPI.transfer(WRITE);
-    SPI.transfer(addr >> 8);
-    SPI.transfer(addr & 0xFF);
+    // Handle 9th bit of address (A8) inside the instruction
+    uint8_t instruction = WRITE;
+    if (addr & 0x0100) instruction |= 0x08; 
 
-    const uint8_t *ptr = (const uint8_t*)data;
-    for (uint16_t i = 0; i < len; i++) {
-        SPI.transfer(ptr[i]);
-    }
+    SPI.transfer(instruction);
+    SPI.transfer(addr & 0xFF); // Send the rest 8 bits
+    SPI.transfer(data);
 
     csHigh();
-
     SPI.endTransaction();
+    
+    waitWrite(); // Wait for the EEPROM to finish physical storage
+}
 
-    waitWrite();
+uint8_t EEPROM_25LC040A::readByte(uint16_t addr) {
+    SPI.beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE0));
+    csLow();
+
+    uint8_t instruction = READ;
+    if (addr & 0x0100) instruction |= 0x08; 
+
+    SPI.transfer(instruction);
+    SPI.transfer(addr & 0xFF);
+    uint8_t data = SPI.transfer(0x00);
+
+    csHigh();
+    SPI.endTransaction();
+    
+    return data;
+}
+
+// --- MULTI-BYTE OPERATIONS (The Reusable Layer) ---
+
+void EEPROM_25LC040A::writeBytes(uint16_t addr, const void *data, uint16_t len) {
+    const uint8_t *ptr = (const uint8_t*)data;
+
+    for (uint16_t i = 0; i < len; i++) {
+        // Reuse the single byte function to bypass pagination logic
+        writeByte(addr + i, ptr[i]);
+    }
 }
 
 void EEPROM_25LC040A::readBytes(uint16_t addr, void *data, uint16_t len) {
+    uint8_t *ptr = (uint8_t*)data;
+    
+    // Note: We don't reuse readByte here because the 25LC040A supports 
+    // "Sequential Read". It's much faster to keep CS LOW and read everything.
+    SPI.beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE0));
     csLow();
-    SPI.transfer(READ);
-    SPI.transfer(addr >> 8);
+
+    uint8_t instruction = READ;
+    if (addr & 0x0100) instruction |= 0x08; 
+
+    SPI.transfer(instruction);
     SPI.transfer(addr & 0xFF);
 
-    uint8_t *ptr = (uint8_t*)data;
     for (uint16_t i = 0; i < len; i++) {
         ptr[i] = SPI.transfer(0x00);
     }
 
     csHigh();
+    SPI.endTransaction();
+}
+
+void EEPROM_25LC040A::factoryReset() {    
+    for (uint16_t i = 0; i < 512; i++) {
+        writeByte(i, 0xFF);
+    }
 }
 
 // -------------------- MEMORY MAP --------------------
