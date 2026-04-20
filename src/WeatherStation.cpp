@@ -64,10 +64,12 @@ void loop() {
     // Only perform measurements if the system is ACTIVE and the interval has elapsed.
     if (isIntervalElapsed(INTERVAL_BETWEEN_ACTIONS)) {
         Serial.println(F("=*=*=*= START =*=*=*="));
+        Serial.println(F("-*-*-*- Environment Stats -*-*-*-"));
         printTemperature();
+        Serial.println(F("-*-*-*- System Stats -*-*-*-"));
         printBatteryPercentage();
         printRamStats();
-        Serial.println(F("=*=*=*= END =*=*=*="));
+        Serial.println(F("=*=*=*= END =*=*=*=\n"));
     }
 }
 
@@ -97,7 +99,7 @@ void printTemperature() {
         // Print only if changed
         //if (isnan(currentTemp) || currentTemp != roundedTemp) {
             currentTemp = roundedTemp;
-            Serial.print(F("Current temperature: "));
+            Serial.print(F(" Current temperature: "));
             Serial.print(currentTemp);
             Serial.println(F("°C"));
         //}
@@ -105,7 +107,7 @@ void printTemperature() {
         // Max update
         if (roundedTemp > maxMeasuredTemp) {
             maxMeasuredTemp = roundedTemp;
-            Serial.print(F("Max temperature: "));
+            Serial.print(F(" Max temperature: "));
             Serial.print(maxMeasuredTemp);
             Serial.println(F("°C"));
         }
@@ -113,7 +115,7 @@ void printTemperature() {
         // Min update (independent!)
         if (roundedTemp < minMeasuredTemp) {
             minMeasuredTemp = roundedTemp;
-            Serial.print(F("Min temperature: "));
+            Serial.print(F(" Min temperature: "));
             Serial.print(minMeasuredTemp);
             Serial.println(F("°C"));
         }
@@ -122,7 +124,7 @@ void printTemperature() {
 
         // old and unprecise printing because we do not store something to save the memory hotspots
         eeprom.loadLifetime(l);
-        Serial.print(F("Min temperature lifetime: "));
+        Serial.print(F(" Min temperature lifetime: "));
         Serial.print(l.minTemp);
         Serial.print(F("°C @ "));
         Serial.print(l.minDay);
@@ -134,7 +136,7 @@ void printTemperature() {
         Serial.print(l.minHour);
         Serial.print(F(":"));
         Serial.println(l.minMinute);
-        Serial.print(F("Max temperature lifetime: "));
+        Serial.print(F(" Max temperature lifetime: "));
         Serial.print(l.maxTemp);
         Serial.print(F("°°C @ "));
         Serial.print(l.maxDay);
@@ -221,7 +223,7 @@ void printBatteryPercentage() {
     float v = battery.readFilteredVoltage();
     int p = battery.readPercent();
 
-    Serial.print(F("Battery: "));
+    Serial.print(F(" Battery: "));
     Serial.print(p);
     Serial.print(F("% ("));
     Serial.print(v);
@@ -229,12 +231,12 @@ void printBatteryPercentage() {
 }
 
 void printRamStats() {
-    Serial.print(F("Heap used: "));
+    Serial.print(F(" Heap used: "));
     Serial.println(ram.getHeapUsed());
 
-    Serial.print(F("Free RAM: "));
+    Serial.print(F(" Free RAM: "));
     Serial.println(ram.getFreeRam());
 
-    Serial.print(F("Used RAM approx: "));
+    Serial.print(F(" Used RAM approx: "));
     Serial.println(ram.getUsedRamApprox());
 }
