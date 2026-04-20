@@ -30,9 +30,9 @@ public:
 
     void readBytes(uint16_t addr, void *data, uint16_t len);
     void writeBytes(uint16_t addr, const void *data, uint16_t len);
-    void EEPROM_25LC040A::writeByte(uint16_t addr, uint8_t data);
-    uint8_t EEPROM_25LC040A::readByte(uint16_t addr);
-    void EEPROM_25LC040A::factoryReset();
+    void writeByte(uint16_t addr, uint8_t data);
+    uint8_t readByte(uint16_t addr);
+    void factoryReset();
 
     void initSystem(uint8_t maxDays);
 
