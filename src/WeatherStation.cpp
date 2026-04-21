@@ -24,7 +24,7 @@ void printBatteryPercentage();
 EEPROM_25LC040A eeprom(10);
 DailyStats d;
 LifetimeStats l;
-void storeTemperatureStats(float roundedTemp, DailyStats &day, LifetimeStats &life);
+void storeTemperatureStats(float maxTemp, float minTemp, DailyStats &day, LifetimeStats &life);
 
 MemoryProfiler ram(2048);
 void printRamStats();
@@ -99,7 +99,8 @@ void printTemperature() {
         // Print only if changed
         //if (isnan(currentTemp) || currentTemp != roundedTemp) {
             currentTemp = roundedTemp;
-            Serial.print(F(" Current temperature: "));
+            Serial.println(F(" Current Stats "));
+            Serial.print(F("  Temperature: "));
             Serial.print(currentTemp);
             Serial.println(F("°C"));
         //}
@@ -107,24 +108,18 @@ void printTemperature() {
         // Max update
         if (roundedTemp > maxMeasuredTemp) {
             maxMeasuredTemp = roundedTemp;
-            Serial.print(F(" Max temperature: "));
-            Serial.print(maxMeasuredTemp);
-            Serial.println(F("°C"));
         }
 
         // Min update (independent!)
         if (roundedTemp < minMeasuredTemp) {
             minMeasuredTemp = roundedTemp;
-            Serial.print(F(" Min temperature: "));
-            Serial.print(minMeasuredTemp);
-            Serial.println(F("°C"));
         }
 
-        // storeTemperatureStats(roundedTemp, d, l);
+        // storeTemperatureStats(maxMeasuredTemp, minMeasuredTemp, d, l);
 
-        // old and unprecise printing because we do not store something to save the memory hotspots
         eeprom.loadLifetime(l);
-        Serial.print(F(" Min temperature lifetime: "));
+        Serial.println(F(" Lifetime Stats "));
+        Serial.print(F("  Min temperature: "));
         Serial.print(l.minTemp);
         Serial.print(F("°C @ "));
         Serial.print(l.minDay);
@@ -136,7 +131,7 @@ void printTemperature() {
         Serial.print(l.minHour);
         Serial.print(F(":"));
         Serial.println(l.minMinute);
-        Serial.print(F(" Max temperature lifetime: "));
+        Serial.print(F("  Max temperature: "));
         Serial.print(l.maxTemp);
         Serial.print(F("°°C @ "));
         Serial.print(l.maxDay);
@@ -149,13 +144,40 @@ void printTemperature() {
         Serial.print(F(":"));
         Serial.println(l.maxMinute);
 
+        eeprom.loadDaily(d);
+        Serial.println(F(" Daily Stats "));
+        Serial.print(F("  Min temperature: "));
+        Serial.print(d.minTemp);
+        Serial.print(F("°C @ "));
+        Serial.print(d.minDay);
+        Serial.print(F("/"));
+        Serial.print(d.minMonth);
+        Serial.print(F("/"));
+        Serial.print(d.minYear);
+        Serial.print(F(" "));
+        Serial.print(d.minHour);
+        Serial.print(F(":"));
+        Serial.println(d.minMinute);
+        Serial.print(F("  Max temperature: "));
+        Serial.print(d.maxTemp);
+        Serial.print(F("°°C @ "));
+        Serial.print(d.maxDay);
+        Serial.print(F("/"));
+        Serial.print(d.maxMonth);
+        Serial.print(F("/"));
+        Serial.print(d.maxYear);
+        Serial.print(F(" "));
+        Serial.print(d.maxHour);
+        Serial.print(F(":"));
+        Serial.println(d.maxMinute);
+
     } else {
         Serial.print(F("Error in temperature sensor: "));
         Serial.println(Temperature::getName(temp.status));
     }
 }
 
-void storeTemperatureStats(float roundedTemp, DailyStats &day, LifetimeStats &life) {
+void storeTemperatureStats(float maxTemp, float minTemp, DailyStats &day, LifetimeStats &life) {
     bool dailyChanged = false;
     bool lifetimeChanged = false;
 
@@ -164,8 +186,8 @@ void storeTemperatureStats(float roundedTemp, DailyStats &day, LifetimeStats &li
     // TODO if current time is between 00:05 - 00:25 force write the daily stats
 
     // Check for NEW MAX: If current is NaN (after reset) OR new temp is higher
-    if (isnan(day.maxTemp) || roundedTemp > day.maxTemp) {
-        day.maxTemp = roundedTemp;
+    if (isnan(day.maxTemp) || maxTemp > day.maxTemp) {
+        day.maxTemp = maxTemp;
         day.maxYear = 2026;
         day.maxMonth = 12;
         day.maxDay = 31;
@@ -175,8 +197,8 @@ void storeTemperatureStats(float roundedTemp, DailyStats &day, LifetimeStats &li
     }
 
     // Check for NEW MIN: If current is NaN (after reset) OR new temp is lower
-    if (isnan(day.minTemp) || roundedTemp < day.minTemp) {
-        day.minTemp = roundedTemp;
+    if (isnan(day.minTemp) || minTemp < day.minTemp) {
+        day.minTemp = minTemp;
         day.minYear = 2026;
         day.minMonth = 12;
         day.minDay = 31;
@@ -188,8 +210,8 @@ void storeTemperatureStats(float roundedTemp, DailyStats &day, LifetimeStats &li
     // ---------------- LIFETIME STATS ----------------
     
     // Lifetime Max check
-    if (isnan(life.maxTemp) || roundedTemp > life.maxTemp) {
-        life.maxTemp = roundedTemp;
+    if (isnan(life.maxTemp) || maxTemp > life.maxTemp) {
+        life.maxTemp = maxTemp;
         life.maxYear = 2026;
         life.maxMonth = 12;
         life.maxDay = 31;
@@ -199,8 +221,8 @@ void storeTemperatureStats(float roundedTemp, DailyStats &day, LifetimeStats &li
     }
 
     // Lifetime Min check
-    if (isnan(life.minTemp) || roundedTemp < life.minTemp) {
-        life.minTemp = roundedTemp;
+    if (isnan(life.minTemp) || minTemp < life.minTemp) {
+        life.minTemp = minTemp;
         life.minYear = 2026;
         life.minMonth = 12;
         life.minDay = 31;
