@@ -17,7 +17,19 @@ void SleepMode::begin() {
 
     pinMode(_pin, INPUT_PULLUP);
 
-    // IMPORTANT: start with FALLING only (stable wake trigger)
+    /* * WARNING: Avoid attaching a LOW-level interrupt during initialization.
+     * 1. CPU Starvation: A LOW-level interrupt is level-triggered. If the pin is LOW 
+     * at startup, the ISR fires continuously (put a `Serial.println(0)` in `isrHandler` to see the problem), preventing the main loop from executing.
+     * 2. Serial Corruption: Continuous ISR execution disrupts UART timing and buffer 
+     * handling, leading to "frozen" or corrupted Serial output (undefined behavior).
+     * 3. Signal Noise: Mechanical bouncing during power-up can trigger a cascade of 
+     * interrupts before the voltage stabilizes.
+     *
+     * During my experiments I was falling to case No1.
+     * 
+     * Best Practice: Sample the state manually via digitalRead() during begin() 
+     * and only attach the LOW interrupt right before entering Power-Down sleep.
+     */
     // attachInterrupt(digitalPinToInterrupt(_pin), isrHandler, FALLING);
 
     _state = (digitalRead(_pin) == LOW)
@@ -62,7 +74,7 @@ void SleepMode::enable() {
     noInterrupts(); 
     
     sleep_enable();
-    attachInterrupt(digitalPinToInterrupt(_pin), isrHandler, LOW); // Το LOW είναι πιο αξιόπιστο για ξύπνημα από Power Down
+    attachWakeInterruptors();
 
     // Reenable interrupts to start listening the outer world
     interrupts(); 
@@ -70,11 +82,21 @@ void SleepMode::enable() {
 
     // Here Arduino wakes up again and continues from here
     sleep_disable();
-    detachInterrupt(digitalPinToInterrupt(_pin));
+    detachWakeInterruptors();
     ADCSRA = adcsra_save; // Restore ADC state and re-enable it
     
     _state = SystemState::ACTIVE;
 }
+
+    void SleepMode::attachWakeInterruptors() {
+        // Internal clock stops during sleep so it cannot detect voltage changing (RISING, FALLING, CHANGE).
+        // Without the clock CPU is blind to voltage changes. This applies to old Arduino (Uno, Nano, Mega)
+        attachInterrupt(digitalPinToInterrupt(_pin), isrHandler, LOW);
+    }
+
+    void SleepMode::detachWakeInterruptors() {
+        detachInterrupt(digitalPinToInterrupt(_pin));
+    }
 
 SystemState SleepMode::getState() {
     return _state;

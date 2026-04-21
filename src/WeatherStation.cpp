@@ -161,6 +161,8 @@ void storeTemperatureStats(float roundedTemp, DailyStats &day, LifetimeStats &li
 
     // ---------------- DAILY STATS ----------------
     
+    // TODO if current time is between 00:05 - 00:25 force write the daily stats
+
     // Check for NEW MAX: If current is NaN (after reset) OR new temp is higher
     if (isnan(day.maxTemp) || roundedTemp > day.maxTemp) {
         day.maxTemp = roundedTemp;

@@ -20,6 +20,9 @@ private:
 
     static SleepMode* _instance;
 
+    void attachWakeInterruptors();
+    void detachWakeInterruptors();
+
     uint8_t _pin;
     uint16_t _debounceMs;
 
