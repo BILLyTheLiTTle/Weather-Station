@@ -252,6 +252,7 @@ void printBatteryPercentage() {
     Serial.print(F("% ("));
     Serial.print(v);
     Serial.println(F("V)"));
+    if(v <= 6.0f) Serial.println(F("  Batteries need to recharge!"));
 }
 
 void printRamStats() {
