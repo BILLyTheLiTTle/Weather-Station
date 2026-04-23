@@ -32,6 +32,7 @@ public:
     void writeBytes(uint16_t addr, const void *data, uint16_t len);
     void writeByte(uint16_t addr, uint8_t data);
     uint8_t readByte(uint16_t addr);
+
     void factoryReset();
 
     void initSystem(uint8_t maxDays);
@@ -45,6 +46,9 @@ public:
     void saveLifetime(const LifetimeStats &data);
     void loadLifetime(LifetimeStats &data);
 
+    void storeDataVersion();
+    uint8_t loadDataVersion();
+
     void nextDay();
     uint8_t getIndex();
 
@@ -52,10 +56,6 @@ private:
     uint8_t _cs;
     uint8_t _maxDays;
     uint8_t _index;
-
-    const uint16_t LIFETIME_ADDR = 0x0000;
-
-    uint16_t baseDailyAddr();
 
     void csLow();
     void csHigh();

@@ -1,4 +1,5 @@
 #include "EEPROM_25LC040A.h"
+#include "./data/MemoryMapping.h"
 
 // SPI commands
 #define WREN  0x06
@@ -129,12 +130,6 @@ void EEPROM_25LC040A::factoryReset() {
     }
 }
 
-// -------------------- MEMORY MAP --------------------
-
-uint16_t EEPROM_25LC040A::baseDailyAddr() {
-    return sizeof(LifetimeStats);
-}
-
 // -------------------- RING BUFFER CONTROL --------------------
 
 void EEPROM_25LC040A::initSystem(uint8_t maxDays) {
@@ -153,7 +148,7 @@ void EEPROM_25LC040A::nextDay() {
 // -------------------- DAILY --------------------
 
 void EEPROM_25LC040A::saveDaily(uint8_t index, const DailyStats &data) {
-    uint16_t addr = baseDailyAddr() + index * sizeof(DailyStats);
+    uint16_t addr = dailyStatsAddress + index * sizeof(DailyStats);
     writeBytes(addr, &data, sizeof(DailyStats));
 }
 
@@ -162,7 +157,7 @@ void EEPROM_25LC040A::saveDaily(const DailyStats &data) {
 }
 
 void EEPROM_25LC040A::loadDaily(uint8_t index, DailyStats &data) {
-    uint16_t addr = baseDailyAddr() + index * sizeof(DailyStats);
+    uint16_t addr = dailyStatsAddress + index * sizeof(DailyStats);
     readBytes(addr, &data, sizeof(DailyStats));
 }
 
@@ -173,9 +168,18 @@ void EEPROM_25LC040A::loadDaily(DailyStats &data) {
 // -------------------- LIFETIME --------------------
 
 void EEPROM_25LC040A::saveLifetime(const LifetimeStats &data) {
-    writeBytes(LIFETIME_ADDR, &data, sizeof(LifetimeStats));
+    writeBytes(lifetimeStatsAddress, &data, sizeof(LifetimeStats));
 }
 
 void EEPROM_25LC040A::loadLifetime(LifetimeStats &data) {
-    readBytes(LIFETIME_ADDR, &data, sizeof(LifetimeStats));
+    readBytes(lifetimeStatsAddress, &data, sizeof(LifetimeStats));
+}
+
+// -------------------- OTHER --------------------
+void EEPROM_25LC040A::storeDataVersion() {
+    writeByte(VERSION_ADDRESS, version);
+}
+
+uint8_t EEPROM_25LC040A::loadDataVersion() {
+    return readByte(VERSION_ADDRESS);
 }

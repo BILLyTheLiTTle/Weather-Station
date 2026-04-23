@@ -25,6 +25,11 @@ EEPROM_25LC040A eeprom(10);
 DailyStats d;
 LifetimeStats l;
 void storeTemperatureStats(float maxTemp, float minTemp, DailyStats &day, LifetimeStats &life);
+void printDataVersion() {
+    uint8_t version = eeprom.loadDataVersion();
+    Serial.print(F(" Data version: "));
+    Serial.println(version);
+}
 
 MemoryProfiler ram(2048);
 void printRamStats();
@@ -32,14 +37,18 @@ void printRamStats();
 SleepMode sleepSwitch(3);
 void enterSleep();
 
+void printSystemStats() {
+    printBatteryPercentage();
+    printRamStats();
+    printDataVersion();
+}
+
 void setup() {
     Serial.begin(9600);
 
     battery.begin();
 
     eeprom.begin();
-
-    eeprom.loadLifetime(l);
 
     sleepSwitch.begin();
 
@@ -67,8 +76,7 @@ void loop() {
         Serial.println(F("-*-*-*- Environment Stats -*-*-*-"));
         printTemperature();
         Serial.println(F("-*-*-*- System Stats -*-*-*-"));
-        printBatteryPercentage();
-        printRamStats();
+        printSystemStats();
         Serial.println(F("=*=*=*= END =*=*=*=\n"));
     }
 }
