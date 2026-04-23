@@ -19,8 +19,8 @@ ChatGPT implementation discussion: https://chatgpt.com/c/69dfb460-452c-832d-a170
 
 #include <Arduino.h>
 #include <SPI.h>
-#include "data/DailyStats.h"
-#include "data/LifetimeStats.h"
+#include "../storage/data/temperature/TemperatureLifetimeStats.h"
+#include "../storage/data/temperature/TemperatureDailyStats.h"
 
 class EEPROM_25LC040A {
 public:
@@ -37,14 +37,14 @@ public:
 
     void initSystem(uint8_t maxDays);
 
-    void saveDaily(uint8_t index, const DailyStats &data);
-    void saveDaily(const DailyStats &data);
+    void saveDailyTemperature(uint8_t index, const TemperatureDailyStats &data);
+    void saveDailyTemperature(const TemperatureDailyStats &data);
 
-    void loadDaily(uint8_t index, DailyStats &data);
-    void loadDaily(DailyStats &data);
+    void loadDailyTemperature(uint8_t index, TemperatureDailyStats &data);
+    void loadDailyTemperature(TemperatureDailyStats &data);
 
-    void saveLifetime(const LifetimeStats &data);
-    void loadLifetime(LifetimeStats &data);
+    void saveLifetimeTemperature(const TemperatureLifetimeStats &data);
+    void loadLifetimeTemperature(TemperatureLifetimeStats &data);
 
     void storeDataVersion();
     uint8_t loadDataVersion();

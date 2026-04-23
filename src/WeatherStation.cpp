@@ -22,9 +22,9 @@ Battery battery(A1, 10.0, 15.0);
 void printBatteryPercentage();
 
 EEPROM_25LC040A eeprom(10);
-DailyStats d;
-LifetimeStats l;
-void storeTemperatureStats(float maxTemp, float minTemp, DailyStats &day, LifetimeStats &life);
+TemperatureDailyStats d;
+TemperatureLifetimeStats l;
+void storeTemperatureStats(float maxTemp, float minTemp, TemperatureDailyStats &day, TemperatureLifetimeStats &life);
 void printDataVersion() {
     uint8_t version = eeprom.loadDataVersion();
     Serial.print(F(" Data version: "));
@@ -125,7 +125,7 @@ void printTemperature() {
 
         // storeTemperatureStats(maxMeasuredTemp, minMeasuredTemp, d, l);
 
-        eeprom.loadLifetime(l);
+        eeprom.loadLifetimeTemperature(l);
         Serial.println(F(" Lifetime Stats "));
         Serial.print(F("  Min temperature: "));
         Serial.print(l.minTemp);
@@ -152,7 +152,7 @@ void printTemperature() {
         Serial.print(F(":"));
         Serial.println(l.maxMinute);
 
-        eeprom.loadDaily(d);
+        eeprom.loadDailyTemperature(d);
         Serial.println(F(" Daily Stats "));
         Serial.print(F("  Min temperature: "));
         Serial.print(d.minTemp);
@@ -185,7 +185,7 @@ void printTemperature() {
     }
 }
 
-void storeTemperatureStats(float maxTemp, float minTemp, DailyStats &day, LifetimeStats &life) {
+void storeTemperatureStats(float maxTemp, float minTemp, TemperatureDailyStats &day, TemperatureLifetimeStats &life) {
     bool dailyChanged = false;
     bool lifetimeChanged = false;
 
@@ -243,11 +243,11 @@ void storeTemperatureStats(float maxTemp, float minTemp, DailyStats &day, Lifeti
     
     // Save only if a record was broken to protect EEPROM lifespan
     if (dailyChanged) {
-        eeprom.saveDaily(day);
+        eeprom.saveDailyTemperature(day);
     }
     
     if (lifetimeChanged) {
-        eeprom.saveLifetime(life);
+        eeprom.saveLifetimeTemperature(life);
     }
 }
 

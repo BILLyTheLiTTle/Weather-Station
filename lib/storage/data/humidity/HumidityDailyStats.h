@@ -3,14 +3,11 @@
 #include <float.h>
 #include <Arduino.h>
 
-struct DailyStats {
+struct __attribute__((packed)) HumidityDailyStats {
     uint16_t dayIndex;
 
-    float minTemp = FLT_MAX;
-    float maxTemp = FLT_MIN;
-
-    // float minHumidity = FLT_MAX;
-    // float maxHumidity = FLT_MIN;
+    float minHumidity = FLT_MAX;
+    float maxHumidity = FLT_MIN;
 
     uint8_t minDay = 29;
     uint8_t minMonth = 12;

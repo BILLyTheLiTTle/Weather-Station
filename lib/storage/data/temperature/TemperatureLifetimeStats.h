@@ -3,12 +3,9 @@
 #include <float.h>
 #include <Arduino.h>
 
-struct LifetimeStats {
+struct __attribute__((packed)) TemperatureLifetimeStats {
     float minTemp = FLT_MAX;
     float maxTemp = FLT_MIN;
-
-    // float minHumidity = 99.0f;
-    // float maxHumidity = 1.0f;
 
     uint8_t minDay = 29;
     uint8_t minMonth = 12;

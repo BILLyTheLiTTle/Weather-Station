@@ -147,32 +147,32 @@ void EEPROM_25LC040A::nextDay() {
 
 // -------------------- DAILY --------------------
 
-void EEPROM_25LC040A::saveDaily(uint8_t index, const DailyStats &data) {
-    uint16_t addr = dailyStatsAddress + index * sizeof(DailyStats);
-    writeBytes(addr, &data, sizeof(DailyStats));
+void EEPROM_25LC040A::saveDailyTemperature(uint8_t index, const TemperatureDailyStats &data) {
+    uint16_t addr = dailyStatsAddress + index * sizeof(TemperatureDailyStats);
+    writeBytes(addr, &data, sizeof(TemperatureDailyStats));
 }
 
-void EEPROM_25LC040A::saveDaily(const DailyStats &data) {
-    saveDaily(0, data);
+void EEPROM_25LC040A::saveDailyTemperature(const TemperatureDailyStats &data) {
+    saveDailyTemperature(0, data);
 }
 
-void EEPROM_25LC040A::loadDaily(uint8_t index, DailyStats &data) {
-    uint16_t addr = dailyStatsAddress + index * sizeof(DailyStats);
-    readBytes(addr, &data, sizeof(DailyStats));
+void EEPROM_25LC040A::loadDailyTemperature(uint8_t index, TemperatureDailyStats &data) {
+    uint16_t addr = dailyStatsAddress + index * sizeof(TemperatureDailyStats);
+    readBytes(addr, &data, sizeof(TemperatureDailyStats));
 }
 
-void EEPROM_25LC040A::loadDaily(DailyStats &data) {
-    loadDaily(0, data);
+void EEPROM_25LC040A::loadDailyTemperature(TemperatureDailyStats &data) {
+    loadDailyTemperature(0, data);
 }
 
 // -------------------- LIFETIME --------------------
 
-void EEPROM_25LC040A::saveLifetime(const LifetimeStats &data) {
-    writeBytes(lifetimeStatsAddress, &data, sizeof(LifetimeStats));
+void EEPROM_25LC040A::saveLifetimeTemperature(const TemperatureLifetimeStats &data) {
+    writeBytes(lifetimeStatsAddress, &data, sizeof(TemperatureLifetimeStats));
 }
 
-void EEPROM_25LC040A::loadLifetime(LifetimeStats &data) {
-    readBytes(lifetimeStatsAddress, &data, sizeof(LifetimeStats));
+void EEPROM_25LC040A::loadLifetimeTemperature(TemperatureLifetimeStats &data) {
+    readBytes(lifetimeStatsAddress, &data, sizeof(TemperatureLifetimeStats));
 }
 
 // -------------------- OTHER --------------------
