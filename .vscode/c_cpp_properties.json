@@ -10,6 +10,7 @@
             "includePath": [
                 "/Users/v.tsapalos/Documents/PlatformIO/Projects/Weather-Station/include",
                 "/Users/v.tsapalos/Documents/PlatformIO/Projects/Weather-Station/src",
+                "/Users/v.tsapalos/Documents/PlatformIO/Projects/Weather-Station/lib/wrappers",
                 "/Users/v.tsapalos/Documents/PlatformIO/Projects/Weather-Station/lib/memory",
                 "/Users/v.tsapalos/Documents/PlatformIO/Projects/Weather-Station/lib/battery",
                 "/Users/v.tsapalos/Documents/PlatformIO/Projects/Weather-Station/lib/power",
@@ -29,6 +30,7 @@
                 "path": [
                     "/Users/v.tsapalos/Documents/PlatformIO/Projects/Weather-Station/include",
                     "/Users/v.tsapalos/Documents/PlatformIO/Projects/Weather-Station/src",
+                    "/Users/v.tsapalos/Documents/PlatformIO/Projects/Weather-Station/lib/wrappers",
                     "/Users/v.tsapalos/Documents/PlatformIO/Projects/Weather-Station/lib/memory",
                     "/Users/v.tsapalos/Documents/PlatformIO/Projects/Weather-Station/lib/battery",
                     "/Users/v.tsapalos/Documents/PlatformIO/Projects/Weather-Station/lib/power",
