@@ -1,5 +1,5 @@
 #pragma once
-#include "./Battery.h"
+#include "Battery.h"
 #include "MemoryProfiler.h"
 
 void printBatteryPercentage(Battery &battery);

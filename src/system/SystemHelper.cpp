@@ -1,4 +1,4 @@
-#include "./system/SystemHelper.h"
+#include "SystemHelper.h"
 
 void printBatteryPercentage(Battery &battery) {
     float v = battery.readFilteredVoltage();

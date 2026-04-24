@@ -1,9 +1,9 @@
 #pragma once
 
-#include "./data/temperature/TemperatureLifetimeStats.h"
-#include "./data/temperature/TemperatureDailyStats.h"
+#include "../lib/storage/data/temperature/TemperatureLifetimeStats.h"
+#include "../lib/storage/data/temperature/TemperatureDailyStats.h"
 #include "Thermistor.h"
-#include "./eeprom/EEPROM_25LC040A.h"
+#include "../lib/storage/eeprom/EEPROM_25LC040A.h"
 
 void printTemperature(Thermistor &therm, EEPROM_25LC040A &eeprom, TemperatureDailyStats d, TemperatureLifetimeStats l);
 
