@@ -6,12 +6,12 @@ Battery::Battery(uint8_t pin, float r1, float r2)
 void Battery::begin() {
     // pinMode(_pin, INPUT);
 
-    for (int i = 0; i < N; i++) {
+    for (uint8_t i = 0; i < N; i++) {
         _samples[i] = 0;
     }
 }
 
-float Battery::adcToVoltage(int adc) {
+float Battery::adcToVoltage(uint16_t adc) {
     float vA0 = (adc * 5.0) / 1023.0;
     return vA0 * (_r1 + _r2) / _r2;
 }
@@ -23,10 +23,10 @@ float Battery::applyFilter(float v) {
 
     if (_index == 0) _filled = true;
 
-    int count = _filled ? N : _index;
+    uint8_t count = _filled ? N : _index;
 
     float sum = 0;
-    for (int i = 0; i < count; i++) {
+    for (uint8_t i = 0; i < count; i++) {
         sum += _samples[i];
     }
 
@@ -40,7 +40,7 @@ float Battery::applyFilter(float v) {
 }
 
 float Battery::readVoltage() {
-    int adc = analogRead(_pin);
+    uint16_t adc = analogRead(_pin);
     float v = adcToVoltage(adc);
     return v;
 }
@@ -50,7 +50,7 @@ float Battery::readFilteredVoltage() {
     return applyFilter(v);
 }
 
-int Battery::readPercent() {
+uint8_t Battery::readPercent() {
     float v = readFilteredVoltage();
 
     if (v >= 8.4) return 100;
@@ -62,5 +62,5 @@ int Battery::readPercent() {
     float curved = x * x * (3.0 - 2.0 * x);  // smoothstep
     curved = pow(curved, 0.75);              // UX boost
 
-    return (int)(curved * 100);
+    return (uint8_t)(curved * 100);
 }

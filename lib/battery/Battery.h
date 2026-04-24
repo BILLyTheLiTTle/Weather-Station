@@ -10,17 +10,17 @@ public:
 
     float readVoltage();
     float readFilteredVoltage();
-    int readPercent();
+    uint8_t readPercent();
 
 private:
     uint8_t _pin;
     float _r1, _r2;
 
-    float adcToVoltage(int adc);
+    float adcToVoltage(uint16_t adc);
     float applyFilter(float v);
 
-    static const int N = 10;
+    static const uint8_t N = 10;
     float _samples[N];
-    int _index = 0;
+    uint8_t _index = 0;
     bool _filled = false;
 };
