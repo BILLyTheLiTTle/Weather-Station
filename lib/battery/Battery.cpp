@@ -37,8 +37,16 @@ uint16_t Battery::applyFilter(uint16_t v) {
 }
 
 uint8_t Battery::readPercent() {
-    // uint16_t v = applyFilter(readVoltage());
     uint16_t v = readVoltage();
+
+    if (_old_voltage == 0) {
+        _old_voltage = v;
+        _filteredV = v;
+    } else if (abs((int16_t)_old_voltage - (int16_t)v) < VOLTAGE_THRESHOLD) {
+        v = applyFilter(v);
+    }
+
+    _old_voltage = v;
 
     if (v >= 8400) return 100;
     if (v <= 6000) return 0;

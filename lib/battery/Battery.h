@@ -36,6 +36,9 @@ private:
     bool     _filled;        // Flag to check if the buffer is full
     uint16_t _filteredV;     // Stores the result of the Low Pass part
 
+    uint16_t _old_voltage = 0;
+    static constexpr uint16_t VOLTAGE_THRESHOLD = 500; //mV
+
     // Internal hybrid filter logic (Moving Average + Exponential Smoothing)
     uint16_t applyFilter(uint16_t v);
 };
