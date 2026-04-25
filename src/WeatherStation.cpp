@@ -41,14 +41,14 @@ void loop() {
     enterConditionalSleep(sleepSwitch);
 
     // Only perform measurements if the system is ACTIVE and the interval has elapsed.
-    if (isIntervalElapsed(INTERVAL_BETWEEN_ACTIONS)) {
-        Serial.println(F("=*=*=*= START =*=*=*="));
-        Serial.println(F("-*-*-*- Environment Stats -*-*-*-"));
-        printTemperature(therm, eeprom, d, l);
-        Serial.println(F("-*-*-*- System Stats -*-*-*-"));
-        printSystemStats(battery, ram);
-        Serial.println(F("=*=*=*= END =*=*=*=\n"));
-    }
+    if ((!isIntervalElapsed(INTERVAL_BETWEEN_ACTIONS) || sleepSwitch.getState() == SystemState::SLEEP)) return;
+
+    Serial.println(F("=*=*=*= START =*=*=*="));
+    Serial.println(F("-*-*-*- Environment Stats -*-*-*-"));
+    printTemperature(therm, eeprom, d, l);
+    Serial.println(F("-*-*-*- System Stats -*-*-*-"));
+    printSystemStats(battery, ram);
+    Serial.println(F("=*=*=*= END =*=*=*=\n"));
 }
 
 bool isIntervalElapsed(uint32_t interval) {
