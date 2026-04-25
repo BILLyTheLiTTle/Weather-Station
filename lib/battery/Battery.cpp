@@ -1,66 +1,40 @@
 #include "Battery.h"
 
-Battery::Battery(uint8_t pin, float r1, float r2)
-: _pin(pin), _r1(r1), _r2(r2) {}
+Battery::Battery(uint8_t pin, uint32_t r1, uint32_t r2)
+    : _pin(pin), _r1(r1), _r2(r2) {
+    _multiplier = (5000UL * (_r1 + _r2)) / (1023UL * _r2);
+}
 
 void Battery::begin() {
-    // pinMode(_pin, INPUT);
-
-    for (uint8_t i = 0; i < N; i++) {
-        _samples[i] = 0;
-    }
+    _filteredV = 0;
 }
 
-float Battery::adcToVoltage(uint16_t adc) {
-    float vA0 = (adc * 5.0) / 1023.0;
-    return vA0 * (_r1 + _r2) / _r2;
+uint16_t Battery::readVoltage() {
+    return (uint16_t)(analogRead(_pin) * _multiplier);
 }
 
-/* ===== LOW PASS + MOVING AVERAGE HYBRID ===== */
-float Battery::applyFilter(float v) {
-    _samples[_index] = v;
-    _index = (_index + 1) % N;
-
-    if (_index == 0) _filled = true;
-
-    uint8_t count = _filled ? N : _index;
-
-    float sum = 0;
-    for (uint8_t i = 0; i < count; i++) {
-        sum += _samples[i];
-    }
-
-    float avg = sum / count;
-
-    // extra low-pass smoothing
-    static float filtered = 0;
-    filtered = 0.85 * filtered + 0.15 * avg;
-
-    return filtered;
-}
-
-float Battery::readVoltage() {
-    uint16_t adc = analogRead(_pin);
-    float v = adcToVoltage(adc);
-    return v;
-}
-
-float Battery::readFilteredVoltage() {
-    float v = readVoltage();
-    return applyFilter(v);
+uint16_t Battery::applyFilter(uint16_t v) {
+    if (_filteredV == 0) _filteredV = v;
+    
+    _filteredV = (v + (_filteredV * 3)) >> 2; 
+    
+    return _filteredV;
 }
 
 uint8_t Battery::readPercent() {
-    float v = readFilteredVoltage();
+    uint16_t v = applyFilter(readVoltage());
 
-    if (v >= 8.4) return 100;
-    if (v <= 6.0) return 0;
+    if (v >= 8400) return 100;
+    if (v <= 6000) return 0;
 
-    float x = (v - 6.0) / (8.4 - 6.0); // normalize 0..1
+    static const uint16_t volt_points[] = {6000, 7200, 7500, 7700, 8000, 8400};
+    static const uint8_t percent_points[] = {0, 20, 40, 60, 80, 100};
 
-    // realistic + UI fast feel curve
-    float curved = x * x * (3.0 - 2.0 * x);  // smoothstep
-    curved = pow(curved, 0.75);              // UX boost
+    uint8_t i = 0;
+    while (v > volt_points[i + 1]) i++;
 
-    return (uint8_t)(curved * 100);
+    uint32_t num = (uint32_t)(v - volt_points[i]) * (percent_points[i+1] - percent_points[i]);
+    uint16_t den = volt_points[i+1] - volt_points[i];
+    
+    return percent_points[i] + (uint8_t)(num / den);
 }
