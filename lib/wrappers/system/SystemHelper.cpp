@@ -1,7 +1,7 @@
 #include "SystemHelper.h"
 
 void printBatteryPercentage(Battery &battery) {
-    float v = battery.readVoltage() / 1000.0f;
+    float v = battery.readVoltage();
     int p = battery.readPercent();
 
     Serial.print(F(" Battery: "));
