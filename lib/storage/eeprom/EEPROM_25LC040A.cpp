@@ -130,40 +130,25 @@ void EEPROM_25LC040A::factoryReset() {
     }
 }
 
-// -------------------- RING BUFFER CONTROL --------------------
-
-void EEPROM_25LC040A::initSystem(uint8_t maxDays) {
-    _maxDays = maxDays;
-    _index = 0;
-}
-
-uint8_t EEPROM_25LC040A::getIndex() {
-    return _index;
-}
-
-void EEPROM_25LC040A::nextDay() {
-    _index = (_index + 1) % _maxDays;
-}
-
 // -------------------- DAILY --------------------
 
-void EEPROM_25LC040A::saveDailyTemperature(uint8_t index, const TemperatureDailyStats &data) {
-    uint16_t addr = dailyStatsAddress + index * sizeof(TemperatureDailyStats);
-    writeBytes(addr, &data, sizeof(TemperatureDailyStats));
-}
+// void EEPROM_25LC040A::saveDailyTemperature(uint8_t index, const TemperatureDailyStats &data) {
+//     uint16_t addr = dailyStatsAddress + index * sizeof(TemperatureDailyStats);
+//     writeBytes(addr, &data, sizeof(TemperatureDailyStats));
+// }
 
-void EEPROM_25LC040A::saveDailyTemperature(const TemperatureDailyStats &data) {
-    saveDailyTemperature(0, data);
-}
+// void EEPROM_25LC040A::saveDailyTemperature(const TemperatureDailyStats &data) {
+//     saveDailyTemperature(0, data);
+// }
 
-void EEPROM_25LC040A::loadDailyTemperature(uint8_t index, TemperatureDailyStats &data) {
-    uint16_t addr = dailyStatsAddress + index * sizeof(TemperatureDailyStats);
-    readBytes(addr, &data, sizeof(TemperatureDailyStats));
-}
+// void EEPROM_25LC040A::loadDailyTemperature(uint8_t index, TemperatureDailyStats &data) {
+//     uint16_t addr = dailyStatsAddress + index * sizeof(TemperatureDailyStats);
+//     readBytes(addr, &data, sizeof(TemperatureDailyStats));
+// }
 
-void EEPROM_25LC040A::loadDailyTemperature(TemperatureDailyStats &data) {
-    loadDailyTemperature(0, data);
-}
+// void EEPROM_25LC040A::loadDailyTemperature(TemperatureDailyStats &data) {
+//     loadDailyTemperature(0, data);
+// }
 
 // -------------------- LIFETIME --------------------
 

@@ -37,11 +37,11 @@ public:
 
     void initSystem(uint8_t maxDays);
 
-    void saveDailyTemperature(uint8_t index, const TemperatureDailyStats &data);
-    void saveDailyTemperature(const TemperatureDailyStats &data);
+    // void saveDailyTemperature(uint8_t index, const TemperatureDailyStats &data);
+    // void saveDailyTemperature(const TemperatureDailyStats &data);
 
-    void loadDailyTemperature(uint8_t index, TemperatureDailyStats &data);
-    void loadDailyTemperature(TemperatureDailyStats &data);
+    // void loadDailyTemperature(uint8_t index, TemperatureDailyStats &data);
+    // void loadDailyTemperature(TemperatureDailyStats &data);
 
     void saveLifetimeTemperature(const TemperatureLifetimeStats &data);
     void loadLifetimeTemperature(TemperatureLifetimeStats &data);
@@ -49,13 +49,8 @@ public:
     void storeDataVersion();
     uint8_t loadDataVersion();
 
-    void nextDay();
-    uint8_t getIndex();
-
 private:
     uint8_t _cs;
-    uint8_t _maxDays;
-    uint8_t _index;
 
     void csLow();
     void csHigh();

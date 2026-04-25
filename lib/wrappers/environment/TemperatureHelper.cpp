@@ -29,14 +29,14 @@ void printTemperature(Thermistor &therm, EEPROM_25LC040A &eeprom, TemperatureDai
             minMeasuredTemp = roundedTemp;
         }
 
-        // storeTemperatureStats(eeprom, maxMeasuredTemp, minMeasuredTemp, d, l);
+        // saveTemperatureLifetimeRecord(eeprom, maxMeasuredTemp, minMeasuredTemp, l);
+        rememberTemperatureDailyRecord(maxMeasuredTemp, minMeasuredTemp, d);
 
         eeprom.loadLifetimeTemperature(l);
         Serial.println(F(" Lifetime Stats "));
         printLine(F("  Min temperature: "), l.minTemp, l.minDay, l.minMonth, l.minYear, l.minHour, l.minMinute);
         printLine(F("  Max temperature: "), l.maxTemp, l.maxDay, l.maxMonth, l.maxYear, l.maxHour, l.maxMinute);
 
-        eeprom.loadDailyTemperature(d);
         Serial.println(F(" Daily Stats "));
         printLine(F("  Min temperature: "), d.minTemp, d.minDay, d.minMonth, d.minYear, d.minHour, d.minMinute);
         printLine(F("  Max temperature: "), d.maxTemp, d.maxDay, d.maxMonth, d.maxYear, d.maxHour, d.maxMinute);
@@ -62,35 +62,8 @@ void printLine(const __FlashStringHelper* label, float value, uint8_t day, uint8
         Serial.println(minute);
 }
 
-void storeTemperatureStats(EEPROM_25LC040A &eeprom, float maxTemp, float minTemp, TemperatureDailyStats &day, TemperatureLifetimeStats &life) {
-    bool dailyChanged = false;
+void saveTemperatureLifetimeRecord(EEPROM_25LC040A &eeprom, float maxTemp, float minTemp, TemperatureLifetimeStats &life) {
     bool lifetimeChanged = false;
-
-    // ---------------- DAILY STATS ----------------
-    
-    // TODO if current time is between 00:05 - 00:25 force write the daily stats
-
-    // Check for NEW MAX: If current is NaN (after reset) OR new temp is higher
-    if (isnan(day.maxTemp) || maxTemp > day.maxTemp) {
-        day.maxTemp = maxTemp;
-        day.maxYear = 2026;
-        day.maxMonth = 12;
-        day.maxDay = 31;
-        day.maxHour = 23;
-        day.maxMinute = 59;
-        dailyChanged = true;
-    }
-
-    // Check for NEW MIN: If current is NaN (after reset) OR new temp is lower
-    if (isnan(day.minTemp) || minTemp < day.minTemp) {
-        day.minTemp = minTemp;
-        day.minYear = 2026;
-        day.minMonth = 12;
-        day.minDay = 31;
-        day.minHour = 23;
-        day.minMinute = 59;
-        dailyChanged = true;
-    }
 
     // ---------------- LIFETIME STATS ----------------
     
@@ -116,14 +89,36 @@ void storeTemperatureStats(EEPROM_25LC040A &eeprom, float maxTemp, float minTemp
         lifetimeChanged = true;
     }
 
-    // ---------------- SAVE TO EEPROM ----------------
-    
-    // Save only if a record was broken to protect EEPROM lifespan
-    if (dailyChanged) {
-        eeprom.saveDailyTemperature(day);
-    }
-    
+    // ---------------- SAVE TO EEPROM ----------------    
     if (lifetimeChanged) {
         eeprom.saveLifetimeTemperature(life);
+    }
+}
+
+void rememberTemperatureDailyRecord(float maxTemp, float minTemp, TemperatureDailyStats &day) {
+    bool dailyChanged = false;
+    
+    // TODO if current time is between 00:05 - 00:25 force write the daily stats
+
+    // Check for NEW MAX: If current is NaN (after reset) OR new temp is higher
+    if (isnan(day.maxTemp) || maxTemp > day.maxTemp) {
+        day.maxTemp = maxTemp;
+        day.maxYear = 2026;
+        day.maxMonth = 12;
+        day.maxDay = 31;
+        day.maxHour = 23;
+        day.maxMinute = 59;
+        dailyChanged = true;
+    }
+
+    // Check for NEW MIN: If current is NaN (after reset) OR new temp is lower
+    if (isnan(day.minTemp) || minTemp < day.minTemp) {
+        day.minTemp = minTemp;
+        day.minYear = 2026;
+        day.minMonth = 12;
+        day.minDay = 31;
+        day.minHour = 23;
+        day.minMinute = 59;
+        dailyChanged = true;
     }
 }
