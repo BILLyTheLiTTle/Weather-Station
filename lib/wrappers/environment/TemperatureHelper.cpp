@@ -33,62 +33,33 @@ void printTemperature(Thermistor &therm, EEPROM_25LC040A &eeprom, TemperatureDai
 
         eeprom.loadLifetimeTemperature(l);
         Serial.println(F(" Lifetime Stats "));
-        Serial.print(F("  Min temperature: "));
-        Serial.print(l.minTemp);
-        Serial.print(F("°C @ "));
-        Serial.print(l.minDay);
-        Serial.print(F("/"));
-        Serial.print(l.minMonth);
-        Serial.print(F("/"));
-        Serial.print(l.minYear);
-        Serial.print(F(" "));
-        Serial.print(l.minHour);
-        Serial.print(F(":"));
-        Serial.println(l.minMinute);
-        Serial.print(F("  Max temperature: "));
-        Serial.print(l.maxTemp);
-        Serial.print(F("°°C @ "));
-        Serial.print(l.maxDay);
-        Serial.print(F("/"));
-        Serial.print(l.maxMonth);
-        Serial.print(F("/"));
-        Serial.print(l.maxYear);
-        Serial.print(F(" "));
-        Serial.print(l.maxHour);
-        Serial.print(F(":"));
-        Serial.println(l.maxMinute);
+        printLine(F("  Min temperature: "), l.minTemp, l.minDay, l.minMonth, l.minYear, l.minHour, l.minMinute);
+        printLine(F("  Max temperature: "), l.maxTemp, l.maxDay, l.maxMonth, l.maxYear, l.maxHour, l.maxMinute);
 
         eeprom.loadDailyTemperature(d);
         Serial.println(F(" Daily Stats "));
-        Serial.print(F("  Min temperature: "));
-        Serial.print(d.minTemp);
-        Serial.print(F("°C @ "));
-        Serial.print(d.minDay);
-        Serial.print(F("/"));
-        Serial.print(d.minMonth);
-        Serial.print(F("/"));
-        Serial.print(d.minYear);
-        Serial.print(F(" "));
-        Serial.print(d.minHour);
-        Serial.print(F(":"));
-        Serial.println(d.minMinute);
-        Serial.print(F("  Max temperature: "));
-        Serial.print(d.maxTemp);
-        Serial.print(F("°°C @ "));
-        Serial.print(d.maxDay);
-        Serial.print(F("/"));
-        Serial.print(d.maxMonth);
-        Serial.print(F("/"));
-        Serial.print(d.maxYear);
-        Serial.print(F(" "));
-        Serial.print(d.maxHour);
-        Serial.print(F(":"));
-        Serial.println(d.maxMinute);
+        printLine(F("  Min temperature: "), d.minTemp, d.minDay, d.minMonth, d.minYear, d.minHour, d.minMinute);
+        printLine(F("  Max temperature: "), d.maxTemp, d.maxDay, d.maxMonth, d.maxYear, d.maxHour, d.maxMinute);
 
     } else {
         Serial.print(F("Error in temperature sensor: "));
         Serial.println(Temperature::getName(temp.status));
     }
+}
+
+void printLine(const __FlashStringHelper* label, float value, uint8_t day, uint8_t month, uint16_t year, uint8_t hour, uint8_t minute) {
+        Serial.print(label);
+        Serial.print(value);
+        Serial.print(F("°C @ "));
+        Serial.print(day);
+        Serial.print(F("/"));
+        Serial.print(month);
+        Serial.print(F("/"));
+        Serial.print(year);
+        Serial.print(F(" "));
+        Serial.print(hour);
+        Serial.print(F(":"));
+        Serial.println(minute);
 }
 
 void storeTemperatureStats(EEPROM_25LC040A &eeprom, float maxTemp, float minTemp, TemperatureDailyStats &day, TemperatureLifetimeStats &life) {
