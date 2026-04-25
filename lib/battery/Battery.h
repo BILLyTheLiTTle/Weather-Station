@@ -19,9 +19,6 @@ public:
     // Returns raw battery voltage in millivolts (mV)
     uint16_t readVoltage();
 
-    // Returns filtered battery voltage in millivolts (mV)
-    uint16_t readFilteredVoltage();
-
     // Returns battery percentage (0-100) using optimized Smoothstep & LUT
     uint8_t readPercent();
 
