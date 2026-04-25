@@ -7,7 +7,7 @@ void Battery::begin() {
     for (uint8_t i = 0; i < N; i++) _samples[i] = 0;
 }
 
-// Μετατροπή σε mV (milliVolts) χωρίς float
+// Convert ADC reading to mV (milliVolts) without using float
 uint16_t Battery::readVoltage() {
     uint32_t adc = analogRead(_pin);
     // V_pin = (adc * 5000) / 1023
@@ -28,9 +28,9 @@ uint16_t Battery::applyFilter(uint16_t v) {
     for (uint8_t i = 0; i < count; i++) sum += _samples[i];
     uint16_t avg = sum / count;
 
-    // 2. Low Pass Part (0.85 * filtered + 0.15 * avg)
-    // Με ακέραιους: (filtered * 85 + avg * 15) / 100
-    if (_filteredV == 0) _filteredV = avg; // Αρχικοποίηση
+    // 2. Low Pass Part (Exponential Smoothing: 0.85 * filtered + 0.15 * avg)
+    // Using integer math: (filtered * 85 + avg * 15) / 100
+    if (_filteredV == 0) _filteredV = avg; // Initial seeding
     _filteredV = ((uint32_t)_filteredV * 85 + (uint32_t)avg * 15) / 100;
 
     return _filteredV;
@@ -51,22 +51,22 @@ uint8_t Battery::readPercent() {
     if (v >= 8400) return 100;
     if (v <= 6000) return 0;
 
-    // Κανονικοποίηση x = (v - 6000) / 2400 (σε κλίμακα 0-1000 για ακρίβεια)
+    // Normalization: x = (v - 6000) / 2400 (scale to 0-1000 for precision)
     uint32_t x = ((uint32_t)(v - 6000) * 1000) / 2400;
 
-    // Smoothstep: x * x * (3000 - 2 * x) / 1000000
-    // Αυτό αντικαθιστά το x * x * (3 - 2x)
+    // Smoothstep curve: x * x * (3 - 2x)
+    // Scaled to integer: (x^2 * (3000 - 2x)) / 1000000
     uint32_t curved = (x * x * (3000 - 2 * x)) / 1000000;
 
-    // Αντί για pow(curved, 0.75), χρησιμοποιούμε μια Look-up Table 11 σημείων
-    // για να δώσουμε αυτό το "UX Boost" που θέλεις
+    // UX Boost Look-up Table (replaces pow(curved, 0.75))
+    // Provides a more "natural" feel to the percentage drop
     static const uint8_t ux_boost_lut[] = {0, 15, 28, 40, 52, 63, 73, 82, 90, 96, 100};
     
-    // Το curved είναι 0-1000, άρα διαιρούμε με 100 για να βρούμε το index (0-10)
+    // Map curved value (0-1000) to LUT index (0-10)
     uint8_t idx = curved / 100;
     if (idx >= 10) return 100;
 
-    // Γραμμική παρεμβολή ανάμεσα στα σημεία της LUT για ομαλότητα 1%
+    // Linear Interpolation between LUT points for 1% granularity
     uint8_t p1 = ux_boost_lut[idx];
     uint8_t p2 = ux_boost_lut[idx + 1];
     uint8_t weight = curved % 100;
