@@ -2,25 +2,40 @@
 
 #include <Arduino.h>
 
+// Number of samples for the Moving Average part of the filter
+#define N 10 
+
 class Battery {
 public:
-    Battery(uint8_t pin, float r1, float r2);
+    /**
+     * @param pin Analog pin (e.g., A0)
+     * @param r1 Resistance connected to V+ in Ohms (uint32_t to avoid float)
+     * @param r2 Resistance connected to GND in Ohms
+     */
+    Battery(uint8_t pin, uint32_t r1, uint32_t r2);
 
     void begin();
 
-    float readVoltage();
-    float readFilteredVoltage();
+    // Returns raw battery voltage in millivolts (mV)
+    uint16_t readVoltage();
+
+    // Returns filtered battery voltage in millivolts (mV)
+    uint16_t readFilteredVoltage();
+
+    // Returns battery percentage (0-100) using optimized Smoothstep & LUT
     uint8_t readPercent();
 
 private:
-    uint8_t _pin;
-    float _r1, _r2;
+    uint8_t  _pin;
+    uint32_t _r1;
+    uint32_t _r2;
 
-    float adcToVoltage(uint16_t adc);
-    float applyFilter(float v);
+    // Filter variables
+    uint16_t _samples[N];    // Array for Moving Average
+    uint8_t  _index;         // Current position in the array
+    bool     _filled;        // Flag to check if the buffer is full
+    uint16_t _filteredV;     // Stores the result of the Low Pass part
 
-    static const uint8_t N = 10;
-    float _samples[N];
-    uint8_t _index = 0;
-    bool _filled = false;
+    // Internal hybrid filter logic (Moving Average + Exponential Smoothing)
+    uint16_t applyFilter(uint16_t v);
 };
