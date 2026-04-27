@@ -13,7 +13,7 @@ Thermistor::Thermistor(uint8_t analogPin,
       _beta(betaCoefficient) {}
 
 Temperature Thermistor::readTemperatureC() {
-    const float manualCalibration = 1.0688;
+    const float manualCalibration = 1;//1.0688;
     uint16_t adc = analogRead(_pin);
 
     if (adc <= 0) {
