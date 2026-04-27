@@ -2,6 +2,7 @@
 #include "./environment/TemperatureHelper.h"
 #include "./power/SleepHelper.h"
 #include "./system/SystemHelper.h"
+#include "Debugger.h"
 
 #define INTERVAL_BETWEEN_ACTIONS 10000L
 
@@ -27,6 +28,8 @@ SleepMode sleepSwitch(3);
 
 void setup() {
     Serial.begin(9600);
+
+    dbg.begin();
 
     battery.begin();
 
