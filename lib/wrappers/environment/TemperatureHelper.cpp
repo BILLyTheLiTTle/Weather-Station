@@ -1,6 +1,6 @@
 #include "TemperatureHelper.h"
 
-void printTemperature(Thermistor &therm, EEPROM_25LC040A &eeprom, TemperatureDailyStats d, TemperatureLifetimeStats l) {
+void printTemperature(Thermistor &therm, EEPROM_25LC040A &eeprom, TemperatureDailyStats &d, TemperatureLifetimeStats &l) {
     static float maxMeasuredTemp = FLT_MIN;
     static float minMeasuredTemp = FLT_MAX;
     static float currentTemp = NAN;
