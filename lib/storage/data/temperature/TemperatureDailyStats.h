@@ -9,15 +9,15 @@ struct __attribute__((packed)) TemperatureDailyStats {
     float minTemp = FLT_MAX;
     float maxTemp = FLT_MIN;
 
-    uint8_t minDay = 29;
-    uint8_t minMonth = 12;
-    uint16_t minYear = 1900;
-    uint8_t minHour = 23;
-    uint8_t minMinute = 59;
+    uint32_t minDay : 5;
+    uint32_t minMonth : 4;
+    uint32_t minYear : 12;
+    uint32_t minHour : 5;
+    uint32_t minMinute : 6;
 
-    uint8_t maxDay = 29;
-    uint8_t maxMonth = 12;
-    uint16_t maxYear = 1900;
-    uint8_t maxHour = 23;
-    uint8_t maxMinute = 59;
+    uint32_t maxDay : 5;
+    uint32_t maxMonth : 4;
+    uint32_t maxYear : 12;
+    uint32_t maxHour : 5;
+    uint32_t maxMinute : 6;
 };
