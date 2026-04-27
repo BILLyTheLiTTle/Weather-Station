@@ -8,10 +8,10 @@
 class Thermistor {
 public:
     Thermistor(uint8_t analogPin,
-               float seriesResistor,
-               float nominalResistance,
-               float nominalTemperature,
-               float betaCoefficient);
+               uint16_t seriesResistor,
+               uint16_t nominalResistance,
+               int8_t nominalTemperature,
+               uint16_t betaCoefficient);
 
     Temperature readTemperatureC();
     Temperature readTemperatureK();
@@ -21,9 +21,9 @@ public:
 
 private:
     uint8_t _pin;
-    float _seriesResistor;
-    float _nominalResistance;
-    float _nominalTemperature;
-    float _beta;
+    uint16_t _seriesResistor;
+    uint16_t _nominalResistance;
+    int8_t _nominalTemperature;
+    uint16_t _beta;
     enum Temperature::SensorStatus _sensorStatus = Temperature::INVALID;
 };

@@ -9,9 +9,9 @@ bool isIntervalElapsed(uint32_t interval);
 
 Thermistor therm(
     A0,        // analog pin
-    9820.0,    // The real value of series resistor (10k)
-    10000.0,   // nominal resistance (10k thermistor) from thermistor datasheet
-    25.0,      // nominal temp (25°C) from thermistor datasheet
+    9820,    // The real value of series resistor (10k)
+    10000,   // nominal resistance (10k thermistor) from thermistor datasheet
+    25,      // nominal temp (25°C) from thermistor datasheet
     ThermistorConstants::BETA_3950   // Beta coefficient (β) of the thermistor
 );
 

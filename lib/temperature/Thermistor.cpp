@@ -2,10 +2,10 @@
 #include <math.h>
 
 Thermistor::Thermistor(uint8_t analogPin,
-                       float seriesResistor,
-                       float nominalResistance,
-                       float nominalTemperature,
-                       float betaCoefficient)
+                       uint16_t seriesResistor,
+                       uint16_t nominalResistance,
+                       int8_t nominalTemperature,
+                       uint16_t betaCoefficient)
     : _pin(analogPin),
       _seriesResistor(seriesResistor),
       _nominalResistance(nominalResistance),
@@ -13,7 +13,7 @@ Thermistor::Thermistor(uint8_t analogPin,
       _beta(betaCoefficient) {}
 
 Temperature Thermistor::readTemperatureC() {
-    const float manualCalibration = 1;//1.0688;
+    const uint16_t manualCalibration = 1;//1.0688;
     uint16_t adc = analogRead(_pin);
 
     if (adc <= 0) {
