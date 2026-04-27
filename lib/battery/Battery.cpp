@@ -9,7 +9,7 @@ void Battery::begin() {
 
 // Convert ADC reading to mV (milliVolts) without using float
 uint16_t Battery::readVoltage() {
-    uint32_t adc = analogRead(_pin);
+    uint16_t adc = analogRead(_pin);
     // V_pin = (adc * 5000) / 1023
     uint32_t v_pin = (adc * 5000UL) / 1023UL;
     // V_bat = V_pin * (R1 + R2) / R2
@@ -48,8 +48,8 @@ uint8_t Battery::readPercent() {
 
     _old_voltage = v;
 
-    if (v >= 8400) return 100;
-    if (v <= 6000) return 0;
+    if (v >= UPPER_BOUND_VOLTAGE) return 100;
+    if (v <= LOWER_BOUND_VOLTAGE) return 0;
 
     // Normalization: x = (v - 6000) / 2400 (scale to 0-1000 for precision)
     uint32_t x = ((uint32_t)(v - 6000) * 1000) / 2400;
