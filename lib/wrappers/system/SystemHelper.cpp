@@ -6,16 +6,21 @@ void printBatteryPercentage(Battery &battery) {
     if (isUsbPowered(voltage)) {
         Serial.println(F("Running on USB power"));
     } else {
-        float v = voltage / 1000.0f;
+        uint8_t voltage_int = voltage / 1000; 
+        uint8_t voltage_frac = (voltage % 1000) / 10; // convert fraction to centiVolts to avoid 3 digits and show only 2 digits
+
         uint8_t p = battery.readPercent();
 
         Serial.print(F(" Battery: "));
         Serial.print(p);
         Serial.print(F("% ("));
-        Serial.print(v);
+        Serial.print(voltage_int);
+        Serial.print(F("."));
+        if (voltage_frac < 10)  Serial.print(F("0"));
+        Serial.print(voltage_frac);
         Serial.println(F("V)"));
 
-        if(v <= 6.0f) {
+        if(voltage <= Battery::LOWER_BOUND_VOLTAGE) {
             Serial.println(F("  Batteries need to recharge!"));
         }
     }

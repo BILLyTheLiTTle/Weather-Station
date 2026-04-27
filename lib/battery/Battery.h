@@ -22,6 +22,9 @@ public:
     // Returns battery percentage (0-100) using optimized Smoothstep & LUT
     uint8_t readPercent();
 
+    static constexpr uint16_t UPPER_BOUND_VOLTAGE = 8400; //mV
+    static constexpr uint16_t LOWER_BOUND_VOLTAGE = 6000; //mV
+
 private:
     uint8_t  _pin;
     uint32_t _r1;
