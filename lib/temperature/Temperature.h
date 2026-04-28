@@ -2,8 +2,8 @@
 
 struct Temperature {
 
-    enum SensorStatus {
-        OK,
+    enum SensorStatus : uint8_t {
+        OK = 0,
         DISCONNECTED,
         SHORT_TO_GND,
         SHORT_TO_VCC,

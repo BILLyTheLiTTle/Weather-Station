@@ -2,7 +2,7 @@
 
 #include "SleepMode.h"
 
-#define INTERVAL_BETWEEN_ACTIONS 10000L
+#define INTERVAL_BETWEEN_ACTIONS 10000UL
 
 void enterConditionalSleep(SleepMode &flag);
 
