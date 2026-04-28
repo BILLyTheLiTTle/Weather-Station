@@ -1,12 +1,8 @@
 #include <float.h>
 #include "./environment/TemperatureHelper.h"
-#include "./power/SleepHelper.h"
+#include "./power/PowerSaver.h"
 #include "./system/SystemHelper.h"
 #include "Debugger.h"
-
-#define INTERVAL_BETWEEN_ACTIONS 10000L
-
-bool isIntervalElapsed(uint32_t interval);
 
 Thermistor therm(
     A0,        // analog pin
@@ -44,7 +40,7 @@ void loop() {
     enterConditionalSleep(sleepSwitch);
 
     // Only perform measurements if the system is ACTIVE and the interval has elapsed.
-    if ((!isIntervalElapsed(INTERVAL_BETWEEN_ACTIONS) || sleepSwitch.getState() == SystemState::SLEEP)) return;
+    if ((!isIntervalElapsed() || sleepSwitch.getState() == SystemState::SLEEP)) return;
 
     Serial.println(F("=*=*=*= START =*=*=*="));
     Serial.println(F("-*-*-*- Environment Stats -*-*-*-"));
@@ -53,17 +49,3 @@ void loop() {
     printSystemStats(battery, ram);
     Serial.println(F("=*=*=*= END =*=*=*=\n"));
 }
-
-bool isIntervalElapsed(uint32_t interval) {
-    static uint32_t lastReadTime = 0;
-
-    uint32_t now = millis();
-
-    if (lastReadTime != 0 && (now - lastReadTime) < interval) {
-        return false;
-    }
-    lastReadTime = now;
-
-    return true;
-}
-

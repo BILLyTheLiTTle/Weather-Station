@@ -88,15 +88,15 @@ void SleepMode::enable() {
     _state = SystemState::ACTIVE;
 }
 
-    void SleepMode::attachWakeInterruptors() {
-        // Internal clock stops during sleep so it cannot detect voltage changing (RISING, FALLING, CHANGE).
-        // Without the clock CPU is blind to voltage changes. This applies to old Arduino (Uno, Nano, Mega)
-        attachInterrupt(digitalPinToInterrupt(_pin), isrHandler, LOW);
-    }
+void SleepMode::attachWakeInterruptors() {
+    // Internal clock stops during sleep so it cannot detect voltage changing (RISING, FALLING, CHANGE).
+    // Without the clock CPU is blind to voltage changes. This applies to old Arduino (Uno, Nano, Mega)
+    attachInterrupt(digitalPinToInterrupt(_pin), isrHandler, LOW);
+}
 
-    void SleepMode::detachWakeInterruptors() {
-        detachInterrupt(digitalPinToInterrupt(_pin));
-    }
+void SleepMode::detachWakeInterruptors() {
+    detachInterrupt(digitalPinToInterrupt(_pin));
+}
 
 SystemState SleepMode::getState() {
     return _state;
