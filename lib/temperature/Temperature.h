@@ -10,7 +10,7 @@ struct Temperature {
         INVALID
     };
 
-    float value;
+    int16_t value;
     SensorStatus status;
 
     static const __FlashStringHelper* getName(SensorStatus s) {

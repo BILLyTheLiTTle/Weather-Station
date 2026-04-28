@@ -1,4 +1,3 @@
-#include <float.h>
 #include "./environment/TemperatureHelper.h"
 #include "./power/PowerSaver.h"
 #include "./system/SystemHelper.h"
@@ -9,7 +8,7 @@ Thermistor therm(
     9820,      // The real value of series resistor (10k)
     10000,     // nominal resistance (10k thermistor) from thermistor datasheet
     25,        // nominal temp (25°C) from thermistor datasheet
-    ThermistorConstants::BETA_3950   // Beta coefficient (β) of the thermistor
+    ThermistorConstants::BETA_4250   // Beta coefficient (β) of the thermistor
 );
 
 Battery battery(A1, 9810, 14830);
@@ -44,7 +43,7 @@ void loop() {
 
     Serial.println(F("=*=*=*= START =*=*=*="));
     Serial.println(F("-*-*-*- Environment Stats -*-*-*-"));
-    printTemperature(therm, eeprom, d, l);
+    printTemperatureStats(therm, eeprom, d, l);
     Serial.println(F("-*-*-*- System Stats -*-*-*-"));
     printSystemStats(battery, ram);
     Serial.println(F("=*=*=*= END =*=*=*=\n"));

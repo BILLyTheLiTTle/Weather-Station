@@ -13,6 +13,7 @@ public:
                int8_t nominalTemperature,
                uint16_t betaCoefficient);
 
+    // returns temprature value as centiCelsius to avoid floats
     Temperature readTemperatureC();
     Temperature readTemperatureK();
     Temperature readTemperatureF();

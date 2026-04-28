@@ -1,13 +1,12 @@
 #pragma once
 
-#include <float.h>
 #include <Arduino.h>
 
 struct __attribute__((packed)) TemperatureDailyStats {
     uint16_t dayIndex;
 
-    float minTemp = FLT_MAX;
-    float maxTemp = FLT_MIN;
+    int16_t minTemp = INT16_MAX;
+    int16_t maxTemp = INT16_MIN;
 
     uint32_t minDay : 5;
     uint32_t minMonth : 4;

@@ -1,23 +1,20 @@
 #include "TemperatureHelper.h"
 
-void printTemperature(Thermistor &therm, EEPROM_25LC040A &eeprom, TemperatureDailyStats &d, TemperatureLifetimeStats &l) {
-    static float maxMeasuredTemp = FLT_MIN;
-    static float minMeasuredTemp = FLT_MAX;
-    static float currentTemp = NAN;
+void printTemperatureStats(Thermistor &therm, EEPROM_25LC040A &eeprom, TemperatureDailyStats &d, TemperatureLifetimeStats &l) {
+    static int16_t maxMeasuredTemp = INT16_MIN;
+    static int16_t minMeasuredTemp = INT16_MAX;
+    static int16_t currentTemp = 0;
 
     Temperature temp = therm.readTemperatureC();
 
     if (temp.status == Temperature::OK) {
-        float roundedTemp = floorf(temp.value * 2.0f + 0.5f) / 2.0f;
+        int16_t roundedTemp = ((temp.value + 25) / 50) * 50;;
 
-        // Print only if changed
-        //if (isnan(currentTemp) || currentTemp != roundedTemp) {
-            currentTemp = roundedTemp;
-            Serial.println(F(" Current Stats "));
-            Serial.print(F("  Temperature: "));
-            Serial.print(currentTemp);
-            Serial.println(F("°C"));
-        //}
+        currentTemp = roundedTemp;
+        Serial.println(F(" Current Stats "));
+        Serial.print(F("  Temperature: "));
+        printTemperature(currentTemp);
+        Serial.println();
 
         // Max update
         if (roundedTemp > maxMeasuredTemp) {
@@ -47,10 +44,10 @@ void printTemperature(Thermistor &therm, EEPROM_25LC040A &eeprom, TemperatureDai
     }
 }
 
-void printLine(const __FlashStringHelper* label, float value, uint8_t day, uint8_t month, uint16_t year, uint8_t hour, uint8_t minute) {
+void printLine(const __FlashStringHelper* label, int16_t value, uint8_t day, uint8_t month, uint16_t year, uint8_t hour, uint8_t minute) {
         Serial.print(label);
-        Serial.print(value);
-        Serial.print(F("°C @ "));
+        printTemperature(value);
+        Serial.print(F(" @ "));
         Serial.print(day);
         Serial.print(F("/"));
         Serial.print(month);
@@ -62,7 +59,20 @@ void printLine(const __FlashStringHelper* label, float value, uint8_t day, uint8
         Serial.println(minute);
 }
 
-void saveTemperatureLifetimeRecord(EEPROM_25LC040A &eeprom, float maxTemp, float minTemp, TemperatureLifetimeStats &life) {
+void printTemperature(int16_t temp) {
+    Serial.print(temp/100);
+
+    Serial.print(F("."));
+
+    int8_t decimals = temp % 100;
+    if (decimals < 10) Serial.print(F("0"));
+
+    Serial.print(decimals);
+
+    Serial.print(F("°C"));
+}
+
+void saveTemperatureLifetimeRecord(EEPROM_25LC040A &eeprom, int16_t maxTemp, int16_t minTemp, TemperatureLifetimeStats &life) {
     bool lifetimeChanged = false;
 
     // ---------------- LIFETIME STATS ----------------
@@ -95,7 +105,7 @@ void saveTemperatureLifetimeRecord(EEPROM_25LC040A &eeprom, float maxTemp, float
     }
 }
 
-void rememberTemperatureDailyRecord(float maxTemp, float minTemp, TemperatureDailyStats &day) {
+void rememberTemperatureDailyRecord(int16_t maxTemp, int16_t minTemp, TemperatureDailyStats &day) {
     bool dailyChanged = false;
     
     // TODO if current time is between 00:05 - 00:25 force write the daily stats
