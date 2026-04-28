@@ -12,7 +12,7 @@ Thermistor therm(
     ThermistorConstants::BETA_3950   // Beta coefficient (β) of the thermistor
 );
 
-Battery battery(A1, 10.0, 15.0);
+Battery battery(A1, 9810, 14830);
 
 EEPROM_25LC040A eeprom(10);
 TemperatureDailyStats d;

@@ -1,7 +1,7 @@
 #include "Battery.h"
 
-Battery::Battery(uint8_t pin, uint32_t r1, uint32_t r2)
-    : _pin(pin), _r1(r1), _r2(r2), _index(0), _filled(false), _filteredV(0) {}
+Battery::Battery(uint8_t pin, uint32_t vcc_r, uint32_t gnd_r)
+    : _pin(pin), _vcc_r(vcc_r), _gnd_r(gnd_r), _index(0), _filled(false), _filteredV(0) {}
 
 void Battery::begin() {
     for (uint8_t i = 0; i < N; i++) _samples[i] = 0;
@@ -13,7 +13,7 @@ uint16_t Battery::readVoltage() {
     // V_pin = (adc * 5000) / 1023
     uint32_t v_pin = (adc * 5000UL) / 1023UL;
     // V_bat = V_pin * (R1 + R2) / R2
-    uint32_t v_bat = (v_pin * (_r1 + _r2)) / _r2;
+    uint32_t v_bat = (v_pin * (_vcc_r + _gnd_r)) / _gnd_r;
     return (uint16_t)v_bat;
 }
 
