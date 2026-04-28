@@ -12,18 +12,18 @@ class Debugger {
     void setEnabled(bool enabled);
     void separator();
 
-    // 1. Για κανονικές μεταβλητές (int, float, long κτλ)
+    // For variable (int, float, long, etc)
     template <typename T>
     void log(T msg) {
       if (_enabled) Serial.println(msg);
     }
 
-    // 2. Ειδικά για κείμενα στη Flash μέσω F("...") - ΜΗΔΕΝ RAM
+    // For literals in Flash
     void log(const __FlashStringHelper* msg) {
       if (_enabled) Serial.println(msg);
     }
 
-    // 3. Για Label και Τιμή (π.χ. dbg.logValue(F("Temp"), s))
+    // For label in Flash and a variable
     template <typename T>
     void log(const __FlashStringHelper* label, T value) {
       if (_enabled) {
