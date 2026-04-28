@@ -1,6 +1,6 @@
 #include "Battery.h"
 
-Battery::Battery(uint8_t pin, uint32_t vcc_r, uint32_t gnd_r)
+Battery::Battery(uint8_t pin, uint16_t vcc_r, uint16_t gnd_r)
     : _pin(pin), _vcc_r(vcc_r), _gnd_r(gnd_r), _index(0), _filled(false), _filteredV(0) {}
 
 void Battery::begin() {

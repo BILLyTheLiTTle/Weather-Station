@@ -9,10 +9,10 @@ class Battery {
 public:
     /**
      * @param pin Analog pin (e.g., A0)
-     * @param vcc_r Resistance connected to V+ in Ohms (uint32_t to avoid float)
+     * @param vcc_r Resistance connected to V+ in Ohms
      * @param gnd_r Resistance connected to GND in Ohms
      */
-    Battery(uint8_t pin, uint32_t vcc_r, uint32_t gnd_r);
+    Battery(uint8_t pin, uint16_t vcc_r, uint16_t gnd_r);
 
     void begin();
 
@@ -27,8 +27,8 @@ public:
 
 private:
     uint8_t  _pin;
-    uint32_t _vcc_r;
-    uint32_t _gnd_r;
+    uint16_t _vcc_r;
+    uint16_t _gnd_r;
 
     // Filter variables
     uint16_t _samples[N];    // Array for Moving Average
