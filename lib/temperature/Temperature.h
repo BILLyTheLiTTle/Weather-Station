@@ -13,14 +13,14 @@ struct Temperature {
     float value;
     SensorStatus status;
 
-    static const char* getName(SensorStatus s) {
+    static const __FlashStringHelper* getName(SensorStatus s) {
         switch (s) {
-            case OK: return "OK";
-            case DISCONNECTED: return "DISCONNECTED";
-            case SHORT_TO_GND: return "SHORT_TO_GND";
-            case SHORT_TO_VCC: return "SHORT_TO_VCC";
-            case INVALID: return "INVALID";
-            default: return "UNKNOWN";
+            case OK: return F("OK");
+            case DISCONNECTED: return F("DISCONNECTED");
+            case SHORT_TO_GND: return F("SHORT_TO_GND");
+            case SHORT_TO_VCC: return F("SHORT_TO_VCC");
+            case INVALID: return F("INVALID");
+            default: return F("UNKNOWN");
         }
     }
 };
