@@ -1,7 +1,9 @@
 #include "SystemHelper.h"
 
-void printBatteryPercentage(Battery &battery) {
+void printBatteryStats(Battery &battery, ACS712 &acs712) {
     uint16_t voltage = battery.readVoltage();
+    uint32_t ma = acs712.getCurrentMA();
+    uint32_t tMin = acs712.getRemainingMinutes();
 
     if (isUsbPowered(voltage)) {
         Serial.println(F("Running on USB power"));
@@ -13,17 +15,31 @@ void printBatteryPercentage(Battery &battery) {
 
         Serial.print(F(" Battery: "));
         Serial.print(p);
-        Serial.print(F("% ("));
+        Serial.print(F("% | Remaining Time: "));
+        if(tMin > 90000) {
+            Serial.print(F("Unknown ("));
+        } else {
+            Serial.print(tMin / 60);
+            Serial.print(F("h "));
+            Serial.print(tMin % 60);
+            Serial.print(F("m ("));
+        }
         Serial.print(voltage_int);
         Serial.print(F("."));
         if (voltage_frac < 10)  Serial.print(F("0"));
         Serial.print(voltage_frac);
-        Serial.println(F("V)"));
+        Serial.print(F("V | "));
+        Serial.print(ma);
+        Serial.println(F(" mA)"));
 
         if(voltage <= Battery::LOWER_BOUND_VOLTAGE) {
             Serial.println(F("  Batteries need to recharge!"));
         }
     }
+}
+
+void printCurrentStats(ACS712 &acs712) {
+    
 }
 
 void printRamStats(MemoryProfiler &ram) {
@@ -37,8 +53,9 @@ void printRamStats(MemoryProfiler &ram) {
     Serial.println(ram.getUsedRamApprox());
 }
 
-void printSystemStats(Battery &battery, MemoryProfiler &ram) {
-    printBatteryPercentage(battery);
+void printSystemStats(Battery &battery, ACS712 &acs712, MemoryProfiler &ram) {
+    printBatteryStats(battery, acs712);
+    printCurrentStats(acs712);
     printRamStats(ram);
 }
 

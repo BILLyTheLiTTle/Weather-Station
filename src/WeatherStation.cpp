@@ -2,6 +2,7 @@
 #include "./power/PowerSaver.h"
 #include "./system/SystemHelper.h"
 #include "Debugger.h"
+#include "ACS712.h"
 
 Thermistor therm(
     A0,        // analog pin
@@ -21,8 +22,13 @@ MemoryProfiler ram(2048);
 
 SleepMode sleepSwitch(3);
 
+ACS712 acs712(A2, ACS712_05B, 2200);
+
 void setup() {
     Serial.begin(9600);
+
+    // For calibration we need to remove all power sources (Vin, batteries) apart from USB. Afte calibration comment it out again
+    // acs712.calibrate();
 
     dbg.begin();
 
@@ -45,6 +51,24 @@ void loop() {
     Serial.println(F("-*-*-*- Environment Stats -*-*-*-"));
     printTemperatureStats(therm, eeprom, d, l);
     Serial.println(F("-*-*-*- System Stats -*-*-*-"));
-    printSystemStats(battery, ram);
+    printSystemStats(battery, acs712, ram);
     Serial.println(F("=*=*=*= END =*=*=*=\n"));
+}
+
+void calculate() {
+    uint32_t ma = acs712.getCurrentMA();
+    uint32_t tMin = acs712.getRemainingMinutes();
+
+    Serial.print("Current: ");
+    Serial.print(ma);
+    Serial.print(" mA | Time: ");
+    
+    if(tMin > 90000) {
+        Serial.println("Unknown");
+    } else {
+        Serial.print(tMin / 60);
+        Serial.print("h ");
+        Serial.print(tMin % 60);
+        Serial.println("m");
+    }
 }
