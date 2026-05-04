@@ -1,5 +1,3 @@
-#pragma once
-
 #include "PowerSaver.h"
 
 static uint32_t lastReadTime = 0;

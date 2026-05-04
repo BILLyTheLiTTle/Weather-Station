@@ -27,7 +27,7 @@ ACS712 acs712(A2, ACS712_05B, 2200);
 void setup() {
     Serial.begin(9600);
 
-    // For calibration we need to remove all power sources (Vin, batteries) apart from USB. Afte calibration comment it out again
+    // For calibration we need to remove all power sources (Vin, batteries) apart from USB. After calibration comment it out again
     // acs712.calibrate();
 
     dbg.begin();
