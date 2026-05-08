@@ -38,8 +38,22 @@ void printBatteryStats(Battery &battery, ACS712 &acs712) {
     }
 }
 
-void printCurrentStats(ACS712 &acs712) {
-    
+void printSystemTemperature(Thermistor &therm) {
+    static int16_t currentTemp = 0;
+    Temperature temp = therm.readTemperatureC();
+
+    if (temp.status == Temperature::OK) {
+        int16_t roundedTemp = ((temp.value + 25) / 50) * 50;;
+
+        currentTemp = roundedTemp;
+        Serial.print(F(" Temperature: "));
+        printTemperature(currentTemp);
+        Serial.println();
+
+    } else {
+        Serial.print(F("Error in temperature sensor: "));
+        Serial.println(Temperature::getName(temp.status));
+    }
 }
 
 void printRamStats(MemoryProfiler &ram) {
@@ -53,9 +67,9 @@ void printRamStats(MemoryProfiler &ram) {
     Serial.println(ram.getUsedRamApprox());
 }
 
-void printSystemStats(Battery &battery, ACS712 &acs712, MemoryProfiler &ram) {
+void printSystemStats(Battery &battery, ACS712 &acs712, MemoryProfiler &ram, Thermistor &therm) {
     printBatteryStats(battery, acs712);
-    printCurrentStats(acs712);
+    printSystemTemperature(therm);
     printRamStats(ram);
 }
 
