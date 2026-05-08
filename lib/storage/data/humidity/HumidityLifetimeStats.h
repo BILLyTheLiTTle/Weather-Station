@@ -1,11 +1,10 @@
 #pragma once
 
-#include <float.h>
 #include <Arduino.h>
 
 struct __attribute__((packed)) HumidityLifetimeStats {
-    float minHumidity = FLT_MAX;
-    float maxHumidity = FLT_MIN;
+    uint16_t minHum = UINT16_MAX;
+    uint16_t maxHum = 0;
 
     uint32_t minDay : 5;
     uint32_t minMonth : 4;

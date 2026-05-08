@@ -14,14 +14,18 @@ Thermistor therm(
 Battery battery(A1, 9810, 14830);
 
 EEPROM_25LC040A eeprom(10);
-TemperatureDailyStats d;
-TemperatureLifetimeStats l;
+TemperatureDailyStats td;
+TemperatureLifetimeStats tl;
+HumidityDailyStats hd;
+HumidityLifetimeStats hl;
 
 MemoryProfiler ram(2048);
 
 SleepMode sleepSwitch(3);
 
 ACS712 acs712(A2, ACS712_05B, 2200);
+
+DHT_Sensor environmentSensor(9, 22);
 
 void setup() {
     Serial.begin(9600);
@@ -48,7 +52,7 @@ void loop() {
 
     Serial.println(F("=*=*=*= START =*=*=*="));
     Serial.println(F("-*-*-*- Environment Stats -*-*-*-"));
-    printTemperatureStats(therm, eeprom, d, l);
+    printEnvironmentStats(environmentSensor, eeprom, td, tl, hd, hl);
     Serial.println(F("-*-*-*- System Stats -*-*-*-"));
     printSystemStats(battery, acs712, ram, therm);
     Serial.println(F("=*=*=*= END =*=*=*=\n"));

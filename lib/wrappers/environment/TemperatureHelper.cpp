@@ -1,46 +1,76 @@
 #include "TemperatureHelper.h"
 
-void printTemperatureStats(Thermistor &therm, EEPROM_25LC040A &eeprom, TemperatureDailyStats &d, TemperatureLifetimeStats &l) {
+void printEnvironmentStats(DHT_Sensor &dht, EEPROM_25LC040A &eeprom, 
+    TemperatureDailyStats &td, TemperatureLifetimeStats &tl, 
+    HumidityDailyStats &hd, HumidityLifetimeStats &hl) {
+
     static int16_t maxMeasuredTemp = INT16_MIN;
     static int16_t minMeasuredTemp = INT16_MAX;
     static int16_t currentTemp = 0;
+    static uint16_t maxMeasuredHum = 0;
+    static uint16_t minMeasuredHum = UINT16_MAX;
+    static uint16_t currentHum = 0;
 
-    Temperature temp = therm.readTemperatureC();
+    int16_t temp = dht.getTemperature();
+    uint16_t hum = dht.getHumidity();
 
-    if (temp.status == Temperature::OK) {
-        int16_t roundedTemp = ((temp.value + 25) / 50) * 50;;
-
-        currentTemp = roundedTemp;
+    if (temp != dht.INVALID_VALUE) {
+        currentTemp = ((temp + 25) / 50) * 50;
         Serial.println(F(" Current Stats "));
         Serial.print(F("  Temperature: "));
         printTemperature(currentTemp);
         Serial.println();
 
         // Max update
-        if (roundedTemp > maxMeasuredTemp) {
-            maxMeasuredTemp = roundedTemp;
+        if (currentTemp > maxMeasuredTemp) {
+            maxMeasuredTemp = currentTemp;
         }
 
         // Min update (independent!)
-        if (roundedTemp < minMeasuredTemp) {
-            minMeasuredTemp = roundedTemp;
+        if (currentTemp < minMeasuredTemp) {
+            minMeasuredTemp = currentTemp;
         }
 
-        // saveTemperatureLifetimeRecord(eeprom, maxMeasuredTemp, minMeasuredTemp, l);
-        rememberTemperatureDailyRecord(maxMeasuredTemp, minMeasuredTemp, d);
+        // saveTemperatureLifetimeRecord(eeprom, maxMeasuredTemp, minMeasuredTemp, tl);
+        rememberTemperatureDailyRecord(maxMeasuredTemp, minMeasuredTemp, td);
 
-        eeprom.loadLifetimeTemperature(l);
-        Serial.println(F(" Lifetime Stats "));
-        printLine(F("  Min temperature: "), l.minTemp, l.minDay, l.minMonth, l.minYear, l.minHour, l.minMinute);
-        printLine(F("  Max temperature: "), l.maxTemp, l.maxDay, l.maxMonth, l.maxYear, l.maxHour, l.maxMinute);
+        eeprom.loadLifetimeTemperature(tl);
+        Serial.println(F("  Lifetime Stats "));
+        printLine(F("   Min temperature: "), tl.minTemp, tl.minDay, tl.minMonth, tl.minYear, tl.minHour, tl.minMinute);
+        printLine(F("   Max temperature: "), tl.maxTemp, tl.maxDay, tl.maxMonth, tl.maxYear, tl.maxHour, tl.maxMinute);
 
-        Serial.println(F(" Daily Stats "));
-        printLine(F("  Min temperature: "), d.minTemp, d.minDay, d.minMonth, d.minYear, d.minHour, d.minMinute);
-        printLine(F("  Max temperature: "), d.maxTemp, d.maxDay, d.maxMonth, d.maxYear, d.maxHour, d.maxMinute);
+        Serial.println(F("  Daily Stats "));
+        printLine(F("   Min temperature: "), td.minTemp, td.minDay, td.minMonth, td.minYear, td.minHour, td.minMinute);
+        printLine(F("   Max temperature: "), td.maxTemp, td.maxDay, td.maxMonth, td.maxYear, td.maxHour, td.maxMinute);
+    }
 
-    } else {
-        Serial.print(F("Error in temperature sensor: "));
-        Serial.println(Temperature::getName(temp.status));
+    if (hum != dht.INVALID_VALUE) {
+        currentHum = ((hum + 25) / 50) * 50;
+        Serial.print(F("  Humidity: "));
+        printDecimalNumber(currentHum, F("%"));
+        Serial.println();
+
+        // Max update
+        if (currentHum > maxMeasuredHum) {
+            maxMeasuredHum = currentHum;
+        }
+
+        // Min update (independent!)
+        if (currentHum < minMeasuredHum) {
+            minMeasuredHum = currentHum;
+        }
+
+        // saveTemperatureLifetimeRecord(eeprom, maxMeasuredHum, minMeasuredHum, hl);
+        rememberHumidityDailyRecord(maxMeasuredHum, minMeasuredHum, hd);
+
+        // eeprom.loadLifetimeTemperature(hl);
+        Serial.println(F("  Lifetime Stats "));
+        printLine(F("   Min humidity: "), hl.minHum, hl.minDay, hl.minMonth, hl.minYear, hl.minHour, hl.minMinute);
+        printLine(F("   Max humidity: "), hl.maxHum, hl.maxDay, hl.maxMonth, hl.maxYear, hl.maxHour, hl.maxMinute);
+
+        Serial.println(F("  Daily Stats "));
+        printLine(F("   Min humidity: "), hd.minHum, hd.minDay, hd.minMonth, hd.minYear, hd.minHour, hd.minMinute);
+        printLine(F("   Max humidity: "), hd.maxHum, hd.maxDay, hd.maxMonth, hd.maxYear, hd.maxHour, hd.maxMinute);
     }
 }
 
@@ -59,7 +89,26 @@ void printLine(const __FlashStringHelper* label, int16_t value, uint8_t day, uin
         Serial.println(minute);
 }
 
+void printLine(const __FlashStringHelper* label, uint16_t value, uint8_t day, uint8_t month, uint16_t year, uint8_t hour, uint8_t minute) {
+        Serial.print(label);
+        printTemperature(value);
+        Serial.print(F(" @ "));
+        Serial.print(day);
+        Serial.print(F("/"));
+        Serial.print(month);
+        Serial.print(F("/"));
+        Serial.print(year);
+        Serial.print(F(" "));
+        Serial.print(hour);
+        Serial.print(F(":"));
+        Serial.println(minute);
+}
+
 void printTemperature(int16_t temp) {
+    printDecimalNumber(temp,  F("°C"));
+}
+
+void printDecimalNumber(int16_t temp, const __FlashStringHelper *symbol) {
     Serial.print(temp/100);
 
     Serial.print(F("."));
@@ -69,7 +118,7 @@ void printTemperature(int16_t temp) {
 
     Serial.print(decimals);
 
-    Serial.print(F("°C"));
+    Serial.print(symbol);
 }
 
 void saveTemperatureLifetimeRecord(EEPROM_25LC040A &eeprom, int16_t maxTemp, int16_t minTemp, TemperatureLifetimeStats &life) {
@@ -124,6 +173,34 @@ void rememberTemperatureDailyRecord(int16_t maxTemp, int16_t minTemp, Temperatur
     // Check for NEW MIN: If current is NaN (after reset) OR new temp is lower
     if (isnan(day.minTemp) || minTemp < day.minTemp) {
         day.minTemp = minTemp;
+        day.minYear = 2026;
+        day.minMonth = 12;
+        day.minDay = 31;
+        day.minHour = 23;
+        day.minMinute = 59;
+        dailyChanged = true;
+    }
+}
+
+void rememberHumidityDailyRecord(uint16_t maxHum, uint16_t minHum, HumidityDailyStats &day) {
+    bool dailyChanged = false;
+    
+    // TODO if current time is between 00:05 - 00:25 force write the daily stats
+
+    // Check for NEW MAX: If current is NaN (after reset) OR new humidity is higher
+    if (isnan(day.maxHum) || maxHum > day.maxHum) {
+        day.maxHum = maxHum;
+        day.maxYear = 2026;
+        day.maxMonth = 12;
+        day.maxDay = 31;
+        day.maxHour = 23;
+        day.maxMinute = 59;
+        dailyChanged = true;
+    }
+
+    // Check for NEW MIN: If current is NaN (after reset) OR new humidity is lower
+    if (isnan(day.minHum) || minHum < day.minHum) {
+        day.minHum = minHum;
         day.minYear = 2026;
         day.minMonth = 12;
         day.minDay = 31;
