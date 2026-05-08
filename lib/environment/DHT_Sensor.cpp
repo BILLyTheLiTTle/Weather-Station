@@ -30,16 +30,16 @@ uint16_t DHT_Sensor::getHumidity() {
         return INVALID_HUMIDITY;
     }
     
-    // if (hum < 0 || hum > 100) {
+    if (hum < 0 || hum > 100) {
         int16_t chk = (_type == 22) ? _dht.read22(_pin) : _dht.read11(_pin);
         if (chk != DHTLIB_OK) {
             _lastHum = INVALID_HUMIDITY;
             return INVALID_HUMIDITY;
         }
         hum = _dht.getHumidity();
-    // }
+    }
 
-    if (hum >= 0.0f && hum <= 100.0f) { // TODO verify it is not normal for humidity to go above 100%
+    if (hum >= 0.0f && hum <= 100.0f) {
         _lastHum = hum * 100;
         return (uint16_t)(hum * 100);
     }
