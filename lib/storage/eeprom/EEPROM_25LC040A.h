@@ -21,6 +21,8 @@ ChatGPT implementation discussion: https://chatgpt.com/c/69dfb460-452c-832d-a170
 #include <SPI.h>
 #include "../storage/data/temperature/TemperatureLifetimeStats.h"
 #include "../storage/data/temperature/TemperatureDailyStats.h"
+#include "../storage/data/humidity/HumidityLifetimeStats.h"
+#include "../storage/data/humidity/HumidityDailyStats.h"
 
 class EEPROM_25LC040A {
 public:
@@ -45,6 +47,8 @@ public:
 
     void saveLifetimeTemperature(const TemperatureLifetimeStats &data);
     void loadLifetimeTemperature(TemperatureLifetimeStats &data);
+    void saveLifetimeHumidity(const HumidityLifetimeStats &data);
+    void loadLifetimeHumidity(HumidityLifetimeStats &data);
 
     void storeDataVersion();
     uint8_t loadDataVersion();

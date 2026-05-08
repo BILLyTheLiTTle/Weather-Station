@@ -8,6 +8,39 @@ void EnvironmentManager::printEnvironmentStats(DHT_Sensor &dht, EEPROM_25LC040A 
     printHumidityStats(dht, eeprom, hd, hl);
 }
 
+void EnvironmentManager::saveHumidityLifetimeRecord(EEPROM_25LC040A &eeprom, int16_t maxHum, int16_t minHum, HumidityLifetimeStats &life) {
+    bool lifetimeChanged = false;
+
+    // ---------------- LIFETIME STATS ----------------
+    
+    // Lifetime Max check
+    if (isnan(life.maxHum) || maxHum > life.maxHum) {
+        life.maxHum = maxHum;
+        life.maxYear = 2026;
+        life.maxMonth = 12;
+        life.maxDay = 31;
+        life.maxHour = 23;
+        life.maxMinute = 59;
+        lifetimeChanged = true;
+    }
+
+    // Lifetime Min check
+    if (isnan(life.minHum) || minHum < life.minHum) {
+        life.minHum = minHum;
+        life.minYear = 2026;
+        life.minMonth = 12;
+        life.minDay = 31;
+        life.minHour = 23;
+        life.minMinute = 59;
+        lifetimeChanged = true;
+    }
+
+    // ---------------- SAVE TO EEPROM ----------------    
+    if (lifetimeChanged) {
+        eeprom.saveLifetimeHumidity(life);
+    }
+}
+
 void EnvironmentManager::saveTemperatureLifetimeRecord(EEPROM_25LC040A &eeprom, int16_t maxTemp, int16_t minTemp, TemperatureLifetimeStats &life) {
     bool lifetimeChanged = false;
 
@@ -142,13 +175,6 @@ void EnvironmentManager::printLine(const __FlashStringHelper* label, int16_t val
         printDate(day, month, year, hour, minute);
 }
 
-// static void printLine(const __FlashStringHelper* label, uint16_t value, uint8_t day, uint8_t month, uint16_t year, uint8_t hour, uint8_t minute) {
-//         Serial.print(label);
-//         printHumidity(value);
-//         Serial.print(F(" @ "));
-//         printDate(day, month, year, hour, minute);
-// }
-
 void EnvironmentManager::printTemperatureStats(DHT_Sensor &dht, EEPROM_25LC040A &eeprom, TemperatureDailyStats &td, TemperatureLifetimeStats &tl) {
     static int16_t maxMeasuredTemp = INT16_MIN;
     static int16_t minMeasuredTemp = INT16_MAX;
@@ -210,10 +236,10 @@ void EnvironmentManager::printHumidityStats(DHT_Sensor &dht, EEPROM_25LC040A &ee
             minMeasuredHum = currentHum;
         }
 
-        // saveTemperatureLifetimeRecord(eeprom, maxMeasuredHum, minMeasuredHum, hl);
+        // saveHumidityLifetimeRecord(eeprom, maxMeasuredHum, minMeasuredHum, hl);
         rememberHumidityDailyRecord(maxMeasuredHum, minMeasuredHum, hd);
 
-        // eeprom.loadLifetimeTemperature(hl);
+        eeprom.loadLifetimeHumidity(hl);
         Serial.println(F("  Lifetime Stats "));
         printLine(F("   Min humidity: "), hl.minHum, false, hl.minDay, hl.minMonth, hl.minYear, hl.minHour, hl.minMinute);
         printLine(F("   Max humidity: "), hl.maxHum, false, hl.maxDay, hl.maxMonth, hl.maxYear, hl.maxHour, hl.maxMinute);

@@ -153,11 +153,19 @@ void EEPROM_25LC040A::factoryReset() {
 // -------------------- LIFETIME --------------------
 
 void EEPROM_25LC040A::saveLifetimeTemperature(const TemperatureLifetimeStats &data) {
-    writeBytes(lifetimeStatsAddress, &data, sizeof(TemperatureLifetimeStats));
+    writeBytes(lifetimeTempStatsAddress, &data, sizeof(TemperatureLifetimeStats));
 }
 
 void EEPROM_25LC040A::loadLifetimeTemperature(TemperatureLifetimeStats &data) {
-    readBytes(lifetimeStatsAddress, &data, sizeof(TemperatureLifetimeStats));
+    readBytes(lifetimeTempStatsAddress, &data, sizeof(TemperatureLifetimeStats));
+}
+
+void EEPROM_25LC040A::saveLifetimeHumidity(const HumidityLifetimeStats &data) {
+    writeBytes(lifetimeHumStatsAddress, &data, sizeof(HumidityLifetimeStats));
+}
+
+void EEPROM_25LC040A::loadLifetimeHumidity(HumidityLifetimeStats &data) {
+    readBytes(lifetimeHumStatsAddress, &data, sizeof(HumidityLifetimeStats));
 }
 
 // -------------------- OTHER --------------------

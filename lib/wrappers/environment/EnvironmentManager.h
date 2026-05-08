@@ -19,6 +19,7 @@ public:
                                HumidityDailyStats &hd, HumidityLifetimeStats &hl);
 
     void saveTemperatureLifetimeRecord(EEPROM_25LC040A &eeprom, int16_t maxTemp, int16_t minTemp, TemperatureLifetimeStats &life);
+    void saveHumidityLifetimeRecord(EEPROM_25LC040A &eeprom, int16_t maxHum, int16_t minHum, HumidityLifetimeStats &life);
     
     void rememberTemperatureDailyRecord(int16_t maxTemp, int16_t minTemp, TemperatureDailyStats &day);
     void rememberHumidityDailyRecord(uint16_t maxHum, uint16_t minHum, HumidityDailyStats &day);
