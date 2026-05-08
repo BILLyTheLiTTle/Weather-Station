@@ -11,7 +11,7 @@ int16_t DHT_Sensor::getTemperature() {
     if (chk == DHTLIB_OK) {
         float temp = _dht.getTemperature();
         
-        if (temp < -40 || temp > 80) {
+        if (temp < -40.0f || temp > 80.0f) {
             _lastTemp = INVALID_TEMPERATURE;
             return INVALID_TEMPERATURE;
         }
@@ -39,7 +39,7 @@ uint16_t DHT_Sensor::getHumidity() {
         hum = _dht.getHumidity();
     // }
 
-    if (hum >= 0 && hum <= 100) {
+    if (hum >= 0.0f && hum <= 100.0f) { // TODO verify it is not normal for humidity to go above 100%
         _lastHum = hum * 100;
         return (uint16_t)(hum * 100);
     }
