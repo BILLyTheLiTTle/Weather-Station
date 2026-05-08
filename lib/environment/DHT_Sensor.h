@@ -3,17 +3,22 @@
 #include "DHTStable.h"
 
 class DHT_Sensor {
-private:
-    DHTStable _dht;
-    uint8_t _pin;
-    uint8_t _type; // 11 for DHT11, 22 for DHT22
-
 public:
-    // Constructor
-    DHT_Sensor(uint8_t pin, uint8_t type);
+    enum SensorType : uint8_t {
+        DHT11 = 11,
+        DHT22 = 22
+    };
+    DHT_Sensor(uint8_t pin, SensorType type);
 
     int16_t getTemperature(); // return centiCelsius to avoid floats
     uint16_t getHumidity(); // return percentage x100 to avoid floats
 
     static const int16_t INVALID_VALUE = DHTLIB_INVALID_VALUE;
+
+private:
+    DHTStable _dht;
+    uint8_t _pin;
+    SensorType _type;
+
+
 };

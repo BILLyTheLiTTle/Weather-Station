@@ -3,7 +3,7 @@
 #include "Battery.h"
 #include "MemoryProfiler.h"
 #include "ACS712.h"
-#include "./environment/TemperatureHelper.h"
+#include "Thermistor.h"
 
 void printBatteryStats(Battery &battery, ACS712 &acs712);
 

@@ -1,6 +1,6 @@
 #include "DHT_Sensor.h"
 
-DHT_Sensor::DHT_Sensor(uint8_t pin, uint8_t type) {
+DHT_Sensor::DHT_Sensor(uint8_t pin, SensorType type) {
     _pin = pin;
     _type = type;
 }

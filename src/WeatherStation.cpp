@@ -2,6 +2,7 @@
 #include "./system/SystemHelper.h"
 #include "Debugger.h"
 #include "ACS712.h"
+#include "environment/EnvironmentManager.h"
 
 Thermistor therm(
     A0,        // analog pin
@@ -13,6 +14,7 @@ Thermistor therm(
 
 Battery battery(A1, 9810, 14830);
 
+EnvironmentManager envMan;
 EEPROM_25LC040A eeprom(10);
 TemperatureDailyStats td;
 TemperatureLifetimeStats tl;
@@ -52,7 +54,7 @@ void loop() {
 
     Serial.println(F("=*=*=*= START =*=*=*="));
     Serial.println(F("-*-*-*- Environment Stats -*-*-*-"));
-    printEnvironmentStats(environmentSensor, eeprom, td, tl, hd, hl);
+    envMan.printEnvironmentStats(environmentSensor, eeprom, td, tl, hd, hl);
     Serial.println(F("-*-*-*- System Stats -*-*-*-"));
     printSystemStats(battery, acs712, ram, therm);
     Serial.println(F("=*=*=*= END =*=*=*=\n"));

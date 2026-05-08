@@ -38,6 +38,23 @@ void printBatteryStats(Battery &battery, ACS712 &acs712) {
     }
 }
 
+static void printDecimalNumber(int16_t value, const __FlashStringHelper *symbol) {
+    Serial.print(value/100);
+
+    Serial.print(F("."));
+
+    int8_t decimals = value % 100;
+    if (decimals < 10) Serial.print(F("0"));
+
+    Serial.print(decimals);
+
+    Serial.print(symbol);
+}
+
+static void printTemperature(int16_t temp) {
+    printDecimalNumber(temp,  F("°C"));
+}
+
 void printSystemTemperature(Thermistor &therm) {
     static int16_t currentTemp = 0;
     Temperature temp = therm.readTemperatureC();
