@@ -27,7 +27,7 @@ SleepMode sleepSwitch(3);
 
 ACS712 acs712(A2, ACS712_05B, 2200);
 
-DHT_Sensor environmentSensor(9, 22);
+DHT_Sensor environmentSensor(9, DHT_Sensor::DHT22);
 
 void setup() {
     Serial.begin(9600);

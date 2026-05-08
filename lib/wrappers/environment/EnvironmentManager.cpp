@@ -182,7 +182,7 @@ void EnvironmentManager::printTemperatureStats(DHT_Sensor &dht, EEPROM_25LC040A 
 
     int16_t temp = dht.getTemperature();
 
-    if (temp != dht.INVALID_VALUE) {
+    if (temp != dht.INVALID_TEMPERATURE) {
         currentTemp = ((temp + 25) / 50) * 50;
         Serial.println(F(" Current Stats "));
         Serial.print(F("  Temperature: "));
@@ -220,7 +220,7 @@ void EnvironmentManager::printHumidityStats(DHT_Sensor &dht, EEPROM_25LC040A &ee
 
     uint16_t hum = dht.getHumidity();
 
-    if (hum != dht.INVALID_VALUE) {
+    if (hum != dht.INVALID_HUMIDITY) {
         currentHum = ((hum + 25) / 50) * 50;
         Serial.print(F("  Humidity: "));
         printHumidity(currentHum);

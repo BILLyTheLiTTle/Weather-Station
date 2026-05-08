@@ -6,29 +6,43 @@ DHT_Sensor::DHT_Sensor(uint8_t pin, SensorType type) {
 }
 
 int16_t DHT_Sensor::getTemperature() {
-    int16_t chk;
-    if (_type == 22) {
-        chk = _dht.read22(_pin);
-    } else {
-        chk = _dht.read11(_pin);
-    }
+    int16_t chk = (_type == 22) ? _dht.read22(_pin) : _dht.read11(_pin);
 
     if (chk == DHTLIB_OK) {
-        return _dht.getTemperature() * 100;
-    } else {
-        return INVALID_VALUE;
+        float temp = _dht.getTemperature();
+        
+        if (temp < -40 || temp > 80) {
+            _lastTemp = INVALID_TEMPERATURE;
+            return INVALID_TEMPERATURE;
+        }
+        _lastTemp = temp * 100;
+        return (int16_t)(temp * 100);
     }
+    _lastTemp = INVALID_TEMPERATURE;
+    return INVALID_TEMPERATURE;
 }
 
 uint16_t DHT_Sensor::getHumidity() {
-    if (_dht.getHumidity() == 0) { 
-        if (_type == 22) {
-            _dht.read22(_pin);
-        }
-        else {
-            _dht.read11(_pin);
-        }
+    float hum = _dht.getHumidity();
+
+    if (_lastTemp == INVALID_TEMPERATURE) {
+        _lastHum = INVALID_HUMIDITY;
+        return INVALID_HUMIDITY;
     }
     
-    return (_dht.getHumidity() != 0) ? _dht.getHumidity() * 100 : INVALID_VALUE;
+    // if (hum < 0 || hum > 100) {
+        int16_t chk = (_type == 22) ? _dht.read22(_pin) : _dht.read11(_pin);
+        if (chk != DHTLIB_OK) {
+            _lastHum = INVALID_HUMIDITY;
+            return INVALID_HUMIDITY;
+        }
+        hum = _dht.getHumidity();
+    // }
+
+    if (hum >= 0 && hum <= 100) {
+        _lastHum = hum * 100;
+        return (uint16_t)(hum * 100);
+    }
+    
+    return INVALID_HUMIDITY;
 }
