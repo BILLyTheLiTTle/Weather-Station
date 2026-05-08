@@ -53,21 +53,3 @@ void loop() {
     printSystemStats(battery, acs712, ram, therm);
     Serial.println(F("=*=*=*= END =*=*=*=\n"));
 }
-
-// void calculate() {
-//     uint32_t ma = acs712.getCurrentMA();
-//     uint32_t tMin = acs712.getRemainingMinutes();
-
-//     Serial.print("Current: ");
-//     Serial.print(ma);
-//     Serial.print(" mA | Time: ");
-    
-//     if(tMin > 90000) {
-//         Serial.println("Unknown");
-//     } else {
-//         Serial.print(tMin / 60);
-//         Serial.print("h ");
-//         Serial.print(tMin % 60);
-//         Serial.println("m");
-//     }
-// }
