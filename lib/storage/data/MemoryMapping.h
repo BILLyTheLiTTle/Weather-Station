@@ -13,4 +13,4 @@ uint8_t version = 1; // Max value should be 254 because 255 (0xFF) is written fr
 uint16_t lifetimeTempStatsAddress = VERSION_ADDRESS + sizeof(uint8_t);
 // uint16_t dailyStatsAddress = lifetimeStatsAddress + sizeof(TemperatureLifetimeStats);
 
-uint16_t lifetimeHumStatsAddress = lifetimeTempStatsAddress + sizeof(lifetimeTempStatsAddress);
+uint16_t lifetimeHumStatsAddress = lifetimeTempStatsAddress + sizeof(TemperatureLifetimeStats);
