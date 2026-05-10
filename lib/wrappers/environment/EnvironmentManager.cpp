@@ -76,11 +76,14 @@ void EnvironmentManager::saveTemperatureLifetimeRecord(EEPROM_25LC040A &eeprom, 
 
 void EnvironmentManager::rememberTemperatureDailyRecord(DS3231 &rtc, int16_t maxTemp, int16_t minTemp, TemperatureDailyStats &day) {
     bool dailyChanged = false;
+    bool forceUpdate = false;
     
-    // TODO if current time is between 00:05 - 00:25 force write the daily stats
+    forceUpdate = rtc.getHour() == EnvironmentManager::RESET_HOUR 
+    && rtc.getMinute() >= EnvironmentManager::RESET_MINUTE_LOWER_BOUND 
+    && rtc.getMinute() <= EnvironmentManager::RESET_MINUTE_UPPER_BOUND;
 
     // Check for NEW MAX: If current is NaN (after reset) OR new temp is higher
-    if (isnan(day.maxTemp) || maxTemp > day.maxTemp) {
+    if (isnan(day.maxTemp) || maxTemp > day.maxTemp || forceUpdate) {
         day.maxTemp = maxTemp;
         day.maxYear = rtc.getYear();
         day.maxMonth = rtc.getMonth();
@@ -91,7 +94,7 @@ void EnvironmentManager::rememberTemperatureDailyRecord(DS3231 &rtc, int16_t max
     }
 
     // Check for NEW MIN: If current is NaN (after reset) OR new temp is lower
-    if (isnan(day.minTemp) || minTemp < day.minTemp) {
+    if (isnan(day.minTemp) || minTemp < day.minTemp || forceUpdate) {
         day.minTemp = minTemp;
         day.minYear = rtc.getYear();
         day.minMonth = rtc.getMonth();
@@ -104,11 +107,14 @@ void EnvironmentManager::rememberTemperatureDailyRecord(DS3231 &rtc, int16_t max
 
 void EnvironmentManager::rememberHumidityDailyRecord(DS3231 &rtc, uint16_t maxHum, uint16_t minHum, HumidityDailyStats &day) {
     bool dailyChanged = false;
+    bool forceUpdate = false;
     
-    // TODO if current time is between 00:05 - 00:25 force write the daily stats
+    forceUpdate = rtc.getHour() == EnvironmentManager::RESET_HOUR 
+    && rtc.getMinute() >= EnvironmentManager::RESET_MINUTE_LOWER_BOUND 
+    && rtc.getMinute() <= EnvironmentManager::RESET_MINUTE_UPPER_BOUND;
 
     // Check for NEW MAX: If current is NaN (after reset) OR new humidity is higher
-    if (isnan(day.maxHum) || maxHum > day.maxHum) {
+    if (isnan(day.maxHum) || maxHum > day.maxHum || forceUpdate) {
         day.maxHum = maxHum;
         day.maxYear = rtc.getYear();
         day.maxMonth = rtc.getMonth();
@@ -119,7 +125,7 @@ void EnvironmentManager::rememberHumidityDailyRecord(DS3231 &rtc, uint16_t maxHu
     }
 
     // Check for NEW MIN: If current is NaN (after reset) OR new humidity is lower
-    if (isnan(day.minHum) || minHum < day.minHum) {
+    if (isnan(day.minHum) || minHum < day.minHum || forceUpdate) {
         day.minHum = minHum;
         day.minYear = rtc.getYear();
         day.minMonth = rtc.getMonth();

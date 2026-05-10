@@ -33,4 +33,8 @@ private:
     void printDate(uint8_t day, uint8_t month, uint16_t year, uint8_t hour, uint8_t minute);
     void printTemperatureStats(DHT_Sensor &dht, EEPROM_25LC040A &eeprom, DS3231 &rtc, TemperatureDailyStats &td, TemperatureLifetimeStats &tl);
     void printHumidityStats(DHT_Sensor &dht, EEPROM_25LC040A &eeprom, DS3231 &rtc, HumidityDailyStats &hd, HumidityLifetimeStats &hl);
+
+    static const uint8_t RESET_HOUR = 0;
+    static const uint8_t RESET_MINUTE_LOWER_BOUND = 5;
+    static const uint8_t RESET_MINUTE_UPPER_BOUND = 25;
 };
