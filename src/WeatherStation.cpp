@@ -35,7 +35,7 @@ DS3231 rtc;
 void setup() {
     Serial.begin(9600);
 
-    // For calibration we need to remove all power sources (Vin, batteries) apart from USB. After calibration comment it out again
+    // For calibration we need to remove all power sources (Vin, batteries) apart from USB. After calibration comment it again
     // acs712.calibrate();
 
     dbg.begin();
@@ -43,17 +43,19 @@ void setup() {
     battery.begin();
 
     eeprom.begin();
+    // To reset the stored data uncomment the factory reset and comment the load lifetime data. Don't forget to undo the commenting for a regular run
+    // eeprom.factoryReset();
+    eeprom.loadLifetimeTemperature(tl);
+    eeprom.loadLifetimeHumidity(hl);
 
     sleepSwitch.begin();
-
-    // eeprom.factoryReset();
 
     if (!rtc.begin()) {
         Serial.println(F("RTC Error!"));
         while (1);
     }
 
-    // You call it when the RTC get cut off from power. Then you comment it out again
+    // You call it when the RTC get cut off from power. Then you comment it again
     // rtc.updateWithSystemTime();
 }
 
