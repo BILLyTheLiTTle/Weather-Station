@@ -1,14 +1,14 @@
 #include "EnvironmentManager.h"
 
-void EnvironmentManager::printEnvironmentStats(DHT_Sensor &dht, EEPROM_25LC040A &eeprom, 
+void EnvironmentManager::printEnvironmentStats(DHT_Sensor &dht, EEPROM_25LC040A &eeprom, DS3231 &rtc,
     TemperatureDailyStats &td, TemperatureLifetimeStats &tl, 
     HumidityDailyStats &hd, HumidityLifetimeStats &hl) {
 
-    printTemperatureStats(dht, eeprom, td, tl);
-    printHumidityStats(dht, eeprom, hd, hl);
+    printTemperatureStats(dht, eeprom, rtc, td, tl);
+    printHumidityStats(dht, eeprom, rtc, hd, hl);
 }
 
-void EnvironmentManager::saveHumidityLifetimeRecord(EEPROM_25LC040A &eeprom, int16_t maxHum, int16_t minHum, HumidityLifetimeStats &life) {
+void EnvironmentManager::saveHumidityLifetimeRecord(EEPROM_25LC040A &eeprom, DS3231 &rtc, int16_t maxHum, int16_t minHum, HumidityLifetimeStats &life) {
     bool lifetimeChanged = false;
 
     // ---------------- LIFETIME STATS ----------------
@@ -16,22 +16,22 @@ void EnvironmentManager::saveHumidityLifetimeRecord(EEPROM_25LC040A &eeprom, int
     // Lifetime Max check
     if (isnan(life.maxHum) || maxHum > life.maxHum) {
         life.maxHum = maxHum;
-        life.maxYear = 2026;
-        life.maxMonth = 12;
-        life.maxDay = 31;
-        life.maxHour = 23;
-        life.maxMinute = 59;
+        life.maxYear = rtc.getYear();
+        life.maxMonth = rtc.getMonth();
+        life.maxDay = rtc.getDay();
+        life.maxHour = rtc.getHour();
+        life.maxMinute = rtc.getMinute();
         lifetimeChanged = true;
     }
 
     // Lifetime Min check
     if (isnan(life.minHum) || minHum < life.minHum) {
         life.minHum = minHum;
-        life.minYear = 2026;
-        life.minMonth = 12;
-        life.minDay = 31;
-        life.minHour = 23;
-        life.minMinute = 59;
+        life.minYear = rtc.getYear();
+        life.minMonth = rtc.getMonth();
+        life.minDay = rtc.getDay();
+        life.minHour = rtc.getHour();
+        life.minMinute = rtc.getMinute();
         lifetimeChanged = true;
     }
 
@@ -41,7 +41,7 @@ void EnvironmentManager::saveHumidityLifetimeRecord(EEPROM_25LC040A &eeprom, int
     }
 }
 
-void EnvironmentManager::saveTemperatureLifetimeRecord(EEPROM_25LC040A &eeprom, int16_t maxTemp, int16_t minTemp, TemperatureLifetimeStats &life) {
+void EnvironmentManager::saveTemperatureLifetimeRecord(EEPROM_25LC040A &eeprom, DS3231 &rtc, int16_t maxTemp, int16_t minTemp, TemperatureLifetimeStats &life) {
     bool lifetimeChanged = false;
 
     // ---------------- LIFETIME STATS ----------------
@@ -49,22 +49,22 @@ void EnvironmentManager::saveTemperatureLifetimeRecord(EEPROM_25LC040A &eeprom, 
     // Lifetime Max check
     if (isnan(life.maxTemp) || maxTemp > life.maxTemp) {
         life.maxTemp = maxTemp;
-        life.maxYear = 2026;
-        life.maxMonth = 12;
-        life.maxDay = 31;
-        life.maxHour = 23;
-        life.maxMinute = 59;
+        life.maxYear = rtc.getYear();
+        life.maxMonth = rtc.getMonth();
+        life.maxDay = rtc.getDay();
+        life.maxHour = rtc.getHour();
+        life.maxMinute = rtc.getMinute();
         lifetimeChanged = true;
     }
 
     // Lifetime Min check
     if (isnan(life.minTemp) || minTemp < life.minTemp) {
         life.minTemp = minTemp;
-        life.minYear = 2026;
-        life.minMonth = 12;
-        life.minDay = 31;
-        life.minHour = 23;
-        life.minMinute = 59;
+        life.minYear = rtc.getYear();
+        life.minMonth = rtc.getMonth();
+        life.minDay = rtc.getDay();
+        life.minHour = rtc.getHour();
+        life.minMinute = rtc.getMinute();
         lifetimeChanged = true;
     }
 
@@ -74,7 +74,7 @@ void EnvironmentManager::saveTemperatureLifetimeRecord(EEPROM_25LC040A &eeprom, 
     }
 }
 
-void EnvironmentManager::rememberTemperatureDailyRecord(int16_t maxTemp, int16_t minTemp, TemperatureDailyStats &day) {
+void EnvironmentManager::rememberTemperatureDailyRecord(DS3231 &rtc, int16_t maxTemp, int16_t minTemp, TemperatureDailyStats &day) {
     bool dailyChanged = false;
     
     // TODO if current time is between 00:05 - 00:25 force write the daily stats
@@ -82,27 +82,27 @@ void EnvironmentManager::rememberTemperatureDailyRecord(int16_t maxTemp, int16_t
     // Check for NEW MAX: If current is NaN (after reset) OR new temp is higher
     if (isnan(day.maxTemp) || maxTemp > day.maxTemp) {
         day.maxTemp = maxTemp;
-        day.maxYear = 2026;
-        day.maxMonth = 12;
-        day.maxDay = 31;
-        day.maxHour = 23;
-        day.maxMinute = 59;
+        day.maxYear = rtc.getYear();
+        day.maxMonth = rtc.getMonth();
+        day.maxDay = rtc.getDay();
+        day.maxHour = rtc.getHour();
+        day.maxMinute = rtc.getMinute();
         dailyChanged = true;
     }
 
     // Check for NEW MIN: If current is NaN (after reset) OR new temp is lower
     if (isnan(day.minTemp) || minTemp < day.minTemp) {
         day.minTemp = minTemp;
-        day.minYear = 2026;
-        day.minMonth = 12;
-        day.minDay = 31;
-        day.minHour = 23;
-        day.minMinute = 59;
+        day.minYear = rtc.getYear();
+        day.minMonth = rtc.getMonth();
+        day.minDay = rtc.getDay();
+        day.minHour = rtc.getHour();
+        day.minMinute = rtc.getMinute();
         dailyChanged = true;
     }
 }
 
-void EnvironmentManager::rememberHumidityDailyRecord(uint16_t maxHum, uint16_t minHum, HumidityDailyStats &day) {
+void EnvironmentManager::rememberHumidityDailyRecord(DS3231 &rtc, uint16_t maxHum, uint16_t minHum, HumidityDailyStats &day) {
     bool dailyChanged = false;
     
     // TODO if current time is between 00:05 - 00:25 force write the daily stats
@@ -110,22 +110,22 @@ void EnvironmentManager::rememberHumidityDailyRecord(uint16_t maxHum, uint16_t m
     // Check for NEW MAX: If current is NaN (after reset) OR new humidity is higher
     if (isnan(day.maxHum) || maxHum > day.maxHum) {
         day.maxHum = maxHum;
-        day.maxYear = 2026;
-        day.maxMonth = 12;
-        day.maxDay = 31;
-        day.maxHour = 23;
-        day.maxMinute = 59;
+        day.maxYear = rtc.getYear();
+        day.maxMonth = rtc.getMonth();
+        day.maxDay = rtc.getDay();
+        day.maxHour = rtc.getHour();
+        day.maxMinute = rtc.getMinute();
         dailyChanged = true;
     }
 
     // Check for NEW MIN: If current is NaN (after reset) OR new humidity is lower
     if (isnan(day.minHum) || minHum < day.minHum) {
         day.minHum = minHum;
-        day.minYear = 2026;
-        day.minMonth = 12;
-        day.minDay = 31;
-        day.minHour = 23;
-        day.minMinute = 59;
+        day.minYear = rtc.getYear();
+        day.minMonth = rtc.getMonth();
+        day.minDay = rtc.getDay();
+        day.minHour = rtc.getHour();
+        day.minMinute = rtc.getMinute();
         dailyChanged = true;
     }
 }
@@ -175,7 +175,7 @@ void EnvironmentManager::printLine(const __FlashStringHelper* label, int16_t val
         printDate(day, month, year, hour, minute);
 }
 
-void EnvironmentManager::printTemperatureStats(DHT_Sensor &dht, EEPROM_25LC040A &eeprom, TemperatureDailyStats &td, TemperatureLifetimeStats &tl) {
+void EnvironmentManager::printTemperatureStats(DHT_Sensor &dht, EEPROM_25LC040A &eeprom, DS3231 &rtc, TemperatureDailyStats &td, TemperatureLifetimeStats &tl) {
     static int16_t maxMeasuredTemp = INT16_MIN;
     static int16_t minMeasuredTemp = INT16_MAX;
     static int16_t currentTemp = 0;
@@ -200,7 +200,7 @@ void EnvironmentManager::printTemperatureStats(DHT_Sensor &dht, EEPROM_25LC040A 
         }
 
         // saveTemperatureLifetimeRecord(eeprom, maxMeasuredTemp, minMeasuredTemp, tl);
-        rememberTemperatureDailyRecord(maxMeasuredTemp, minMeasuredTemp, td);
+        rememberTemperatureDailyRecord(rtc, maxMeasuredTemp, minMeasuredTemp, td);
 
         eeprom.loadLifetimeTemperature(tl);
         Serial.println(F("  Lifetime Stats "));
@@ -213,7 +213,7 @@ void EnvironmentManager::printTemperatureStats(DHT_Sensor &dht, EEPROM_25LC040A 
     }
 }
 
-void EnvironmentManager::printHumidityStats(DHT_Sensor &dht, EEPROM_25LC040A &eeprom, HumidityDailyStats &hd, HumidityLifetimeStats &hl) {
+void EnvironmentManager::printHumidityStats(DHT_Sensor &dht, EEPROM_25LC040A &eeprom, DS3231 &rtc, HumidityDailyStats &hd, HumidityLifetimeStats &hl) {
     static uint16_t maxMeasuredHum = 0;
     static uint16_t minMeasuredHum = UINT16_MAX;
     static uint16_t currentHum = 0;
@@ -237,7 +237,7 @@ void EnvironmentManager::printHumidityStats(DHT_Sensor &dht, EEPROM_25LC040A &ee
         }
 
         // saveHumidityLifetimeRecord(eeprom, maxMeasuredHum, minMeasuredHum, hl);
-        rememberHumidityDailyRecord(maxMeasuredHum, minMeasuredHum, hd);
+        rememberHumidityDailyRecord(rtc, maxMeasuredHum, minMeasuredHum, hd);
 
         eeprom.loadLifetimeHumidity(hl);
         Serial.println(F("  Lifetime Stats "));

@@ -3,6 +3,7 @@
 #include "Debugger.h"
 #include "ACS712.h"
 #include "environment/EnvironmentManager.h"
+#include "DS3231.h"
 
 Thermistor therm(
     A0,        // analog pin
@@ -29,6 +30,8 @@ ACS712 acs712(A2, ACS712_05B, 2200);
 
 DHT_Sensor environmentSensor(9, DHT_Sensor::DHT22);
 
+DS3231 rtc;
+
 void setup() {
     Serial.begin(9600);
 
@@ -44,6 +47,14 @@ void setup() {
     sleepSwitch.begin();
 
     // eeprom.factoryReset();
+
+    if (!rtc.begin()) {
+        Serial.println(F("RTC Error!"));
+        while (1);
+    }
+
+    // You call it when the RTC get cut off from power. Then you comment it out again
+    // rtc.updateWithSystemTime();
 }
 
 void loop() {
@@ -54,7 +65,7 @@ void loop() {
 
     Serial.println(F("=*=*=*= START =*=*=*="));
     Serial.println(F("-*-*-*- Environment Stats -*-*-*-"));
-    envMan.printEnvironmentStats(environmentSensor, eeprom, td, tl, hd, hl);
+    envMan.printEnvironmentStats(environmentSensor, eeprom, rtc, td, tl, hd, hl);
     Serial.println(F("-*-*-*- System Stats -*-*-*-"));
     printSystemStats(battery, acs712, ram, therm);
     Serial.println(F("=*=*=*= END =*=*=*=\n"));
