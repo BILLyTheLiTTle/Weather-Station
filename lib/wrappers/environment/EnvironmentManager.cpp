@@ -8,7 +8,7 @@ void EnvironmentManager::printEnvironmentStats(DHT_Sensor &dht, EEPROM_25LC040A 
     printHumidityStats(dht, eeprom, rtc, hd, hl);
 }
 
-void EnvironmentManager::saveHumidityLifetimeRecord(EEPROM_25LC040A &eeprom, DS3231 &rtc, int16_t maxHum, int16_t minHum, HumidityLifetimeStats &life) {
+bool EnvironmentManager::saveHumidityLifetimeRecord(EEPROM_25LC040A &eeprom, DS3231 &rtc, int16_t maxHum, int16_t minHum, HumidityLifetimeStats &life) {
     bool lifetimeChanged = false;
 
     // ---------------- LIFETIME STATS ----------------
@@ -39,9 +39,11 @@ void EnvironmentManager::saveHumidityLifetimeRecord(EEPROM_25LC040A &eeprom, DS3
     if (lifetimeChanged) {
         eeprom.saveLifetimeHumidity(life);
     }
+
+    return lifetimeChanged;
 }
 
-void EnvironmentManager::saveTemperatureLifetimeRecord(EEPROM_25LC040A &eeprom, DS3231 &rtc, int16_t maxTemp, int16_t minTemp, TemperatureLifetimeStats &life) {
+bool EnvironmentManager::saveTemperatureLifetimeRecord(EEPROM_25LC040A &eeprom, DS3231 &rtc, int16_t maxTemp, int16_t minTemp, TemperatureLifetimeStats &life) {
     bool lifetimeChanged = false;
 
     // ---------------- LIFETIME STATS ----------------
@@ -72,9 +74,11 @@ void EnvironmentManager::saveTemperatureLifetimeRecord(EEPROM_25LC040A &eeprom, 
     if (lifetimeChanged) {
         eeprom.saveLifetimeTemperature(life);
     }
+
+    return lifetimeChanged;
 }
 
-void EnvironmentManager::rememberTemperatureDailyRecord(DS3231 &rtc, int16_t maxTemp, int16_t minTemp, TemperatureDailyStats &day) {
+bool EnvironmentManager::rememberTemperatureDailyRecord(DS3231 &rtc, int16_t maxTemp, int16_t minTemp, TemperatureDailyStats &day) {
     bool dailyChanged = false;
     bool forceUpdate = false;
     
@@ -103,9 +107,11 @@ void EnvironmentManager::rememberTemperatureDailyRecord(DS3231 &rtc, int16_t max
         day.minMinute = rtc.getMinute();
         dailyChanged = true;
     }
+
+    return dailyChanged;
 }
 
-void EnvironmentManager::rememberHumidityDailyRecord(DS3231 &rtc, uint16_t maxHum, uint16_t minHum, HumidityDailyStats &day) {
+bool EnvironmentManager::rememberHumidityDailyRecord(DS3231 &rtc, uint16_t maxHum, uint16_t minHum, HumidityDailyStats &day) {
     bool dailyChanged = false;
     bool forceUpdate = false;
     
@@ -134,6 +140,8 @@ void EnvironmentManager::rememberHumidityDailyRecord(DS3231 &rtc, uint16_t maxHu
         day.minMinute = rtc.getMinute();
         dailyChanged = true;
     }
+
+    return dailyChanged;
 }
 
 void EnvironmentManager::printDecimalNumber(int16_t value, const __FlashStringHelper *symbol) {
@@ -205,15 +213,19 @@ void EnvironmentManager::printTemperatureStats(DHT_Sensor &dht, EEPROM_25LC040A 
             minMeasuredTemp = currentTemp;
         }
 
-        // saveTemperatureLifetimeRecord(eeprom, maxMeasuredTemp, minMeasuredTemp, tl);
-        rememberTemperatureDailyRecord(rtc, maxMeasuredTemp, minMeasuredTemp, td);
+        bool lifetimeTemperatureRecordExists = saveTemperatureLifetimeRecord(eeprom, rtc, maxMeasuredTemp, minMeasuredTemp, tl);
+        bool dailyTemperatureRecordExists = rememberTemperatureDailyRecord(rtc, maxMeasuredTemp, minMeasuredTemp, td);
 
         eeprom.loadLifetimeTemperature(tl);
-        Serial.println(F("  Lifetime Stats "));
+        Serial.print(F("  Lifetime Stats "));
+        if (lifetimeTemperatureRecordExists) Serial.print(F("(*)"));
+        Serial.println();
         printLine(F("   Min temperature: "), tl.minTemp, true, tl.minDay, tl.minMonth, tl.minYear, tl.minHour, tl.minMinute);
         printLine(F("   Max temperature: "), tl.maxTemp, true, tl.maxDay, tl.maxMonth, tl.maxYear, tl.maxHour, tl.maxMinute);
 
-        Serial.println(F("  Daily Stats "));
+        Serial.print(F("  Daily Stats "));
+        if (dailyTemperatureRecordExists) Serial.print(F("(*)"));
+        Serial.println();
         printLine(F("   Min temperature: "), td.minTemp, true, td.minDay, td.minMonth, td.minYear, td.minHour, td.minMinute);
         printLine(F("   Max temperature: "), td.maxTemp, true, td.maxDay, td.maxMonth, td.maxYear, td.maxHour, td.maxMinute);
     }
@@ -242,15 +254,19 @@ void EnvironmentManager::printHumidityStats(DHT_Sensor &dht, EEPROM_25LC040A &ee
             minMeasuredHum = currentHum;
         }
 
-        // saveHumidityLifetimeRecord(eeprom, maxMeasuredHum, minMeasuredHum, hl);
-        rememberHumidityDailyRecord(rtc, maxMeasuredHum, minMeasuredHum, hd);
+        bool lifetimeHumidityRecordExists = saveHumidityLifetimeRecord(eeprom, rtc, maxMeasuredHum, minMeasuredHum, hl);
+        bool dailyHumidityRecordExists = rememberHumidityDailyRecord(rtc, maxMeasuredHum, minMeasuredHum, hd);
 
         eeprom.loadLifetimeHumidity(hl);
-        Serial.println(F("  Lifetime Stats "));
+        Serial.print(F("  Lifetime Stats "));
+        if (lifetimeHumidityRecordExists) Serial.print(F("(*)"));
+        Serial.println();
         printLine(F("   Min humidity: "), hl.minHum, false, hl.minDay, hl.minMonth, hl.minYear, hl.minHour, hl.minMinute);
         printLine(F("   Max humidity: "), hl.maxHum, false, hl.maxDay, hl.maxMonth, hl.maxYear, hl.maxHour, hl.maxMinute);
 
-        Serial.println(F("  Daily Stats "));
+        Serial.print(F("  Daily Stats "));
+        if (dailyHumidityRecordExists) Serial.print(F("(*)"));
+        Serial.println();
         printLine(F("   Min humidity: "), hd.minHum, false, hd.minDay, hd.minMonth, hd.minYear, hd.minHour, hd.minMinute);
         printLine(F("   Max humidity: "), hd.maxHum, false, hd.maxDay, hd.maxMonth, hd.maxYear, hd.maxHour, hd.maxMinute);
     }
