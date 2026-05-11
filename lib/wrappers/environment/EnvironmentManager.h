@@ -23,6 +23,9 @@ public:
     bool rememberTemperatureDailyRecord(DS3231 &rtc, int16_t maxTemp, int16_t minTemp, TemperatureDailyStats &day);
     bool rememberHumidityDailyRecord(DS3231 &rtc, uint16_t maxHum, uint16_t minHum, HumidityDailyStats &day);
 
+    int16_t getCurrentTemp();
+    uint16_t getCurrentHum();
+
 private:
     void printLine(const __FlashStringHelper* label, int16_t value, bool isTemperature, 
                    uint8_t day, uint8_t month, uint16_t year, uint8_t hour, uint8_t minute);
@@ -33,6 +36,9 @@ private:
     void printDate(uint8_t day, uint8_t month, uint16_t year, uint8_t hour, uint8_t minute);
     void printTemperatureStats(DHT_Sensor &dht, EEPROM_25LC040A &eeprom, DS3231 &rtc, TemperatureDailyStats &td, TemperatureLifetimeStats &tl);
     void printHumidityStats(DHT_Sensor &dht, EEPROM_25LC040A &eeprom, DS3231 &rtc, HumidityDailyStats &hd, HumidityLifetimeStats &hl);
+
+    int16_t _currentTemp;
+    uint16_t _currentHumidity;
 
     static const uint8_t RESET_HOUR = 0;
     static const uint8_t RESET_MINUTE_LOWER_BOUND = 5;

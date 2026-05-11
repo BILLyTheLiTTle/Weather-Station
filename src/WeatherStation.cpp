@@ -4,6 +4,7 @@
 #include "ACS712.h"
 #include "environment/EnvironmentManager.h"
 #include "DS3231.h"
+#include "SSD1306.h"
 
 Thermistor therm(
     A0,        // analog pin
@@ -50,13 +51,16 @@ void setup() {
 
     sleepSwitch.begin();
 
-    if (!rtc.begin()) {
-        Serial.println(F("RTC Error!"));
-        while (1);
+    Wire.setWireTimeout(25000, true);
+    while (!rtc.begin()) {
+        Serial.println(F("RTC not found! Retrying in 2 seconds..."));
+        delay(2000);
     }
-
     // You call it when the RTC get cut off from power. Then you comment it again
     // rtc.updateWithSystemTime();
+
+    display.begin();
+    display.showBootMessage();
 }
 
 void loop() {
@@ -68,6 +72,14 @@ void loop() {
 
     // Only perform measurements if the system is ACTIVE and the interval has elapsed.
     if ((!isIntervalElapsed() || sleepSwitch.getState() == SystemState::SLEEP)) return;
+
+    display.clear();
+    display.showCurrentStats(envMan.getCurrentTemp(), envMan.getCurrentHum());
+    // display.showDailyTemperatureStats(td);
+    // display.showDailyHumidityStats(hd);
+    // display.showLifetimeTemperatureStats(tl);
+    // display.showLifetimeHumidityStats(hl);
+    // display.showSystemStats(battery, acs712, ram, therm);
 
     Serial.println(F("=*=*=*= START =*=*=*="));
     Serial.println(F("-*-*-*- Environment Stats -*-*-*-"));

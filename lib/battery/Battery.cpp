@@ -73,3 +73,8 @@ uint8_t Battery::readPercent() {
 
     return p1 + ((p2 - p1) * weight) / 100;
 }
+
+bool Battery::isUsbPowered() {
+    uint16_t voltage = readVoltage();
+    return voltage > 4000 && voltage < 5100;
+}

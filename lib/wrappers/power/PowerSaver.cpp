@@ -1,4 +1,5 @@
 #include "PowerSaver.h"
+#include "SSD1306.h"
 
 static uint32_t lastReadTime = 0;
 
@@ -10,6 +11,7 @@ void enterConditionalSleep(DS3231 &rtc, SleepMode &mode){
     // We don't wait for the interval timer to trigger sleep.
     if (mode.getState() == SystemState::SLEEP) {
         rtc.setRecuringMinutesAlarm(INTERVAL_BETWEEN_RTC_WAKEUPS);
+        display.clear();
 
         Serial.println(F("System going to sleep..."));
         mode.enable();

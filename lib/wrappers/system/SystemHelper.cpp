@@ -5,7 +5,7 @@ void printBatteryStats(Battery &battery, ACS712 &acs712) {
     uint32_t ma = acs712.getCurrentMA();
     uint32_t tMin = acs712.getRemainingMinutes();
 
-    if (isUsbPowered(voltage)) {
+    if (battery.isUsbPowered()) {
         Serial.println(F("Running on USB power"));
     } else {
         uint8_t voltage_int = voltage / 1000; 
@@ -60,7 +60,7 @@ void printSystemTemperature(Thermistor &therm) {
     Temperature temp = therm.readTemperatureC();
 
     if (temp.status == Temperature::OK) {
-        int16_t roundedTemp = ((temp.value + 25) / 50) * 50;;
+        int16_t roundedTemp = ((temp.value + 25) / 50) * 50;
 
         currentTemp = roundedTemp;
         Serial.print(F(" Temperature: "));
@@ -88,8 +88,4 @@ void printSystemStats(Battery &battery, ACS712 &acs712, MemoryProfiler &ram, The
     printBatteryStats(battery, acs712);
     printSystemTemperature(therm);
     printRamStats(ram);
-}
-
-bool isUsbPowered(uint16_t voltage) {
-    return voltage > 4000 && voltage < 5100;
 }

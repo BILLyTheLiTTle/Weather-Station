@@ -166,7 +166,7 @@ void EnvironmentManager::printHumidity(uint16_t temp) {
 }
 
 void EnvironmentManager::printDate(uint8_t day, uint8_t month, uint16_t year, uint8_t hour, uint8_t minute) {
-        if (day < 10) Serial.print('0');
+    if (day < 10) Serial.print('0');
     Serial.print(day);
     Serial.print(F("/"));
     if (month < 10) Serial.print('0');
@@ -184,7 +184,7 @@ void EnvironmentManager::printDate(uint8_t day, uint8_t month, uint16_t year, ui
 void EnvironmentManager::printLine(const __FlashStringHelper* label, int16_t value, bool isTemp, uint8_t day, uint8_t month, uint16_t year, uint8_t hour, uint8_t minute) {
         Serial.print(label);
         if (isTemp) printTemperature(value);
-    else printHumidity((uint16_t)value);
+        else printHumidity((uint16_t)value);
         Serial.print(F(" @ "));
         printDate(day, month, year, hour, minute);
 }
@@ -200,6 +200,7 @@ void EnvironmentManager::printTemperatureStats(DHT_Sensor &dht, EEPROM_25LC040A 
         currentTemp = ((temp + 25) / 50) * 50;
         Serial.println(F(" Current Stats "));
         Serial.print(F("  Temperature: "));
+        _currentTemp = currentTemp;
         printTemperature(currentTemp);
         Serial.println();
 
@@ -241,6 +242,7 @@ void EnvironmentManager::printHumidityStats(DHT_Sensor &dht, EEPROM_25LC040A &ee
     if (hum != dht.INVALID_HUMIDITY) {
         currentHum = ((hum + 25) / 50) * 50;
         Serial.print(F("  Humidity: "));
+        _currentHumidity = currentHum;
         printHumidity(currentHum);
         Serial.println();
 
@@ -271,3 +273,6 @@ void EnvironmentManager::printHumidityStats(DHT_Sensor &dht, EEPROM_25LC040A &ee
         printLine(F("   Max humidity: "), hd.maxHum, false, hd.maxDay, hd.maxMonth, hd.maxYear, hd.maxHour, hd.maxMinute);
     }
 }
+
+int16_t EnvironmentManager::getCurrentTemp() {return _currentTemp; }
+uint16_t EnvironmentManager::getCurrentHum() {return _currentHumidity; }
