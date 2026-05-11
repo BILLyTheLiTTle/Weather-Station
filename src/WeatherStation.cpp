@@ -38,7 +38,7 @@ void setup() {
     // For calibration we need to remove all power sources (Vin, batteries) apart from USB. After calibration comment it again
     // acs712.calibrate();
 
-    dbg.begin();
+    // dbg.begin();
 
     battery.begin();
 
