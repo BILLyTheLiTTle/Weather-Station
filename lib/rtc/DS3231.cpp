@@ -24,7 +24,7 @@ void DS3231::setAlarm(uint8_t hour, uint8_t minute, uint8_t second, Ds3231Alarm1
     );
 }
 
-void DS3231::setRecuringMinutesAlarm(uint8_t minutes) {
+void DS3231::setRecurringMinutesAlarm(uint8_t minutes) {
     DateTime now = rtc.now();
     DateTime next = now + TimeSpan(0, 0, minutes, 0);
     setAlarm(next.hour(), next.minute(), next.second(), DS3231_A1_Minute);
