@@ -10,7 +10,7 @@ void enterConditionalSleep(DS3231 &rtc, SleepMode &mode){
     // If the state is SLEEP, enter low-power mode immediately.
     // We don't wait for the interval timer to trigger sleep.
     if (mode.getState() == SystemState::SLEEP) {
-        rtc.setRecuringMinutesAlarm(INTERVAL_BETWEEN_RTC_WAKEUPS);
+        rtc.setRecurringMinutesAlarm(INTERVAL_BETWEEN_RTC_WAKEUPS);
         display.clear();
 
         Serial.println(F("System going to sleep..."));

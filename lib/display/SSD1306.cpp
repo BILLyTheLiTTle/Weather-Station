@@ -3,21 +3,21 @@
 SSD1306 display;
 
 void SSD1306::begin() {
-    _oled.begin(&Adafruit128x64, 0x3C); // 0x3C είναι η standard διεύθυνση
-    _oled.setFont(Adafruit5x7);         // Ελαφριά γραμματοσειρά
+    _oled.begin(&Adafruit128x64, 0x3C);
+    _oled.setFont(Adafruit5x7);
     _oled.setContrast(1);
 }
 
 void SSD1306::showBootMessage() {
     _oled.clear();
-    _oled.set2X();                      // Διπλάσιο μέγεθος γραμμάτων
+    _oled.set2X();
     _oled.println(F("SYSTEM"));
     _oled.println(F("STARTING..."));
-    _oled.set1X();                      // Επαναφορά σε κανονικό μέγεθος
+    _oled.set1X();
 }
 
 void SSD1306::updateTime(int hours, int minutes, int seconds) {
-    _oled.setCursor(0, 4);              // Πήγαινε στη μέση της οθόνης
+    _oled.setCursor(0, 4);
     if(hours < 10) _oled.print('0');
     _oled.print(hours);
     _oled.print(':');
@@ -308,43 +308,3 @@ void SSD1306::showSystemStats(Battery &battery, ACS712 &acs712, MemoryProfiler &
 void SSD1306::clear() {
     _oled.clear();
 }
-
-// void SSD1306::print(const __FlashStringHelper* msg) {
-//     _oled.print(msg);
-// }
-
-// void SSD1306::println(const __FlashStringHelper* msg) {
-//     _oled.println(msg);
-// }
-
-// void SSD1306::print(int16_t value) {
-//     _oled.print(value);
-// }
-
-// void SSD1306::println(int16_t value) {
-//     _oled.println(value);
-// }
-
-// void SSD1306::print(uint16_t value) {
-//     _oled.print(value);
-// }
-
-// void SSD1306::println(uint16_t value) {
-//     _oled.println(value);
-// }
-
-// void SSD1306::print(int8_t value) {
-//     _oled.print(value);
-// }
-
-// void SSD1306::println(int8_t value) {
-//     _oled.println(value);
-// }
-
-// void SSD1306::print(uint8_t value) {
-//     _oled.print(value);
-// }
-
-// void SSD1306::println(uint8_t value) {
-//     _oled.println(value);
-// }
