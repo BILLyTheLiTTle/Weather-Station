@@ -6,8 +6,9 @@
 volatile bool SleepMode::_interruptFlag = false;
 SleepMode* SleepMode::_instance = nullptr;
 
-SleepMode::SleepMode(uint8_t pin, uint16_t debounceMs)
-    : _pin(pin),
+SleepMode::SleepMode(uint8_t manualPin, uint8_t rtcPin, uint16_t debounceMs)
+    : _manualPin(manualPin),
+      _rtcPin(rtcPin),
       _debounceMs(debounceMs),
       _state(SystemState::SLEEP)
 {}
@@ -15,7 +16,8 @@ SleepMode::SleepMode(uint8_t pin, uint16_t debounceMs)
 void SleepMode::begin() {
     _instance = this;
 
-    pinMode(_pin, INPUT_PULLUP);
+    pinMode(_manualPin, INPUT_PULLUP);
+    pinMode(_rtcPin, INPUT_PULLUP);
 
     /* * WARNING: Avoid attaching a LOW-level interrupt during initialization.
      * 1. CPU Starvation: A LOW-level interrupt is level-triggered. If the pin is LOW 
@@ -32,7 +34,7 @@ void SleepMode::begin() {
      */
     // attachInterrupt(digitalPinToInterrupt(_pin), isrHandler, FALLING);
 
-    _state = (digitalRead(_pin) == LOW)
+    _state = (digitalRead(_manualPin) == LOW || digitalRead(_rtcPin) == LOW)
                 ? SystemState::ACTIVE
                 : SystemState::SLEEP;
 }
@@ -40,11 +42,12 @@ void SleepMode::begin() {
 void SleepMode::isrHandler() {
     // ultra minimal ISR: NO millis, NO logic
     _interruptFlag = true;
+    // Serial.println("WAKE");
 }
 
 void SleepMode::update() {
-    // truth comes ONLY from pin
-    bool isLow = (digitalRead(_pin) == LOW);
+    // truth comes ONLY from pins
+    bool isLow = (digitalRead(_manualPin) == LOW || digitalRead(_rtcPin) == LOW);
 
     _state = isLow ? SystemState::ACTIVE : SystemState::SLEEP;
 
@@ -54,7 +57,7 @@ void SleepMode::update() {
 }
 
 void SleepMode::enable() {
-    if (digitalRead(_pin) == LOW) {
+    if (digitalRead(_manualPin) == LOW || digitalRead(_rtcPin) == LOW) {
         return; 
     }
 
@@ -91,11 +94,13 @@ void SleepMode::enable() {
 void SleepMode::attachWakeInterruptors() {
     // Internal clock stops during sleep so it cannot detect voltage changing (RISING, FALLING, CHANGE).
     // Without the clock CPU is blind to voltage changes. This applies to old Arduino (Uno, Nano, Mega)
-    attachInterrupt(digitalPinToInterrupt(_pin), isrHandler, LOW);
+    attachInterrupt(digitalPinToInterrupt(_manualPin), isrHandler, LOW);
+    attachInterrupt(digitalPinToInterrupt(_rtcPin), isrHandler, LOW);
 }
 
 void SleepMode::detachWakeInterruptors() {
-    detachInterrupt(digitalPinToInterrupt(_pin));
+    detachInterrupt(digitalPinToInterrupt(_manualPin));
+    detachInterrupt(digitalPinToInterrupt(_rtcPin));
 }
 
 SystemState SleepMode::getState() {

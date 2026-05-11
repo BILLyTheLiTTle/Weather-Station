@@ -5,7 +5,7 @@
 
 class SleepMode {
 public:
-    SleepMode(uint8_t pin, uint16_t debounceMs = 50);
+    SleepMode(uint8_t manualPin, uint8_t rtcPin, uint16_t debounceMs = 50);
 
     void begin();
     void update();
@@ -23,7 +23,8 @@ private:
     void attachWakeInterruptors();
     void detachWakeInterruptors();
 
-    uint8_t _pin;
+    uint8_t _manualPin;
+    uint8_t _rtcPin;
     uint16_t _debounceMs;
 
     SystemState _state;

@@ -24,7 +24,7 @@ HumidityLifetimeStats hl;
 
 MemoryProfiler ram(2048);
 
-SleepMode sleepSwitch(3);
+SleepMode sleepSwitch(3, 2);
 
 ACS712 acs712(A2, ACS712_05B, 2200);
 
@@ -60,7 +60,11 @@ void setup() {
 }
 
 void loop() {
-    enterConditionalSleep(sleepSwitch);
+    if (rtc.alarmFired()) {
+        rtc.clearAlarm();
+    }
+
+    enterConditionalSleep(rtc, sleepSwitch);
 
     // Only perform measurements if the system is ACTIVE and the interval has elapsed.
     if ((!isIntervalElapsed() || sleepSwitch.getState() == SystemState::SLEEP)) return;
