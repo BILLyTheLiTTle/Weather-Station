@@ -33,6 +33,8 @@ DHT_Sensor environmentSensor(9, DHT_Sensor::DHT22);
 
 DS3231 rtc;
 
+void navigate(Page page, bool forceRender);
+
 void setup() {
     Serial.begin(9600);
 
@@ -64,6 +66,9 @@ void setup() {
 }
 
 void loop() {
+    Page screen = display.readControls();
+    navigate(screen, false);
+
     if (rtc.alarmFired()) {
         rtc.clearAlarm();
     }
@@ -73,13 +78,7 @@ void loop() {
     // Only perform measurements if the system is ACTIVE and the interval has elapsed.
     if ((!isIntervalElapsed() || sleepSwitch.getState() == SystemState::SLEEP)) return;
 
-    display.clear();
-    display.showCurrentStats(envMan.getCurrentTemp(), envMan.getCurrentHum());
-    // display.showDailyTemperatureStats(td);
-    // display.showDailyHumidityStats(hd);
-    // display.showLifetimeTemperatureStats(tl);
-    // display.showLifetimeHumidityStats(hl);
-    // display.showSystemStats(battery, acs712, ram, therm);
+    navigate(screen, true);
 
     Serial.println(F("=*=*=*= START =*=*=*="));
     Serial.println(F("-*-*-*- Environment Stats -*-*-*-"));
@@ -87,4 +86,41 @@ void loop() {
     Serial.println(F("-*-*-*- System Stats -*-*-*-"));
     printSystemStats(battery, acs712, ram, therm);
     Serial.println(F("=*=*=*= END =*=*=*=\n"));
+}
+
+void navigate(Page page, bool forceRender) {
+    static Page currentPage = PAGE_COUNT;
+
+    if (page == currentPage && forceRender == false) return;
+
+    currentPage = page;
+    display.clear();
+    switch (page) {
+        case PAGE_CURRENT_STATS:
+            display.showCurrentStats(envMan.getCurrentTemp(), envMan.getCurrentHum());
+            break;
+
+        case PAGE_DAILY_TEMPERATURE_STATS:
+            display.showDailyTemperatureStats(td);
+            break;
+
+        case PAGE_DAILY_HUMIDITY_STATS:
+            display.showDailyHumidityStats(hd);
+            break;
+
+        case PAGE_LIFETIME_TEMPERATURE_STATS:
+            display.showLifetimeTemperatureStats(tl);
+            break;
+
+        case PAGE_LIFETIME_HUMIDITY_STATS:
+            display.showLifetimeHumidityStats(hl);
+            break;
+        
+        case PAGE_SYSTEM_STATS:
+            display.showSystemStats(battery, acs712, ram, therm);
+            break;
+
+        default:
+            break;
+    }
 }

@@ -12,19 +12,27 @@
 #include "ACS712.h"
 #include "MemoryProfiler.h"
 #include "Thermistor.h"
+#include "controller/ButtonSensor.h"
 
 enum Page : uint8_t {
     PAGE_CURRENT_STATS = 0,
-    PAGE_DAILY_STATS,
-    PAGE_LIFETIME_STATS,
-    PAGE_SYSTEM_STATS
+    PAGE_DAILY_TEMPERATURE_STATS,
+    PAGE_DAILY_HUMIDITY_STATS,
+    PAGE_LIFETIME_TEMPERATURE_STATS,
+    PAGE_LIFETIME_HUMIDITY_STATS,
+    PAGE_SYSTEM_STATS,
+    PAGE_COUNT // This will have value of 6, which represents the number of available Pages!
 };
 
 class SSD1306 {
 private:
     SSD1306AsciiWire _oled;
+    ButtonSensor navigationButton;
+    Page currentPage = PAGE_CURRENT_STATS;
 
 public:
+    SSD1306(uint8_t navigationControl);
+
     void begin();
     void showBootMessage();
     void updateTime(int hours, int minutes, int seconds);
@@ -37,16 +45,8 @@ public:
     void showSystemStats(Battery &battery, ACS712 &acs712, MemoryProfiler &ram, Thermistor &therm);
 
     void clear();
-    // void print(const __FlashStringHelper* msg);
-    // void println(const __FlashStringHelper* msg);
-    // void print(int16_t value);
-    // void println(int16_t value);
-    // void print(uint16_t value);
-    // void println(uint16_t value);
-    // void print(int8_t value);
-    // void println(int8_t value);
-    // void print(uint8_t value);
-    // void println(uint8_t value);
+
+    Page readControls();
 
 };
 

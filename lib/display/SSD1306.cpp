@@ -1,6 +1,9 @@
 #include "SSD1306.h"
 
-SSD1306 display;
+SSD1306 display(8);
+
+SSD1306::SSD1306(uint8_t navigationControl)
+    : navigationButton(navigationControl){}
 
 void SSD1306::begin() {
     _oled.begin(&Adafruit128x64, 0x3C);
@@ -307,4 +310,39 @@ void SSD1306::showSystemStats(Battery &battery, ACS712 &acs712, MemoryProfiler &
 
 void SSD1306::clear() {
     _oled.clear();
+}
+
+Page SSD1306::readControls() {
+    navigationButton.update();
+
+    ButtonEvent e = navigationButton.getEvent();
+
+    if (e != BUTTON_NONE) {
+
+        switch (e) {
+            case BUTTON_CLICK:
+                currentPage = static_cast<Page> ((currentPage + 1) % PAGE_COUNT);
+                Serial.println("CLICK");
+                break;
+
+            case BUTTON_DOUBLE_CLICK:
+                if (currentPage == 0) {
+                    currentPage = static_cast<Page>(PAGE_COUNT - 1);
+                } else {
+                    currentPage = static_cast<Page>(currentPage - 1);
+                }
+                break;
+
+            case BUTTON_LONG_CLICK:
+                currentPage = PAGE_CURRENT_STATS;
+                break;
+
+            default:
+                break;
+        }
+
+        navigationButton.clearEvent();
+    }
+    
+    return currentPage;
 }
