@@ -44,112 +44,99 @@ void SSD1306::showCurrentStats(int16_t temp, uint16_t hum) {
 
     _oled.println(F("Temperature: "));
 
-    char buffer[10];
-    formatNumber(buffer, temp);
-    _oled.print(buffer);
+    formatNumber(bufferedValue, temp);
+    _oled.print(bufferedValue);
     _oled.println(F(" C"));
     _oled.println();
 
     _oled.println(F("Humidity: "));
-    formatNumber(buffer, hum);
-    _oled.print(buffer);
+    formatNumber(bufferedValue, hum);
+    _oled.print(bufferedValue);
     _oled.println(F(" %"));
 }
 
 void SSD1306::showDailyTemperatureStats(TemperatureDailyStats &stats) {
-    char buffer[10];
-    char dateTimeBuffer[20];
-
     _oled.setCursor(0, 0);
     _oled.print(F("DAY TEMPERATURE STATS"));
     _oled.println();
 
     _oled.println(F("Minimum: "));
-    formatNumber(buffer, stats.minTemp);
-    _oled.print(buffer);
+    formatNumber(bufferedValue, stats.minTemp);
+    _oled.print(bufferedValue);
     _oled.println(F(" C "));
-    formatDateTime(dateTimeBuffer, stats.minDay, stats.minMonth, stats.minYear, stats.minHour, stats.minMinute);
-    _oled.println(dateTimeBuffer);
+    formatDateTime(bufferedDateTime, stats.minDay, stats.minMonth, stats.minYear, stats.minHour, stats.minMinute);
+    _oled.println(bufferedDateTime);
     _oled.println();
 
     _oled.println(F("Maximum: "));
-    formatNumber(buffer, stats.maxTemp);
-    _oled.print(buffer);
+    formatNumber(bufferedValue, stats.maxTemp);
+    _oled.print(bufferedValue);
     _oled.println(F(" C "));
-    formatDateTime(dateTimeBuffer, stats.maxDay, stats.maxMonth, stats.maxYear, stats.maxHour, stats.maxMinute);
-    _oled.println(dateTimeBuffer);
+    formatDateTime(bufferedDateTime, stats.maxDay, stats.maxMonth, stats.maxYear, stats.maxHour, stats.maxMinute);
+    _oled.println(bufferedDateTime);
 }
 
 void SSD1306::showDailyHumidityStats(HumidityDailyStats &stats) {
-    char buffer[10];
-    char dateTimeBuffer[20];
-
     _oled.setCursor(8, 0);
     _oled.print(F("DAY HUMIDITY STATS"));
     _oled.println();
 
     _oled.println(F("Minimum: "));
-    formatNumber(buffer, stats.minHum);
-    _oled.print(buffer);
+    formatNumber(bufferedValue, stats.minHum);
+    _oled.print(bufferedValue);
     _oled.println(F(" % "));
-    formatDateTime(dateTimeBuffer, stats.minDay, stats.minMonth, stats.minYear, stats.minHour, stats.minMinute);
-    _oled.println(dateTimeBuffer);
+    formatDateTime(bufferedDateTime, stats.minDay, stats.minMonth, stats.minYear, stats.minHour, stats.minMinute);
+    _oled.println(bufferedDateTime);
     _oled.println();
 
     _oled.println(F("Maximum: "));
-    formatNumber(buffer, stats.maxHum);
-    _oled.print(buffer);
+    formatNumber(bufferedValue, stats.maxHum);
+    _oled.print(bufferedValue);
     _oled.println(F(" % "));
-    formatDateTime(dateTimeBuffer, stats.maxDay, stats.maxMonth, stats.maxYear, stats.maxHour, stats.maxMinute);
-    _oled.println(dateTimeBuffer);
+    formatDateTime(bufferedDateTime, stats.maxDay, stats.maxMonth, stats.maxYear, stats.maxHour, stats.maxMinute);
+    _oled.println(bufferedDateTime);
 }
 
 void SSD1306::showLifetimeTemperatureStats(TemperatureLifetimeStats &stats) {
-    char buffer[10];
-    char dateTimeBuffer[20];
-
     _oled.setCursor(0, 0);
     _oled.print(F("ALL TEMPERATURE STATS"));
     _oled.println();
 
     _oled.println(F("Minimum: "));
-    formatNumber(buffer, stats.minTemp);
-    _oled.print(buffer);
+    formatNumber(bufferedValue, stats.minTemp);
+    _oled.print(bufferedValue);
     _oled.println(F(" C "));
-    formatDateTime(dateTimeBuffer, stats.minDay, stats.minMonth, stats.minYear, stats.minHour, stats.minMinute);
-    _oled.println(dateTimeBuffer);
+    formatDateTime(bufferedDateTime, stats.minDay, stats.minMonth, stats.minYear, stats.minHour, stats.minMinute);
+    _oled.println(bufferedDateTime);
     _oled.println();
 
     _oled.println(F("Maximum: "));
-    formatNumber(buffer, stats.maxTemp);
-    _oled.print(buffer);
+    formatNumber(bufferedValue, stats.maxTemp);
+    _oled.print(bufferedValue);
     _oled.println(F(" C "));
-    formatDateTime(dateTimeBuffer, stats.maxDay, stats.maxMonth, stats.maxYear, stats.maxHour, stats.maxMinute);
-    _oled.println(dateTimeBuffer);
+    formatDateTime(bufferedDateTime, stats.maxDay, stats.maxMonth, stats.maxYear, stats.maxHour, stats.maxMinute);
+    _oled.println(bufferedDateTime);
 }
 
 void SSD1306::showLifetimeHumidityStats(HumidityLifetimeStats &stats) {
-    char buffer[10];
-    char dateTimeBuffer[20];
-
     _oled.setCursor(8, 0);
     _oled.print(F("ALL HUMIDITY STATS"));
     _oled.println();
 
     _oled.println(F("Minimum: "));
-    formatNumber(buffer, stats.minHum);
-    _oled.print(buffer);
+    formatNumber(bufferedValue, stats.minHum);
+    _oled.print(bufferedValue);
     _oled.println(F(" % "));
-    formatDateTime(dateTimeBuffer, stats.minDay, stats.minMonth, stats.minYear, stats.minHour, stats.minMinute);
-    _oled.println(dateTimeBuffer);
+    formatDateTime(bufferedDateTime, stats.minDay, stats.minMonth, stats.minYear, stats.minHour, stats.minMinute);
+    _oled.println(bufferedDateTime);
     _oled.println();
 
     _oled.println(F("Maximum: "));
-    formatNumber(buffer, stats.maxHum);
-    _oled.print(buffer);
+    formatNumber(bufferedValue, stats.maxHum);
+    _oled.print(bufferedValue);
     _oled.println(F(" % "));
-    formatDateTime(dateTimeBuffer, stats.maxDay, stats.maxMonth, stats.maxYear, stats.maxHour, stats.maxMinute);
-    _oled.println(dateTimeBuffer);
+    formatDateTime(bufferedDateTime, stats.maxDay, stats.maxMonth, stats.maxYear, stats.maxHour, stats.maxMinute);
+    _oled.println(bufferedDateTime);
 }
 
 void SSD1306::showSystemStats(Battery &battery, ACS712 &acs712, MemoryProfiler &ram, Thermistor &therm) {
@@ -206,63 +193,6 @@ void SSD1306::showSystemStats(Battery &battery, ACS712 &acs712, MemoryProfiler &
 
 void SSD1306::clear() {
     _oled.clear();
-}
-
-void SSD1306::formatNumber(char* buffer, int16_t value) {
-    int16_t integral = value / 100;
-    int16_t decimals = value % 100;
-
-    itoa(integral, buffer, 10); 
-    
-    int len = strlen(buffer);
-    buffer[len] = '.';
-    
-    if (decimals < 10) {
-        buffer[len + 1] = '0';
-        itoa(decimals, buffer + len + 2, 10);
-    } else {
-        itoa(decimals, buffer + len + 1, 10);
-    }
-}
-
-void SSD1306::formatNumber(char* buffer, uint16_t value) {
-    uint16_t integral = value / 100;
-    uint16_t decimals = value % 100;
-
-    itoa(integral, buffer, 10); 
-    
-    int len = strlen(buffer);
-    buffer[len] = '.';
-    
-    if (decimals < 10) {
-        buffer[len + 1] = '0';
-        itoa(decimals, buffer + len + 2, 10);
-    } else {
-        itoa(decimals, buffer + len + 1, 10);
-    }
-}
-
-void SSD1306::formatDateTime(char* buffer, uint8_t d, uint8_t m, uint16_t y, uint8_t h, uint8_t min) {
-    buffer[0] = (d / 10) + '0';
-    buffer[1] = (d % 10) + '0';
-    buffer[2] = '/';
-
-    buffer[3] = (m / 10) + '0';
-    buffer[4] = (m % 10) + '0';
-    buffer[5] = '/';
-
-    itoa(y, buffer + 6, 10); 
-    
-    buffer[10] = ' ';
-
-    buffer[11] = (h / 10) + '0';
-    buffer[12] = (h % 10) + '0';
-    buffer[13] = ':';
-
-    buffer[14] = (min / 10) + '0';
-    buffer[15] = (min % 10) + '0';
-
-    buffer[16] = '\0';
 }
 
 Page SSD1306::readControls() {
