@@ -12,6 +12,7 @@ bool DS3231::begin() {
 
 void DS3231::updateWithSystemTime() {
     rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+    Serial.println(F(__TIME__));
 }
 
 void DS3231::setAlarm(uint8_t hour, uint8_t minute, uint8_t second, Ds3231Alarm1Mode mode) {
