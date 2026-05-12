@@ -144,41 +144,21 @@ bool EnvironmentManager::rememberHumidityDailyRecord(DS3231 &rtc, uint16_t maxHu
     return dailyChanged;
 }
 
-void EnvironmentManager::printDecimalNumber(int16_t value, const __FlashStringHelper *symbol) {
-    Serial.print(value/100);
-
-    Serial.print(F("."));
-
-    int8_t decimals = value % 100;
-    if (decimals < 10) Serial.print(F("0"));
-
-    Serial.print(decimals);
-
-    Serial.print(symbol);
-}
-
 void EnvironmentManager::printTemperature(int16_t temp) {
-    printDecimalNumber(temp,  F("°C"));
+    formatNumber(bufferedValue, temp);
+    Serial.print(bufferedValue);
+    Serial.print(F("°C"));
 }
 
-void EnvironmentManager::printHumidity(uint16_t temp) {
-    printDecimalNumber(temp,  F("%"));
+void EnvironmentManager::printHumidity(uint16_t hum) {
+    formatNumber(bufferedValue, hum);
+    Serial.print(bufferedValue);
+    Serial.print(F("%"));
 }
 
 void EnvironmentManager::printDate(uint8_t day, uint8_t month, uint16_t year, uint8_t hour, uint8_t minute) {
-    if (day < 10) Serial.print('0');
-    Serial.print(day);
-    Serial.print(F("/"));
-    if (month < 10) Serial.print('0');
-    Serial.print(month);
-    Serial.print(F("/"));
-    Serial.print(year);
-    Serial.print(F(" "));
-    if (hour < 10) Serial.print('0');
-    Serial.print(hour);
-    Serial.print(F(":"));
-    if (minute < 10) Serial.print('0');
-    Serial.println(minute);
+    formatDateTime(bufferedDateTime, day, month, year, hour, minute);
+    Serial.println(bufferedDateTime);
 }
 
 void EnvironmentManager::printLine(const __FlashStringHelper* label, int16_t value, bool isTemp, uint8_t day, uint8_t month, uint16_t year, uint8_t hour, uint8_t minute) {
