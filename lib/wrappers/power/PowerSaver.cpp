@@ -11,7 +11,7 @@ void enterConditionalSleep(DS3231 &rtc, SleepMode &mode){
     // We don't wait for the interval timer to trigger sleep.
     if (mode.getState() == SystemState::SLEEP) {
         rtc.setRecurringMinutesAlarm(INTERVAL_BETWEEN_RTC_WAKEUPS);
-        display.clear();
+        display.sleep();
 
         Serial.println(F("System going to sleep..."));
         mode.enable();
@@ -21,6 +21,7 @@ void enterConditionalSleep(DS3231 &rtc, SleepMode &mode){
         // Execution resumes here after the interrupt wakes up the MCU.
         // Update state immediately to reflect the wake-up trigger.
         mode.update();
+        display.wake();
         
     }
 }

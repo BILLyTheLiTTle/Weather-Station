@@ -49,6 +49,9 @@ public:
 
     void clear();
 
+    void sleep();
+    void wake();
+
     Page readControls();
 
 };

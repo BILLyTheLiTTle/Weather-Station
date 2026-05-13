@@ -195,6 +195,16 @@ void SSD1306::clear() {
     _oled.clear();
 }
 
+void SSD1306::sleep() {
+    clear();
+    _oled.ssd1306WriteCmd(SSD1306_DISPLAYOFF);
+}
+
+void SSD1306::wake() {
+    _oled.ssd1306WriteCmd(SSD1306_DISPLAYON);
+    clear();
+}
+
 Page SSD1306::readControls() {
     navigationButton.update();
 
