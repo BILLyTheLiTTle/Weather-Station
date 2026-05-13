@@ -215,7 +215,6 @@ Page SSD1306::readControls() {
         switch (e) {
             case BUTTON_CLICK:
                 currentPage = static_cast<Page> ((currentPage + 1) % PAGE_COUNT);
-                Serial.println("CLICK");
                 break;
 
             case BUTTON_DOUBLE_CLICK:
