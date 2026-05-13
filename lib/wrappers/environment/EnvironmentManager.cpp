@@ -80,14 +80,9 @@ bool EnvironmentManager::saveTemperatureLifetimeRecord(EEPROM_25LC040A &eeprom, 
 
 bool EnvironmentManager::rememberTemperatureDailyRecord(DS3231 &rtc, int16_t maxTemp, int16_t minTemp, TemperatureDailyStats &day) {
     bool dailyChanged = false;
-    bool forceUpdate = false;
     
-    forceUpdate = rtc.getHour() == EnvironmentManager::RESET_HOUR 
-    && rtc.getMinute() >= EnvironmentManager::RESET_MINUTE_LOWER_BOUND 
-    && rtc.getMinute() <= EnvironmentManager::RESET_MINUTE_UPPER_BOUND;
-
     // Check for NEW MAX: If current is NaN (after reset) OR new temp is higher
-    if (isnan(day.maxTemp) || maxTemp > day.maxTemp || forceUpdate) {
+    if (maxTemp > day.maxTemp || shouldResetDailyMetrics(rtc)) {
         day.maxTemp = maxTemp;
         day.maxYear = rtc.getYear();
         day.maxMonth = rtc.getMonth();
@@ -98,7 +93,7 @@ bool EnvironmentManager::rememberTemperatureDailyRecord(DS3231 &rtc, int16_t max
     }
 
     // Check for NEW MIN: If current is NaN (after reset) OR new temp is lower
-    if (isnan(day.minTemp) || minTemp < day.minTemp || forceUpdate) {
+    if (minTemp < day.minTemp || shouldResetDailyMetrics(rtc)) {
         day.minTemp = minTemp;
         day.minYear = rtc.getYear();
         day.minMonth = rtc.getMonth();
@@ -113,14 +108,9 @@ bool EnvironmentManager::rememberTemperatureDailyRecord(DS3231 &rtc, int16_t max
 
 bool EnvironmentManager::rememberHumidityDailyRecord(DS3231 &rtc, uint16_t maxHum, uint16_t minHum, HumidityDailyStats &day) {
     bool dailyChanged = false;
-    bool forceUpdate = false;
     
-    forceUpdate = rtc.getHour() == EnvironmentManager::RESET_HOUR 
-    && rtc.getMinute() >= EnvironmentManager::RESET_MINUTE_LOWER_BOUND 
-    && rtc.getMinute() <= EnvironmentManager::RESET_MINUTE_UPPER_BOUND;
-
     // Check for NEW MAX: If current is NaN (after reset) OR new humidity is higher
-    if (isnan(day.maxHum) || maxHum > day.maxHum || forceUpdate) {
+    if (maxHum > day.maxHum || shouldResetDailyMetrics(rtc)) {
         day.maxHum = maxHum;
         day.maxYear = rtc.getYear();
         day.maxMonth = rtc.getMonth();
@@ -131,7 +121,7 @@ bool EnvironmentManager::rememberHumidityDailyRecord(DS3231 &rtc, uint16_t maxHu
     }
 
     // Check for NEW MIN: If current is NaN (after reset) OR new humidity is lower
-    if (isnan(day.minHum) || minHum < day.minHum || forceUpdate) {
+    if (minHum < day.minHum || shouldResetDailyMetrics(rtc)) {
         day.minHum = minHum;
         day.minYear = rtc.getYear();
         day.minMonth = rtc.getMonth();
@@ -142,6 +132,12 @@ bool EnvironmentManager::rememberHumidityDailyRecord(DS3231 &rtc, uint16_t maxHu
     }
 
     return dailyChanged;
+}
+
+bool EnvironmentManager::shouldResetDailyMetrics(DS3231 &rtc) {
+    return rtc.getHour() == EnvironmentManager::RESET_HOUR 
+    && rtc.getMinute() >= EnvironmentManager::RESET_MINUTE_LOWER_BOUND 
+    && rtc.getMinute() <= EnvironmentManager::RESET_MINUTE_UPPER_BOUND;
 }
 
 void EnvironmentManager::printTemperature(int16_t temp) {
@@ -173,6 +169,11 @@ void EnvironmentManager::printTemperatureStats(DHT_Sensor &dht, EEPROM_25LC040A 
     static int16_t maxMeasuredTemp = INT16_MIN;
     static int16_t minMeasuredTemp = INT16_MAX;
     static int16_t currentTemp = 0;
+
+    if (shouldResetDailyMetrics(rtc)) {
+        maxMeasuredTemp = INT16_MIN;
+        minMeasuredTemp = INT16_MAX;
+    }
 
     int16_t temp = dht.getTemperature();
 
@@ -216,6 +217,11 @@ void EnvironmentManager::printHumidityStats(DHT_Sensor &dht, EEPROM_25LC040A &ee
     static uint16_t maxMeasuredHum = 0;
     static uint16_t minMeasuredHum = UINT16_MAX;
     static uint16_t currentHum = 0;
+
+    if (shouldResetDailyMetrics(rtc)) {
+        maxMeasuredHum = 0;
+        minMeasuredHum = UINT16_MAX;
+    }
 
     uint16_t hum = dht.getHumidity();
 

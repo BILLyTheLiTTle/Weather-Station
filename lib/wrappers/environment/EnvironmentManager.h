@@ -37,6 +37,8 @@ private:
     void printTemperatureStats(DHT_Sensor &dht, EEPROM_25LC040A &eeprom, DS3231 &rtc, TemperatureDailyStats &td, TemperatureLifetimeStats &tl);
     void printHumidityStats(DHT_Sensor &dht, EEPROM_25LC040A &eeprom, DS3231 &rtc, HumidityDailyStats &hd, HumidityLifetimeStats &hl);
 
+    bool shouldResetDailyMetrics(DS3231 &rtc);
+
     int16_t _currentTemp;
     uint16_t _currentHumidity;
 
