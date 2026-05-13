@@ -60,7 +60,6 @@ void setup() {
     }
     // You call it when the RTC get cut off from power. Then you comment it again
     // rtc.updateWithSystemTime();
-    delay(20);
 
     display.begin();
     display.showBootMessage();
