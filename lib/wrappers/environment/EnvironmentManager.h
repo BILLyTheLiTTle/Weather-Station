@@ -19,7 +19,7 @@ public:
                                HumidityDailyStats &hd, HumidityLifetimeStats &hl);
 
     bool saveTemperatureLifetimeRecord(EEPROM_25LC040A &eeprom, DS3231 &rtc, int16_t maxTemp, int16_t minTemp, TemperatureLifetimeStats &life);
-    bool saveHumidityLifetimeRecord(EEPROM_25LC040A &eeprom, DS3231 &rtc, int16_t maxHum, int16_t minHum, HumidityLifetimeStats &life);
+    bool saveHumidityLifetimeRecord(EEPROM_25LC040A &eeprom, DS3231 &rtc, uint16_t maxHum, uint16_t minHum, HumidityLifetimeStats &life);
     
     bool rememberTemperatureDailyRecord(DS3231 &rtc, int16_t maxTemp, int16_t minTemp, TemperatureDailyStats &day);
     bool rememberHumidityDailyRecord(DS3231 &rtc, uint16_t maxHum, uint16_t minHum, HumidityDailyStats &day);

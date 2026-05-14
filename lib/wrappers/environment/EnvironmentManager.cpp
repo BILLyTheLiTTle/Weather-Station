@@ -9,7 +9,7 @@ void EnvironmentManager::printEnvironmentStats(DHT_Sensor &dht, EEPROM_25LC040A 
     printHumidityStats(dht, eeprom, rtc, hd, hl);
 }
 
-bool EnvironmentManager::saveHumidityLifetimeRecord(EEPROM_25LC040A &eeprom, DS3231 &rtc, int16_t maxHum, int16_t minHum, HumidityLifetimeStats &life) {
+bool EnvironmentManager::saveHumidityLifetimeRecord(EEPROM_25LC040A &eeprom, DS3231 &rtc, uint16_t maxHum, uint16_t minHum, HumidityLifetimeStats &life) {
     bool lifetimeChanged = false;
 
     // ---------------- LIFETIME STATS ----------------
