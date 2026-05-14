@@ -167,37 +167,32 @@ void EnvironmentManager::printLine(const __FlashStringHelper* label, int16_t val
 }
 
 void EnvironmentManager::printTemperatureStats(DHT_Sensor &dht, EEPROM_25LC040A &eeprom, DS3231 &rtc, TemperatureDailyStats &td, TemperatureLifetimeStats &tl) {
-    static int16_t maxMeasuredTemp = INT16_MIN;
-    static int16_t minMeasuredTemp = INT16_MAX;
-    static int16_t currentTemp = 0;
-
     if (shouldResetDailyMetrics(rtc)) {
-        maxMeasuredTemp = INT16_MIN;
-        minMeasuredTemp = INT16_MAX;
+        _maxMeasuredTemp = INT16_MIN;
+        _minMeasuredTemp = INT16_MAX;
     }
 
     int16_t temp = dht.getTemperature();
 
     if (temp != dht.INVALID_TEMPERATURE) {
-        currentTemp = ((temp + 25) / 50) * 50;
+        _currentTemp = ((temp + 25) / 50) * 50;
         DBG_LN(F(" Current Stats "));
         DBG(F("  Temperature: "));
-        _currentTemp = currentTemp;
-        printTemperature(currentTemp);
+        printTemperature(_currentTemp);
         DBG_LN();
 
         // Max update
-        if (currentTemp > maxMeasuredTemp) {
-            maxMeasuredTemp = currentTemp;
+        if (_currentTemp > _maxMeasuredTemp) {
+            _maxMeasuredTemp = _currentTemp;
         }
 
         // Min update (independent!)
-        if (currentTemp < minMeasuredTemp) {
-            minMeasuredTemp = currentTemp;
+        if (_currentTemp < _minMeasuredTemp) {
+            _minMeasuredTemp = _currentTemp;
         }
 
-        bool lifetimeTemperatureRecordExists = saveTemperatureLifetimeRecord(eeprom, rtc, maxMeasuredTemp, minMeasuredTemp, tl);
-        bool dailyTemperatureRecordExists = rememberTemperatureDailyRecord(rtc, maxMeasuredTemp, minMeasuredTemp, td);
+        bool lifetimeTemperatureRecordExists = saveTemperatureLifetimeRecord(eeprom, rtc, _maxMeasuredTemp, _minMeasuredTemp, tl);
+        bool dailyTemperatureRecordExists = rememberTemperatureDailyRecord(rtc, _maxMeasuredTemp, _minMeasuredTemp, td);
 
         eeprom.loadLifetimeTemperature(tl);
         DBG(F("  Lifetime Stats "));
@@ -215,36 +210,31 @@ void EnvironmentManager::printTemperatureStats(DHT_Sensor &dht, EEPROM_25LC040A 
 }
 
 void EnvironmentManager::printHumidityStats(DHT_Sensor &dht, EEPROM_25LC040A &eeprom, DS3231 &rtc, HumidityDailyStats &hd, HumidityLifetimeStats &hl) {
-    static uint16_t maxMeasuredHum = 0;
-    static uint16_t minMeasuredHum = UINT16_MAX;
-    static uint16_t currentHum = 0;
-
     if (shouldResetDailyMetrics(rtc)) {
-        maxMeasuredHum = 0;
-        minMeasuredHum = UINT16_MAX;
+        _maxMeasuredHum = 0;
+        _minMeasuredHum = UINT16_MAX;
     }
 
     uint16_t hum = dht.getHumidity();
 
     if (hum != dht.INVALID_HUMIDITY) {
-        currentHum = ((hum + 25) / 50) * 50;
+        _currentHumidity = ((hum + 25) / 50) * 50;
         DBG(F("  Humidity: "));
-        _currentHumidity = currentHum;
-        printHumidity(currentHum);
+        printHumidity(_currentHumidity);
         DBG_LN();
 
         // Max update
-        if (currentHum > maxMeasuredHum) {
-            maxMeasuredHum = currentHum;
+        if (_currentHumidity > _maxMeasuredHum) {
+            _maxMeasuredHum = _currentHumidity;
         }
 
         // Min update (independent!)
-        if (currentHum < minMeasuredHum) {
-            minMeasuredHum = currentHum;
+        if (_currentHumidity < _minMeasuredHum) {
+            _minMeasuredHum = _currentHumidity;
         }
 
-        bool lifetimeHumidityRecordExists = saveHumidityLifetimeRecord(eeprom, rtc, maxMeasuredHum, minMeasuredHum, hl);
-        bool dailyHumidityRecordExists = rememberHumidityDailyRecord(rtc, maxMeasuredHum, minMeasuredHum, hd);
+        bool lifetimeHumidityRecordExists = saveHumidityLifetimeRecord(eeprom, rtc, _maxMeasuredHum, _minMeasuredHum, hl);
+        bool dailyHumidityRecordExists = rememberHumidityDailyRecord(rtc, _maxMeasuredHum, _minMeasuredHum, hd);
 
         eeprom.loadLifetimeHumidity(hl);
         DBG_LN(F("  Lifetime Stats "));

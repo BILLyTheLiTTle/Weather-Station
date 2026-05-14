@@ -42,6 +42,12 @@ private:
     int16_t _currentTemp;
     uint16_t _currentHumidity;
 
+    int16_t _maxMeasuredTemp = INT16_MIN;
+    int16_t _minMeasuredTemp = INT16_MAX;
+
+    uint16_t _maxMeasuredHum = 0;
+    uint16_t _minMeasuredHum = UINT16_MAX;
+
     char bufferedValue[10];
     char bufferedDateTime[20];
 
