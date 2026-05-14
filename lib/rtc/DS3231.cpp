@@ -1,50 +1,72 @@
 #include "DS3231.h"
 #include "Debugger.h"
+#include <TimeLib.h> 
+
+DS3231::DS3231() : rtc(false) {}
 
 bool DS3231::begin() {
-    uint8_t retry = 0;
-    while (retry < 3) {
-        if (rtc.begin()) return true;
-        retry++;
-        delay(50);
-    }
-    return false;
+    rtc.begin();
+    // Στην v2.x η oscStopped δεν δέχεται πλέον παραμέτρους
+    return (rtc.oscStopped() == false);
 }
 
 void DS3231::updateWithSystemTime() {
-    rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
-    DBG(F(__TIME__));
-    delay(20);
-}
-
-void DS3231::setAlarm(uint8_t hour, uint8_t minute, uint8_t second, Ds3231Alarm1Mode mode) {
-    rtc.clearAlarm(1);
+    const char *monthNames = "JanFebMarAprMayJunJulAugSepOctNovDec";
+    char m[4];
+    int d, y, hh, mm, ss;
     
-    rtc.setAlarm1(
-        // Random day, month, year since we only care for minutes!
-        DateTime(2026, 1, 1, hour, minute, second), 
-        mode
-    );
+    sscanf(__DATE__, "%s %d %d", m, &d, &y);
+    sscanf(__TIME__, "%d:%d:%d", &hh, &mm, &ss);
+    
+    tmElements_t tm;
+    tm.Second = ss;
+    tm.Minute = mm;
+    tm.Hour = hh;
+    tm.Day = d;
+    tm.Month = (strstr(monthNames, m) - monthNames) / 3 + 1;
+    tm.Year = y - 1970;
+    
+    rtc.write(tm);
+    DBG_LN(__TIME__);
 }
 
-void DS3231::setRecurringMinutesAlarm(uint8_t minutes) {
-    DateTime now = rtc.now();
-    DateTime next = now + TimeSpan(0, 0, minutes, 0);
-    setAlarm(next.hour(), next.minute(), next.second(), DS3231_A1_Minute);
+void DS3231::setAlarm(uint8_t hour, uint8_t minute, uint8_t second) {
+    // Καθαρισμός προηγούμενου alarm flag
+    rtc.alarm(DS3232RTC::ALARM_NBR_t::ALARM_1); 
+    
+    // Ρύθμιση του Alarm 1
+    rtc.setAlarm(DS3232RTC::ALARM_TYPES_t::ALM1_MATCH_HOURS, second, minute, hour, 0);
+    
+    // Ενεργοποίηση του Interrupt pin
+    rtc.alarmInterrupt(DS3232RTC::ALARM_NBR_t::ALARM_1, true);
+}
+
+void DS3231::setRecurringMinutesAlarm(uint8_t minutesToAdd) {
+    time_t now = rtc.get();
+    time_t next = now + (minutesToAdd * 60UL);
+    
+    rtc.alarm(DS3232RTC::ALARM_NBR_t::ALARM_1);
+    
+    rtc.setAlarm(DS3232RTC::ALARM_TYPES_t::ALM1_MATCH_HOURS, second(next), minute(next), hour(next), 0);
+    
+    rtc.alarmInterrupt(DS3232RTC::ALARM_NBR_t::ALARM_1, true);
+    
+    DBG_STAT(F("Next Alarm at min"), minute(next));
 }
 
 void DS3231::clearAlarm() {
-    rtc.clearAlarm(1);
+    rtc.alarm(DS3232RTC::ALARM_NBR_t::ALARM_1);
+    rtc.alarmInterrupt(DS3232RTC::ALARM_NBR_t::ALARM_1, false);
 }
-
 
 bool DS3231::alarmFired() {
-    return rtc.alarmFired(1);
+    // Επιστρέφει true αν το flag είναι ενεργό και το μηδενίζει
+    return rtc.alarm(DS3232RTC::ALARM_NBR_t::ALARM_1);
 }
 
-uint8_t  DS3231::getDay()    { return rtc.now().day(); }
-uint8_t  DS3231::getMonth()  { return rtc.now().month(); }
-uint16_t DS3231::getYear()   { return rtc.now().year(); }
-uint8_t  DS3231::getHour()   { return rtc.now().hour(); }
-uint8_t  DS3231::getMinute() { return rtc.now().minute(); }
-uint8_t  DS3231::getSecond() { return rtc.now().second(); }
+uint8_t DS3231::getHour()   { return hour(rtc.get()); }
+uint8_t DS3231::getMinute() { return minute(rtc.get()); }
+uint8_t DS3231::getSecond() { return second(rtc.get()); }
+uint8_t DS3231::getDay()    { return day(rtc.get()); }
+uint8_t DS3231::getMonth()  { return month(rtc.get()); }
+uint16_t DS3231::getYear()  { return year(rtc.get()); }

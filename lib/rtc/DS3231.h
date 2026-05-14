@@ -1,18 +1,18 @@
-#ifndef DS3231_H
-#define DS3231_H
+#pragma once
 
 #include <Arduino.h>
-#include "RTClib.h"
+#include <DS3232RTC.h>
 
 class DS3231 {
 private:
-    RTC_DS3231 rtc;
+    DS3232RTC rtc;
 
 public:
+    DS3231();
     bool begin();
     void updateWithSystemTime();
 
-    void setAlarm(uint8_t hour, uint8_t minute, uint8_t second, Ds3231Alarm1Mode mode);
+    void setAlarm(uint8_t hour, uint8_t minute, uint8_t second);
     void setRecurringMinutesAlarm(uint8_t minutes);
     void clearAlarm();
     bool alarmFired();
@@ -24,5 +24,3 @@ public:
     uint8_t  getMinute();
     uint8_t  getSecond();
 };
-
-#endif
