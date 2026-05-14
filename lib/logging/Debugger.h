@@ -2,7 +2,7 @@
 
 #include <Arduino.h>
 
-#define DEBUG_ON 0
+#define DEBUG_ON 1
 
 #if DEBUG_ON
   #define DBG_BEGIN(baud) { Serial.begin(baud); }

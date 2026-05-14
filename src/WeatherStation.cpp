@@ -80,10 +80,10 @@ void loop() {
 
     navigate(screen, true);
 
-    DBG(F("=*=*=*= START =*=*=*="));
-    DBG(F("-*-*-*- Environment Stats -*-*-*-"));
+    DBG_LN(F("=*=*=*= START =*=*=*="));
+    DBG_LN(F("-*-*-*- Environment Stats -*-*-*-"));
     envMan.printEnvironmentStats(environmentSensor, eeprom, rtc, td, tl, hd, hl);
-    DBG(F("-*-*-*- System Stats -*-*-*-"));
+    DBG_LN(F("-*-*-*- System Stats -*-*-*-"));
     printSystemStats(battery, acs712, ram, therm);
     DBG(F("=*=*=*= END =*=*=*=\n"));
 }

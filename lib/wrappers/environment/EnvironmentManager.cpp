@@ -237,7 +237,7 @@ void EnvironmentManager::printHumidityStats(DHT_Sensor &dht, EEPROM_25LC040A &ee
         bool dailyHumidityRecordExists = rememberHumidityDailyRecord(rtc, _maxMeasuredHum, _minMeasuredHum, hd);
 
         eeprom.loadLifetimeHumidity(hl);
-        DBG_LN(F("  Lifetime Stats "));
+        DBG(F("  Lifetime Stats "));
         if (lifetimeHumidityRecordExists) DBG(F("(*)"));
         DBG_LN();
         printLine(F("   Min humidity: "), hl.minHum, false, hl.minDay, hl.minMonth, hl.minYear, hl.minHour, hl.minMinute);
