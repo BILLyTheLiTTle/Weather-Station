@@ -2,6 +2,7 @@
 
 #include <avr/sleep.h>
 #include <avr/interrupt.h>
+#include "Debugger.h"
 
 volatile bool SleepMode::_interruptFlag = false;
 SleepMode* SleepMode::_instance = nullptr;
@@ -42,7 +43,7 @@ void SleepMode::begin() {
 void SleepMode::isrHandler() {
     // ultra minimal ISR: NO millis, NO logic
     _interruptFlag = true;
-    // Serial.println("WAKE");
+    DBG("WAKE");
 }
 
 void SleepMode::update() {
@@ -63,8 +64,8 @@ void SleepMode::enable() {
 
     // Serial activity can prevent deep sleep or cause immediate wake-up.
     // Ensure the Serial buffer is fully empty before sleeping.
-    if (Serial) { 
-        Serial.flush(); 
+    if (DEBUG_ON || Serial) { 
+        DBG_FLUSH(); 
     }
 
     // Save ADC settings and power it down

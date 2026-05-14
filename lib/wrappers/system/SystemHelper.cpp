@@ -1,4 +1,5 @@
 #include "SystemHelper.h"
+#include "Debugger.h"
 
 void printBatteryStats(Battery &battery, ACS712 &acs712) {
     uint16_t voltage = battery.readVoltage();
@@ -6,49 +7,49 @@ void printBatteryStats(Battery &battery, ACS712 &acs712) {
     uint32_t tMin = acs712.getRemainingMinutes();
 
     if (battery.isUsbPowered()) {
-        Serial.println(F("Running on USB power"));
+        DBG_LN(F("Running on USB power"));
     } else {
         uint8_t voltage_int = voltage / 1000; 
         uint8_t voltage_frac = (voltage % 1000) / 10; // convert fraction to centiVolts to avoid 3 digits and show only 2 digits
 
         uint8_t p = battery.readPercent();
 
-        Serial.print(F(" Battery: "));
-        Serial.print(p);
-        Serial.print(F("% | Remaining Time: "));
+        DBG(F(" Battery: "));
+        DBG(p);
+        DBG(F("% | Remaining Time: "));
         if(tMin > 90000) {
-            Serial.print(F("Unknown ("));
+            DBG(F("Unknown ("));
         } else {
-            Serial.print(tMin / 60);
-            Serial.print(F("h "));
-            Serial.print(tMin % 60);
-            Serial.print(F("m ("));
+            DBG(tMin / 60);
+            DBG(F("h "));
+            DBG(tMin % 60);
+            DBG(F("m ("));
         }
-        Serial.print(voltage_int);
-        Serial.print(F("."));
-        if (voltage_frac < 10)  Serial.print(F("0"));
-        Serial.print(voltage_frac);
-        Serial.print(F("V | "));
-        Serial.print(ma);
-        Serial.println(F(" mA)"));
+        DBG(voltage_int);
+        DBG(F("."));
+        if (voltage_frac < 10)  DBG(F("0"));
+        DBG(voltage_frac);
+        DBG(F("V | "));
+        DBG(ma);
+        DBG_LN(F(" mA)"));
 
         if(voltage <= Battery::LOWER_BOUND_VOLTAGE) {
-            Serial.println(F("  Batteries need to recharge!"));
+            DBG_LN(F("  Batteries need to recharge!"));
         }
     }
 }
 
 static void printDecimalNumber(int16_t value, const __FlashStringHelper *symbol) {
-    Serial.print(value/100);
+    DBG(value/100);
 
-    Serial.print(F("."));
+    DBG(F("."));
 
     int8_t decimals = value % 100;
-    if (decimals < 10) Serial.print(F("0"));
+    if (decimals < 10) DBG(F("0"));
 
-    Serial.print(decimals);
+    DBG(decimals);
 
-    Serial.print(symbol);
+    DBG(symbol);
 }
 
 static void printTemperature(int16_t temp) {
@@ -63,25 +64,22 @@ void printSystemTemperature(Thermistor &therm) {
         int16_t roundedTemp = ((temp.value + 25) / 50) * 50;
 
         currentTemp = roundedTemp;
-        Serial.print(F(" Temperature: "));
+        DBG(F(" Temperature: "));
         printTemperature(currentTemp);
-        Serial.println();
+        DBG_LN();
 
     } else {
-        Serial.print(F("Error in temperature sensor: "));
-        Serial.println(Temperature::getName(temp.status));
+        DBG(F("Error in temperature sensor: "));
+        DBG_LN(Temperature::getName(temp.status));
     }
 }
 
 void printRamStats(MemoryProfiler &ram) {
-    Serial.print(F(" Heap used: "));
-    Serial.println(ram.getHeapUsed());
+    DBG_STAT(F(" Heap used"), ram.getHeapUsed());
 
-    Serial.print(F(" Free RAM: "));
-    Serial.println(ram.getFreeRam());
+    DBG_STAT(F(" Free RAM"), ram.getFreeRam());
 
-    Serial.print(F(" Used RAM approx: "));
-    Serial.println(ram.getUsedRamApprox());
+    DBG_STAT(F(" Used RAM approx"), ram.getUsedRamApprox());
 }
 
 void printSystemStats(Battery &battery, ACS712 &acs712, MemoryProfiler &ram, Thermistor &therm) {

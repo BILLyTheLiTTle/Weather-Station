@@ -1,5 +1,6 @@
 #include "PowerSaver.h"
 #include "SSD1306.h"
+#include "Debugger.h"
 
 static uint32_t lastReadTime = 0;
 
@@ -13,7 +14,7 @@ void enterConditionalSleep(DS3231 &rtc, SleepMode &mode){
         rtc.setRecurringMinutesAlarm(INTERVAL_BETWEEN_RTC_WAKEUPS);
         display.sleep();
 
-        Serial.println(F("System going to sleep..."));
+        DBG_LN(F("System going to sleep..."));
         mode.enable();
 
         lastReadTime = 0;

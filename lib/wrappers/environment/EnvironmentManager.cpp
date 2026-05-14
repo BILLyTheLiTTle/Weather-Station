@@ -1,4 +1,5 @@
 #include "EnvironmentManager.h"
+#include "Debugger.h"
 
 void EnvironmentManager::printEnvironmentStats(DHT_Sensor &dht, EEPROM_25LC040A &eeprom, DS3231 &rtc,
     TemperatureDailyStats &td, TemperatureLifetimeStats &tl, 
@@ -142,27 +143,27 @@ bool EnvironmentManager::shouldResetDailyMetrics(DS3231 &rtc) {
 
 void EnvironmentManager::printTemperature(int16_t temp) {
     formatNumber(bufferedValue, temp);
-    Serial.print(bufferedValue);
-    Serial.print(F("°C"));
+    DBG(bufferedValue);
+    DBG(F("°C"));
 }
 
 void EnvironmentManager::printHumidity(uint16_t hum) {
     formatNumber(bufferedValue, hum);
-    Serial.print(bufferedValue);
-    Serial.print(F("%"));
+    DBG(bufferedValue);
+    DBG(F("%"));
 }
 
 void EnvironmentManager::printDate(uint8_t day, uint8_t month, uint16_t year, uint8_t hour, uint8_t minute) {
     formatDateTime(bufferedDateTime, day, month, year, hour, minute);
-    Serial.println(bufferedDateTime);
+    DBG_LN(bufferedDateTime);
 }
 
 void EnvironmentManager::printLine(const __FlashStringHelper* label, int16_t value, bool isTemp, uint8_t day, uint8_t month, uint16_t year, uint8_t hour, uint8_t minute) {
-        Serial.print(label);
-        if (isTemp) printTemperature(value);
-        else printHumidity((uint16_t)value);
-        Serial.print(F(" @ "));
-        printDate(day, month, year, hour, minute);
+    DBG(label);
+    if (isTemp) printTemperature(value);
+    else printHumidity((uint16_t)value);
+    DBG(F(" @ "));
+    printDate(day, month, year, hour, minute);
 }
 
 void EnvironmentManager::printTemperatureStats(DHT_Sensor &dht, EEPROM_25LC040A &eeprom, DS3231 &rtc, TemperatureDailyStats &td, TemperatureLifetimeStats &tl) {
@@ -179,11 +180,11 @@ void EnvironmentManager::printTemperatureStats(DHT_Sensor &dht, EEPROM_25LC040A 
 
     if (temp != dht.INVALID_TEMPERATURE) {
         currentTemp = ((temp + 25) / 50) * 50;
-        Serial.println(F(" Current Stats "));
-        Serial.print(F("  Temperature: "));
+        DBG_LN(F(" Current Stats "));
+        DBG(F("  Temperature: "));
         _currentTemp = currentTemp;
         printTemperature(currentTemp);
-        Serial.println();
+        DBG_LN();
 
         // Max update
         if (currentTemp > maxMeasuredTemp) {
@@ -199,15 +200,15 @@ void EnvironmentManager::printTemperatureStats(DHT_Sensor &dht, EEPROM_25LC040A 
         bool dailyTemperatureRecordExists = rememberTemperatureDailyRecord(rtc, maxMeasuredTemp, minMeasuredTemp, td);
 
         eeprom.loadLifetimeTemperature(tl);
-        Serial.print(F("  Lifetime Stats "));
-        if (lifetimeTemperatureRecordExists) Serial.print(F("(*)"));
-        Serial.println();
+        DBG(F("  Lifetime Stats "));
+        if (lifetimeTemperatureRecordExists) DBG(F("(*)"));
+        DBG_LN();
         printLine(F("   Min temperature: "), tl.minTemp, true, tl.minDay, tl.minMonth, tl.minYear, tl.minHour, tl.minMinute);
         printLine(F("   Max temperature: "), tl.maxTemp, true, tl.maxDay, tl.maxMonth, tl.maxYear, tl.maxHour, tl.maxMinute);
 
-        Serial.print(F("  Daily Stats "));
-        if (dailyTemperatureRecordExists) Serial.print(F("(*)"));
-        Serial.println();
+        DBG(F("  Daily Stats "));
+        if (dailyTemperatureRecordExists) DBG(F("(*)"));
+        DBG_LN();
         printLine(F("   Min temperature: "), td.minTemp, true, td.minDay, td.minMonth, td.minYear, td.minHour, td.minMinute);
         printLine(F("   Max temperature: "), td.maxTemp, true, td.maxDay, td.maxMonth, td.maxYear, td.maxHour, td.maxMinute);
     }
@@ -227,10 +228,10 @@ void EnvironmentManager::printHumidityStats(DHT_Sensor &dht, EEPROM_25LC040A &ee
 
     if (hum != dht.INVALID_HUMIDITY) {
         currentHum = ((hum + 25) / 50) * 50;
-        Serial.print(F("  Humidity: "));
+        DBG(F("  Humidity: "));
         _currentHumidity = currentHum;
         printHumidity(currentHum);
-        Serial.println();
+        DBG_LN();
 
         // Max update
         if (currentHum > maxMeasuredHum) {
@@ -246,15 +247,15 @@ void EnvironmentManager::printHumidityStats(DHT_Sensor &dht, EEPROM_25LC040A &ee
         bool dailyHumidityRecordExists = rememberHumidityDailyRecord(rtc, maxMeasuredHum, minMeasuredHum, hd);
 
         eeprom.loadLifetimeHumidity(hl);
-        Serial.print(F("  Lifetime Stats "));
-        if (lifetimeHumidityRecordExists) Serial.print(F("(*)"));
-        Serial.println();
+        DBG_LN(F("  Lifetime Stats "));
+        if (lifetimeHumidityRecordExists) DBG(F("(*)"));
+        DBG_LN();
         printLine(F("   Min humidity: "), hl.minHum, false, hl.minDay, hl.minMonth, hl.minYear, hl.minHour, hl.minMinute);
         printLine(F("   Max humidity: "), hl.maxHum, false, hl.maxDay, hl.maxMonth, hl.maxYear, hl.maxHour, hl.maxMinute);
 
-        Serial.print(F("  Daily Stats "));
-        if (dailyHumidityRecordExists) Serial.print(F("(*)"));
-        Serial.println();
+        DBG(F("  Daily Stats "));
+        if (dailyHumidityRecordExists) DBG(F("(*)"));
+        DBG_LN();
         printLine(F("   Min humidity: "), hd.minHum, false, hd.minDay, hd.minMonth, hd.minYear, hd.minHour, hd.minMinute);
         printLine(F("   Max humidity: "), hd.maxHum, false, hd.maxDay, hd.maxMonth, hd.maxYear, hd.maxHour, hd.maxMinute);
     }

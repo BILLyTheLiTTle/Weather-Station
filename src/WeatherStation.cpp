@@ -36,7 +36,7 @@ DS3231 rtc;
 void navigate(Page page, bool forceRender);
 
 void setup() {
-    Serial.begin(9600);
+    DBG_BEGIN(9600);
 
     // For calibration we need to remove all power sources (Vin, batteries) apart from USB. After calibration comment it again
     // acs712.calibrate();
@@ -55,7 +55,7 @@ void setup() {
 
     Wire.setWireTimeout(25000, true);
     while (!rtc.begin()) {
-        Serial.println(F("RTC not found! Retrying in 2 seconds..."));
+        DBG_LN(F("RTC not found! Retrying in 2 seconds..."));
         delay(2000);
     }
     // You call it when the RTC get cut off from power. Then you comment it again
@@ -80,12 +80,12 @@ void loop() {
 
     navigate(screen, true);
 
-    Serial.println(F("=*=*=*= START =*=*=*="));
-    Serial.println(F("-*-*-*- Environment Stats -*-*-*-"));
+    DBG(F("=*=*=*= START =*=*=*="));
+    DBG(F("-*-*-*- Environment Stats -*-*-*-"));
     envMan.printEnvironmentStats(environmentSensor, eeprom, rtc, td, tl, hd, hl);
-    Serial.println(F("-*-*-*- System Stats -*-*-*-"));
+    DBG(F("-*-*-*- System Stats -*-*-*-"));
     printSystemStats(battery, acs712, ram, therm);
-    Serial.println(F("=*=*=*= END =*=*=*=\n"));
+    DBG(F("=*=*=*= END =*=*=*=\n"));
 }
 
 void navigate(Page page, bool forceRender) {

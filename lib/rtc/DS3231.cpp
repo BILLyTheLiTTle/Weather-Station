@@ -1,4 +1,5 @@
 #include "DS3231.h"
+#include "Debugger.h"
 
 bool DS3231::begin() {
     uint8_t retry = 0;
@@ -12,7 +13,7 @@ bool DS3231::begin() {
 
 void DS3231::updateWithSystemTime() {
     rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
-    Serial.println(F(__TIME__));
+    DBG(F(__TIME__));
     delay(20);
 }
 
