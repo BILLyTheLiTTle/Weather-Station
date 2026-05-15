@@ -25,9 +25,3 @@ TEST(FormatterTest, PositiveNumberFormatWithOneDecimal) {
     formatNumber(buffer, (int16_t)1203);
     EXPECT_STREQ("12.03", buffer);
 }
-
-// We need a main function in GTest suite
-int main(int argc, char **argv) {
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}
