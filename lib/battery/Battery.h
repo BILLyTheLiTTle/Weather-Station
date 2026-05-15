@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Arduino.h>
+#include "../hal/IHardware.h"
 
 // Number of samples for the Moving Average part of the filter
 #define N 10 
@@ -12,7 +12,7 @@ public:
      * @param vcc_r Resistance connected to V+ in Ohms
      * @param gnd_r Resistance connected to GND in Ohms
      */
-    Battery(uint8_t pin, uint16_t vcc_r, uint16_t gnd_r);
+    Battery(IHardware* hw, uint8_t pin, uint16_t vcc_r, uint16_t gnd_r);
 
     void begin();
 
@@ -28,6 +28,7 @@ public:
     static constexpr uint16_t LOWER_BOUND_VOLTAGE = 6000; //mV
 
 private:
+    IHardware* _hw;
     uint8_t  _pin;
     uint16_t _vcc_r;
     uint16_t _gnd_r;
@@ -40,6 +41,8 @@ private:
 
     uint16_t _old_voltage = 0;
     static constexpr uint16_t VOLTAGE_THRESHOLD = 500; //mV
+    static constexpr uint16_t USB_VOLTAGE_LOWER_BOUND = 4000; //mV
+    static constexpr uint16_t USB_VOLTAGE_UPPER_BOUND = 5100; //mV
 
     // Internal hybrid filter logic (Moving Average + Exponential Smoothing)
     uint16_t applyFilter(uint16_t v);

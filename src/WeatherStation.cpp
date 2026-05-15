@@ -5,6 +5,9 @@
 #include "environment/EnvironmentManager.h"
 #include "DS3231.h"
 #include "SSD1306.h"
+#include "ArduinoBoard.h"
+
+ArduinoBoard board;
 
 Thermistor therm(
     A0,        // analog pin
@@ -14,7 +17,7 @@ Thermistor therm(
     ThermistorConstants::BETA_4250   // Beta coefficient (β) of the thermistor
 );
 
-Battery battery(A1, 9810, 14830);
+Battery battery(&board, A1, 9810, 14830);
 
 EnvironmentManager envMan;
 EEPROM_25LC040A eeprom(10);
@@ -27,7 +30,7 @@ MemoryProfiler ram(2048);
 
 SleepMode sleepSwitch(3, 2);
 
-ACS712 acs712(A2, ACS712_05B, 2200);
+ACS712 acs712(&board, A2, ACS712_05B, 2200);
 
 DHT_Sensor environmentSensor(9, DHT_Sensor::DHT22);
 

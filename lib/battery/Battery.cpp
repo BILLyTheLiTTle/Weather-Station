@@ -1,7 +1,7 @@
 #include "Battery.h"
 
-Battery::Battery(uint8_t pin, uint16_t vcc_r, uint16_t gnd_r)
-    : _pin(pin), _vcc_r(vcc_r), _gnd_r(gnd_r), _index(0), _filled(false), _filteredV(0) {}
+Battery::Battery(IHardware* hw, uint8_t pin, uint16_t vcc_r, uint16_t gnd_r)
+    : _hw(hw), _pin(pin), _vcc_r(vcc_r), _gnd_r(gnd_r), _index(0), _filled(false), _filteredV(0) {}
 
 void Battery::begin() {
     for (uint8_t i = 0; i < N; i++) _samples[i] = 0;
@@ -9,7 +9,7 @@ void Battery::begin() {
 
 // Convert ADC reading to mV (milliVolts) without using float
 uint16_t Battery::readVoltage() {
-    uint16_t adc = analogRead(_pin);
+    uint16_t adc = _hw->analogRead(_pin);
     // V_pin = (adc * 5000) / 1023
     uint32_t v_pin = (adc * 5000UL) / 1023UL;
     // V_bat = V_pin * (R1 + R2) / R2
@@ -76,5 +76,5 @@ uint8_t Battery::readPercent() {
 
 bool Battery::isUsbPowered() {
     uint16_t voltage = readVoltage();
-    return voltage > 4000 && voltage < 5100;
+    return voltage > USB_VOLTAGE_LOWER_BOUND && voltage < USB_VOLTAGE_UPPER_BOUND;
 }
