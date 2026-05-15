@@ -1,6 +1,7 @@
 #include "SSD1306.h"
+#include "PinMapping.h"
 
-SSD1306 display(8);
+SSD1306 display(Pin::SCREEN_COTROLLER);
 
 SSD1306::SSD1306(uint8_t navigationControl)
     : navigationButton(navigationControl){}

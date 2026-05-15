@@ -6,21 +6,22 @@
 #include "DS3231.h"
 #include "SSD1306.h"
 #include "ArduinoBoard.h"
+#include "PinMapping.h"
 
 ArduinoBoard board;
 
 Thermistor therm(
-    A0,        // analog pin
+    Pin::SYSTEM_TEMP_THERMISTOR,        // analog pin
     9820,      // The real value of series resistor (10k)
     10000,     // nominal resistance (10k thermistor) from thermistor datasheet
     25,        // nominal temp (25°C) from thermistor datasheet
     ThermistorConstants::BETA_4250   // Beta coefficient (β) of the thermistor
 );
 
-Battery battery(&board, A1, 9810, 14830);
+Battery battery(&board, Pin::BATTERY_VOLTAGE_DIVIDER, 9810, 14830);
 
 EnvironmentManager envMan;
-EEPROM_25LC040A eeprom(10);
+EEPROM_25LC040A eeprom(Pin::EEPROM_SS);
 TemperatureDailyStats td;
 TemperatureLifetimeStats tl;
 HumidityDailyStats hd;
@@ -28,11 +29,11 @@ HumidityLifetimeStats hl;
 
 MemoryProfiler ram(2048);
 
-SleepMode sleepSwitch(3, 2);
+SleepMode sleepSwitch(Pin::INT_MANUAL, Pin::INT_RTC);
 
-ACS712 acs712(&board, A2, ACS712_05B, 2200);
+ACS712 acs712(&board, Pin::ACS712, ACS712_05B, 2200);
 
-DHT_Sensor environmentSensor(9, DHT_Sensor::DHT22);
+DHT_Sensor environmentSensor(Pin::DHT, DHT_Sensor::DHT22);
 
 DS3231 rtc;
 
