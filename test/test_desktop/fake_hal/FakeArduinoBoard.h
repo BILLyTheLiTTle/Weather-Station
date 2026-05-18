@@ -1,5 +1,6 @@
 #include "../hal/IHardware.h"
 
+// You can check GoogleMock as well instead of creating my own fake class
 class FakeArduinoBoard : public IHardware {
 public:
     uint16_t analogReadValue = 512;
