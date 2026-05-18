@@ -36,15 +36,15 @@ Temperature Thermistor::readTemperatureC() {
     steinhart -= 273.15;                              // K -> C
 
     _sensorStatus = Temperature::OK;
-    return {steinhart * 100, _sensorStatus};
+    return {static_cast<int16_t>(steinhart * 100), _sensorStatus};
 }
 
 Temperature Thermistor::readTemperatureK() {
-    return {(readTemperatureC().value + 27315), _sensorStatus};
+    return {static_cast<int16_t>(readTemperatureC().value + 27315), _sensorStatus};
 }
 
 Temperature Thermistor::readTemperatureF() {
-    return {(readTemperatureC().value * 9.0 / 5.0 + 3200), _sensorStatus};
+    return {static_cast<int16_t>(readTemperatureC().value * 9.0 / 5.0 + 3200), _sensorStatus};
 }
 
 Temperature::SensorStatus Thermistor::getStatus() const {
