@@ -1,10 +1,7 @@
 #include "SSD1306.h"
-#include "PinMapping.h"
 
-SSD1306 display(PIN_SCREEN_CONTROLLER);
-
-SSD1306::SSD1306(uint8_t navigationControl)
-    : navigationButton(navigationControl){}
+SSD1306::SSD1306(IHardware *hw, uint8_t navigationControl)
+    : navigationButton(hw, navigationControl){}
 
 void SSD1306::begin() {
     _oled.begin(&Adafruit128x64, 0x3C);

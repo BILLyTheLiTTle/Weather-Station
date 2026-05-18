@@ -1,9 +1,6 @@
 #pragma once
 
-#include <Arduino.h>
-#include <Wire.h>
-#include "SSD1306Ascii.h"
-#include "SSD1306AsciiWire.h"
+#include "../hal/IHardware.h"
 #include "../storage/data/temperature/TemperatureLifetimeStats.h"
 #include "../storage/data/temperature/TemperatureDailyStats.h"
 #include "../storage/data/humidity/HumidityLifetimeStats.h"
@@ -34,7 +31,7 @@ private:
     char bufferedDateTime[20];
 
 public:
-    SSD1306(uint8_t navigationControl);
+    SSD1306(IHardware *hw, uint8_t navigationControl);
 
     void begin();
     void showBootMessage();

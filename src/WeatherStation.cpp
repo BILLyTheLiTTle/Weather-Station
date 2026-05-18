@@ -37,6 +37,7 @@ DHT_Sensor environmentSensor(PIN_DHT, DHT_Sensor::DHT22);
 
 DS3231 rtc;
 
+SSD1306 display(&board, PIN_SCREEN_CONTROLLER);
 void navigate(Page page, bool forceRender);
 
 void setup() {

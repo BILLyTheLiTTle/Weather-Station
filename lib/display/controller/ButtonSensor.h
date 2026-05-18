@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Arduino.h>
+#include "IHardware.h"
 
 enum ButtonEvent {
     BUTTON_NONE = 0,
@@ -11,10 +11,11 @@ enum ButtonEvent {
 
 class ButtonSensor {
 public:
-    ButtonSensor(uint8_t pin,
-           uint16_t debounceMs = 20,
-           uint16_t doubleClickMs = 250,
-           uint16_t longClickMs = 600);
+    ButtonSensor(IHardware *hw,
+        uint8_t pin,
+        uint16_t debounceMs = 20,
+        uint16_t doubleClickMs = 250,
+        uint16_t longClickMs = 600);
 
     void update();
 
@@ -24,6 +25,7 @@ public:
     bool isPressed() const;
 
 private:
+    IHardware *_hw;
     uint8_t _pin;               // input pin where the button is connected
 
     uint16_t _debounceMs;       // debounce time (ms) to filter mechanical bouncing

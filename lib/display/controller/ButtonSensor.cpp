@@ -1,10 +1,12 @@
 #include "ButtonSensor.h"
 
-ButtonSensor::ButtonSensor(uint8_t pin,
-               uint16_t debounceMs,     // debounce window: suppresses signal bouncing after state change
-               uint16_t doubleClickMs,  // time window to detect second press for double click
-               uint16_t longClickMs)    // press duration threshold for long click event
-: _pin(pin),
+ButtonSensor::ButtonSensor(IHardware *hw,
+    uint8_t pin,
+    uint16_t debounceMs,     // debounce window: suppresses signal bouncing after state change
+    uint16_t doubleClickMs,  // time window to detect second press for double click
+    uint16_t longClickMs)    // press duration threshold for long click event
+: _hw(hw), 
+  _pin(pin),
   _debounceMs(debounceMs),
   _doubleClickMs(doubleClickMs),
   _longClickMs(longClickMs),
@@ -17,12 +19,12 @@ ButtonSensor::ButtonSensor(uint8_t pin,
   _waitingSecondClick(false),
   _event(BUTTON_NONE)
 {
-    pinMode(_pin, INPUT_PULLUP); // Button not pressed -> HIGH, Button pressed -> LOW
+    _hw->pinMode(_pin, INPUT_PULLUP); // Button not pressed -> HIGH, Button pressed -> LOW
 }
 
 void ButtonSensor::update() {
-    uint32_t now = millis();
-    bool raw = digitalRead(_pin);
+    uint32_t now = _hw->millis();
+    bool raw = _hw->digitalRead(_pin);
 
     // --- debounce ---
     if (raw != _lastRawState) {
