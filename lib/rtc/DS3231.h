@@ -11,6 +11,7 @@ public:
     DS3231();
     bool begin(bool force);
     void updateWithSystemTime();
+    void reset();
 
     void setAlarm(uint8_t hour, uint8_t minute, uint8_t second);
     void setRecurringMinutesAlarm(uint8_t minutes);

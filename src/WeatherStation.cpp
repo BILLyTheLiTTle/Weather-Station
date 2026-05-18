@@ -62,6 +62,17 @@ void setup() {
 }
 
 void loop() {
+    if (Wire.getWireTimeoutFlag()) {
+        DBG_LN(F("I2C Timeout!"));
+        Wire.clearWireTimeoutFlag();
+
+        if (battery.isUsbPowered()) {
+            rtc.updateWithSystemTime();
+        } else {
+            rtc.reset();
+        }         
+    }
+
     Page screen = display.readControls();
     navigate(screen, false);
 

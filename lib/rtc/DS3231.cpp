@@ -52,6 +52,21 @@ void DS3231::updateWithSystemTime() {
     DBG_LN(__TIME__);
 }
 
+void DS3231::reset() {
+    tmElements_t tm;
+    
+    tm.Second = 0;
+    tm.Minute = 0;
+    tm.Hour   = 0;
+    tm.Day    = 1;
+    tm.Month  = 1;
+    tm.Year   = 2026 - 1970;
+
+    rtc.write(tm);
+    
+    DBG_LN(F("RTC Reset autonomously without PC!"));
+}
+
 void DS3231::setAlarm(uint8_t hour, uint8_t minute, uint8_t second) {
     // Καθαρισμός προηγούμενου alarm flag
     rtc.alarm(DS3232RTC::ALARM_NBR_t::ALARM_1); 
