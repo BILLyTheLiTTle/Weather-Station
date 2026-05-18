@@ -4,29 +4,51 @@
 
 DS3231::DS3231() : rtc(false) {}
 
-bool DS3231::begin() {
+bool DS3231::begin(bool force) {
     rtc.begin();
-    // Στην v2.x η oscStopped δεν δέχεται πλέον παραμέτρους
+
+    if (force) {
+        // In case the clock is not set of mulfunctioning the RTC will block us here. Adjust RTC clock to release the hold.
+        updateWithSystemTime(); 
+    }
+
     return (rtc.oscStopped() == false);
 }
 
 void DS3231::updateWithSystemTime() {
-    const char *monthNames = "JanFebMarAprMayJunJulAugSepOctNovDec";
-    char m[4];
-    int d, y, hh, mm, ss;
+    uint8_t hh = ((__TIME__[0] - '0') * 10) + (__TIME__[1] - '0');
+    uint8_t mm = ((__TIME__[3] - '0') * 10) + (__TIME__[4] - '0');
+    uint8_t ss = ((__TIME__[6] - '0') * 10) + (__TIME__[7] - '0');
+
+    uint16_t y = ((__DATE__[7] - '0') * 1000) + ((__DATE__[8] - '0') * 100) + ((__DATE__[9] - '0') * 10) + (__DATE__[10] - '0');
     
-    sscanf(__DATE__, "%s %d %d", m, &d, &y);
-    sscanf(__TIME__, "%d:%d:%d", &hh, &mm, &ss);
-    
+    uint8_t d = 0;
+    if (__DATE__[4] == ' ') {
+        d = __DATE__[5] - '0';
+    } else {
+        d = ((__DATE__[4] - '0') * 10) + (__DATE__[5] - '0');
+    }
+
+    const char *months = "JanFebMarAprMayJunJulAugSepOctNovDec";
+    uint8_t month_index = 1;
+    for (uint8_t i = 0; i < 12; i++) { // uint8_t και για τον μετρητή του loop
+        if (__DATE__[0] == months[i*3] && __DATE__[1] == months[i*3+1] && __DATE__[2] == months[i*3+2]) {
+            month_index = i + 1;
+            break;
+        }
+    }
+
     tmElements_t tm;
     tm.Second = ss;
     tm.Minute = mm;
-    tm.Hour = hh;
-    tm.Day = d;
-    tm.Month = (strstr(monthNames, m) - monthNames) / 3 + 1;
-    tm.Year = y - 1970;
-    
+    tm.Hour   = hh;
+    tm.Day    = d;
+    tm.Month  = month_index;
+    tm.Year   = (uint8_t)(y - 1970);
+
     rtc.write(tm);
+    
+    DBG(F("RTC Successfully Calibrated: "));
     DBG_LN(__TIME__);
 }
 

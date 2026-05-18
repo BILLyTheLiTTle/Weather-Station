@@ -41,8 +41,6 @@ void setup() {
     // For calibration we need to remove all power sources (Vin, batteries) apart from USB. After calibration comment it again
     // acs712.calibrate();
 
-    // dbg.begin();
-
     battery.begin();
 
     eeprom.begin();
@@ -54,12 +52,10 @@ void setup() {
     sleepSwitch.begin();
 
     Wire.setWireTimeout(25000, true);
-    while (!rtc.begin()) {
+    if (!rtc.begin(false)) { // When RTC is out of sync or on hold then use `begin(true)`.
         DBG_LN(F("RTC not found! Retrying in 2 seconds..."));
         delay(2000);
     }
-    // You call it when the RTC get cut off from power. Then you comment it again
-    // rtc.updateWithSystemTime();
 
     display.begin();
     display.showBootMessage();

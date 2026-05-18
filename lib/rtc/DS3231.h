@@ -9,7 +9,7 @@ private:
 
 public:
     DS3231();
-    bool begin();
+    bool begin(bool force);
     void updateWithSystemTime();
 
     void setAlarm(uint8_t hour, uint8_t minute, uint8_t second);
