@@ -1,27 +1,29 @@
+#pragma once
+
 #include "IHardware.h"
 
-struct Pin {
-    static constexpr uint8_t SYSTEM_TEMP_THERMISTOR = A0;
-    static constexpr uint8_t BATTERY_VOLTAGE_DIVIDER = A1;
-    static constexpr uint8_t ACS712 = A2;
-    // static constexpr uint8_t EMPTY = A3;
-    // static constexpr uint8_t I2C_SDA = A4;
-    // static constexpr uint8_t I2C_SCL = A5;
-    // static constexpr uint8_t EMPTY = A6;
-    // static constexpr uint8_t EMPTY = A7;
-    
-    // static constexpr uint8_t D0 = 0; // TX USB
-    // static constexpr uint8_t D1 = 1; // RX USB
-    static constexpr uint8_t INT_RTC = 2;
-    static constexpr uint8_t INT_MANUAL = 3;
-    // static constexpr uint8_t EMPTY = 4;
-    // static constexpr uint8_t EMPTY = 5;
-    // static constexpr uint8_t EMPTY = 6;
-    // static constexpr uint8_t EMPTY = 7;
-    static constexpr uint8_t SCREEN_COTROLLER = 8;
-    static constexpr uint8_t DHT = 9;
-    static constexpr uint8_t EEPROM_SS = 10;
-    // static constexpr uint8_t SPI_MOSI = 11;
-    // static constexpr uint8_t SPI_MISO = 12;
-    // static constexpr uint8_t SPI SCK = 13; 
-};
+// --- ANALOG PINS ---
+#define PIN_SYSTEM_TEMP_THERMISTOR   A0
+#define PIN_BATTERY_VOLTAGE_DIVIDER  A1
+#define PIN_ACS712                   A2
+// #define PIN_EMPTY                 A3
+// #define PIN_I2C_SDA               A4
+// #define PIN_I2C_SCL               A5
+// #define PIN_EMPTY                 A6
+// #define PIN_EMPTY                 A7
+
+// --- DIGITAL PINS ---
+// #define PIN_D0                    0  // TX USB
+// #define PIN_D1                    1  // RX USB
+#define PIN_INT_RTC                  2
+#define PIN_INT_MANUAL               3
+// #define PIN_EMPTY                 4
+// #define PIN_EMPTY                 5
+// #define PIN_EMPTY                 6
+// #define PIN_EMPTY                 7
+#define PIN_SCREEN_CONTROLLER        8
+#define PIN_DHT                      9
+#define PIN_EEPROM_SS                10
+// #define PIN_SPI_MOSI              11
+// #define PIN_SPI_MISO              12
+// #define PIN_SPI_SCK               13

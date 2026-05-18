@@ -7,7 +7,7 @@
 class ACS712 {
   private:
     IHardware* _hw;
-    int8_t     _pin;
+    uint8_t     _pin;
     ACS712_Model _sensitivity; // mV/A (185 for 05B)
     uint16_t   _vOffsetRaw; // // Raw ADC value with no load
     uint16_t   _capacityMAH;
@@ -16,7 +16,7 @@ class ACS712 {
     static constexpr uint8_t  MEASUREMENT_SAMPLES = 200;
 
   public:
-    ACS712(IHardware* hw, int8_t pin, ACS712_Model sens, uint16_t capacity);
+    ACS712(IHardware* hw, uint8_t pin, ACS712_Model sens, uint16_t capacity);
     
     void     calibrate();
     uint32_t getCurrentMA();    

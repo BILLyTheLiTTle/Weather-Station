@@ -1,6 +1,6 @@
 #include "ACS712.h"
 
-ACS712::ACS712(IHardware* hw, int8_t pin, ACS712_Model sens, uint16_t capacity) {
+ACS712::ACS712(IHardware* hw, uint8_t pin, ACS712_Model sens, uint16_t capacity) {
     _hw = hw;
     _pin = pin;
     _sensitivity = sens;
