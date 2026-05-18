@@ -62,6 +62,9 @@ void setup() {
 }
 
 void loop() {
+    // ==========================================
+    // 1. FAILSAFE PART
+    // ==========================================
     if (Wire.getWireTimeoutFlag()) {
         DBG_LN(F("I2C Timeout!"));
         Wire.clearWireTimeoutFlag();
@@ -73,6 +76,9 @@ void loop() {
         }         
     }
 
+    // ==========================================
+    // 2. IMMEDIATE EXECUTION
+    // ==========================================
     Page screen = display.readControls();
     navigate(screen, false);
 
@@ -82,17 +88,20 @@ void loop() {
 
     enterConditionalSleep(rtc, sleepSwitch);
 
-    // Only perform measurements if the system is ACTIVE and the interval has elapsed.
-    if ((!isIntervalElapsed() || sleepSwitch.getState() == SystemState::SLEEP)) return;
+    // ==========================================
+    // 3. DELAYED EXECUTION
+    // ==========================================
+    if (isIntervalElapsed() && sleepSwitch.getState() != SystemState::SLEEP) {
+        
+        navigate(screen, true); 
 
-    navigate(screen, true);
-
-    DBG_LN(F("=*=*=*= START =*=*=*="));
-    DBG_LN(F("-*-*-*- Environment Stats -*-*-*-"));
-    envMan.printEnvironmentStats(environmentSensor, eeprom, rtc, td, tl, hd, hl);
-    DBG_LN(F("-*-*-*- System Stats -*-*-*-"));
-    printSystemStats(battery, acs712, ram, therm);
-    DBG(F("=*=*=*= END =*=*=*=\n"));
+        DBG_LN(F("=*=*=*= START =*=*=*="));
+        DBG_LN(F("-*-*-*- Environment Stats -*-*-*-"));
+        envMan.printEnvironmentStats(environmentSensor, eeprom, rtc, td, tl, hd, hl);
+        DBG_LN(F("-*-*-*- System Stats -*-*-*-"));
+        printSystemStats(battery, acs712, ram, therm);
+        DBG(F("=*=*=*= END =*=*=*=\n"));
+    }
 }
 
 void navigate(Page page, bool forceRender) {
