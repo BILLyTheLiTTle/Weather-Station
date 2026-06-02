@@ -1,4 +1,5 @@
 #include "WeatherPredictor.h"
+#include "Debugger.h"
 
 WeatherPredictor::WeatherPredictor() : _historyCount(0), _lastUpdateTime(0), _currentTrendVal(0) {
     for(int i = 0; i < 6; i++) _history[i] = 0;
