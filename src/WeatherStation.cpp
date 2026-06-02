@@ -30,6 +30,7 @@ SleepMode sleepSwitch(3, 2);
 ACS712 acs712(A2, ACS712_05B, 2200);
 
 DHT_Sensor environmentSensor(9, DHT_Sensor::DHT22);
+BME280Sensor bmp;
 
 DS3231 rtc;
 
@@ -59,6 +60,11 @@ void setup() {
 
     display.begin();
     display.showBootMessage();
+
+    if (!bmp.begin(0x76)) {
+        Serial.println("Pressure sensor error!");
+        while (1);
+    }
 }
 
 void loop() {
@@ -92,12 +98,13 @@ void loop() {
     // 3. DELAYED EXECUTION
     // ==========================================
     if (isIntervalElapsed() && sleepSwitch.getState() != SystemState::SLEEP) {
-        
+        bmp.update();
+
         navigate(screen, true); 
 
         DBG_LN(F("=*=*=*= START =*=*=*="));
         DBG_LN(F("-*-*-*- Environment Stats -*-*-*-"));
-        envMan.printEnvironmentStats(environmentSensor, eeprom, rtc, td, tl, hd, hl);
+        envMan.printEnvironmentStats(bmp, environmentSensor, eeprom, rtc, td, tl, hd, hl);
         DBG_LN(F("-*-*-*- System Stats -*-*-*-"));
         printSystemStats(battery, acs712, ram, therm);
         DBG(F("=*=*=*= END =*=*=*=\n"));
@@ -113,7 +120,7 @@ void navigate(Page page, bool forceRender) {
     display.clear();
     switch (page) {
         case PAGE_CURRENT_STATS:
-            display.showCurrentStats(envMan.getCurrentTemp(), envMan.getCurrentHum());
+            display.showCurrentStats(envMan.getCurrentTemp(), envMan.getCurrentHum(), envMan.getCurrentPres());
             break;
 
         case PAGE_DAILY_TEMPERATURE_STATS:

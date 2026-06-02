@@ -6,6 +6,7 @@
 #include "../storage/data/humidity/HumidityDailyStats.h"
 #include "Thermistor.h"
 #include "DHT_Sensor.h"
+#include "BME280Sensor.h"
 #include "../storage/eeprom/EEPROM_25LC040A.h"
 #include "DS3231.h"
 #include "Formatter.h"
@@ -14,7 +15,7 @@ class EnvironmentManager {
 public:
     EnvironmentManager() {}
 
-    void printEnvironmentStats(DHT_Sensor &dht, EEPROM_25LC040A &eeprom, DS3231 &rtc,
+    void printEnvironmentStats(BME280Sensor &bme, DHT_Sensor &dht, EEPROM_25LC040A &eeprom, DS3231 &rtc,
                                TemperatureDailyStats &td, TemperatureLifetimeStats &tl, 
                                HumidityDailyStats &hd, HumidityLifetimeStats &hl);
 
@@ -26,21 +27,25 @@ public:
 
     int16_t getCurrentTemp();
     uint16_t getCurrentHum();
+    uint32_t getCurrentPres();
 
 private:
     void printLine(const __FlashStringHelper* label, int16_t value, bool isTemperature, 
                    uint8_t day, uint8_t month, uint16_t year, uint8_t hour, uint8_t minute);
     
+    void printPressure(uint32_t pres);
     void printTemperature(int16_t temp);
     void printHumidity(uint16_t hum);
     void printDate(uint8_t day, uint8_t month, uint16_t year, uint8_t hour, uint8_t minute);
     void printTemperatureStats(DHT_Sensor &dht, EEPROM_25LC040A &eeprom, DS3231 &rtc, TemperatureDailyStats &td, TemperatureLifetimeStats &tl);
+    void printPressureStats(BME280Sensor &bme);
     void printHumidityStats(DHT_Sensor &dht, EEPROM_25LC040A &eeprom, DS3231 &rtc, HumidityDailyStats &hd, HumidityLifetimeStats &hl);
 
     bool shouldResetDailyMetrics(DS3231 &rtc);
 
     int16_t _currentTemp;
     uint16_t _currentHumidity;
+    uint32_t _currentPressure;
 
     int16_t _maxMeasuredTemp = INT16_MIN;
     int16_t _minMeasuredTemp = INT16_MAX;

@@ -1,11 +1,12 @@
 #include "EnvironmentManager.h"
 #include "Debugger.h"
 
-void EnvironmentManager::printEnvironmentStats(DHT_Sensor &dht, EEPROM_25LC040A &eeprom, DS3231 &rtc,
+void EnvironmentManager::printEnvironmentStats(BME280Sensor &bme, DHT_Sensor &dht, EEPROM_25LC040A &eeprom, DS3231 &rtc,
     TemperatureDailyStats &td, TemperatureLifetimeStats &tl, 
     HumidityDailyStats &hd, HumidityLifetimeStats &hl) {
 
     printTemperatureStats(dht, eeprom, rtc, td, tl);
+    printPressureStats(bme);
     printHumidityStats(dht, eeprom, rtc, hd, hl);
 }
 
@@ -141,6 +142,12 @@ bool EnvironmentManager::shouldResetDailyMetrics(DS3231 &rtc) {
     && rtc.getMinute() <= EnvironmentManager::RESET_MINUTE_UPPER_BOUND;
 }
 
+void EnvironmentManager::printPressure(uint32_t pres) {
+    formatNumber(bufferedValue, pres);
+    DBG(bufferedValue);
+    DBG(F("hPa"));
+}
+
 void EnvironmentManager::printTemperature(int16_t temp) {
     formatNumber(bufferedValue, temp);
     DBG(bufferedValue);
@@ -209,6 +216,17 @@ void EnvironmentManager::printTemperatureStats(DHT_Sensor &dht, EEPROM_25LC040A 
     }
 }
 
+void EnvironmentManager::printPressureStats(BME280Sensor &bmp) {
+    uint32_t pres = bmp.getPressure();
+
+    // if (hum != dht.INVALID_HUMIDITY) {
+        _currentPressure = pres;
+        DBG(F("  Pressure: "));
+        printPressure(_currentPressure);
+        DBG_LN();
+    // }
+}
+
 void EnvironmentManager::printHumidityStats(DHT_Sensor &dht, EEPROM_25LC040A &eeprom, DS3231 &rtc, HumidityDailyStats &hd, HumidityLifetimeStats &hl) {
     if (shouldResetDailyMetrics(rtc)) {
         _maxMeasuredHum = 0;
@@ -253,3 +271,4 @@ void EnvironmentManager::printHumidityStats(DHT_Sensor &dht, EEPROM_25LC040A &ee
 
 int16_t EnvironmentManager::getCurrentTemp() {return _currentTemp; }
 uint16_t EnvironmentManager::getCurrentHum() {return _currentHumidity; }
+uint32_t EnvironmentManager::getCurrentPres() {return _currentPressure; }

@@ -40,7 +40,7 @@ public:
     void showBootMessage();
     void updateTime(int hours, int minutes, int seconds);
     void showError(const __FlashStringHelper* msg);
-    void showCurrentStats(int16_t temp, uint16_t hum);
+    void showCurrentStats(int16_t temp, uint16_t hum, uint32_t pres);
     void showDailyTemperatureStats(TemperatureDailyStats &stats);
     void showDailyHumidityStats(HumidityDailyStats &stats);
     void showLifetimeTemperatureStats(TemperatureLifetimeStats &stats);

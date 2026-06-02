@@ -37,22 +37,28 @@ void SSD1306::showError(const __FlashStringHelper* msg) {
     _oled.println(msg);
 }
 
-void SSD1306::showCurrentStats(int16_t temp, uint16_t hum) {
+void SSD1306::showCurrentStats(int16_t temp, uint16_t hum, uint32_t pres) {
     _oled.setCursor(20, 0);
     _oled.println(F("CURRENT STATS"));
     _oled.println();
 
     _oled.println(F("Temperature: "));
-
     formatNumber(bufferedValue, temp);
+    _oled.print(F(" "));
     _oled.print(bufferedValue);
     _oled.println(F(" C"));
-    _oled.println();
 
     _oled.println(F("Humidity: "));
     formatNumber(bufferedValue, hum);
+    _oled.print(F(" "));
     _oled.print(bufferedValue);
     _oled.println(F(" %"));
+
+    _oled.println(F("Pressure: "));
+    formatNumber(bufferedValue, pres);
+    _oled.print(F(" "));
+    _oled.print(bufferedValue);
+    _oled.println(F(" hPa"));
 }
 
 void SSD1306::showDailyTemperatureStats(TemperatureDailyStats &stats) {
