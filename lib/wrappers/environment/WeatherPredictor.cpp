@@ -19,6 +19,12 @@ int8_t WeatherPredictor::calculateTrend(uint32_t currentPres, uint32_t oldPres) 
 WeatherForecast WeatherPredictor::addReading(uint32_t currentPressurePascal, uint32_t currentTime, bool isWinter) {
     
     if (_historyCount == 0 || (currentTime - _lastUpdateTime >= _updateInterval)) {
+        DBG(F("CURRENT TIME: "));
+        DBG_LN(currentTime);
+        DBG(F("LAST TIME: "));
+        DBG_LN(_lastUpdateTime);
+        DBG(F("WINTER: "));
+        DBG_LN(isWinter);
         for (uint8_t i = 0; i < 5; i++) _history[i] = _history[i+1];
         _history[5] = currentPressurePascal;
         if (_historyCount < 6) _historyCount++;
