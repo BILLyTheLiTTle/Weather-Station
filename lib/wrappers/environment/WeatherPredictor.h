@@ -24,7 +24,7 @@ private:
     uint32_t _history[6];
     uint8_t  _historyCount;
     uint32_t _lastUpdateTime;
-    const uint32_t _updateInterval = 840000; // 14 minutes
+    const uint32_t _updateInterval = 840; // 14 minutes
 
     int32_t _currentTrendVal; // Αποθήκευση της διαφοράς σε hPa
 
