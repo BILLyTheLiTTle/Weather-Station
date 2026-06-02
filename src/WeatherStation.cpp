@@ -3,6 +3,7 @@
 #include "Debugger.h"
 #include "ACS712.h"
 #include "environment/EnvironmentManager.h"
+#include "environment/WeatherPredictor.h"
 #include "DS3231.h"
 #include "SSD1306.h"
 
@@ -31,6 +32,9 @@ ACS712 acs712(A2, ACS712_05B, 2200);
 
 DHT_Sensor environmentSensor(9, DHT_Sensor::DHT22);
 BME280Sensor bmp;
+WeatherPredictor predictor;
+WeatherForecast forecast;
+ForecastTimeframe timeframe;
 
 DS3231 rtc;
 
@@ -61,9 +65,9 @@ void setup() {
     display.begin();
     display.showBootMessage();
 
-    if (!bmp.begin(0x76)) {
+    while (!bmp.begin(0x76)) {
         Serial.println("Pressure sensor error!");
-        while (1);
+        delay(1000);
     }
 }
 
@@ -98,6 +102,16 @@ void loop() {
     // 3. DELAYED EXECUTION
     // ==========================================
     if (isIntervalElapsed() && sleepSwitch.getState() != SystemState::SLEEP) {
+        uint32_t currentPres = envMan.getCurrentPres(); 
+    
+        // 1. Δίνουμε τη μέτρηση
+        uint8_t currentMonth = rtc.getMonth();
+        bool winterFlag = (currentMonth >= 10 || currentMonth <= 3);
+        forecast = predictor.addReading(currentPres, rtc.getTimestamp(), winterFlag);
+        
+        // 2. Παίρνουμε την εκτίμηση του χρόνου
+        timeframe = predictor.getTimeframe();
+        
         bmp.update();
 
         navigate(screen, true); 
@@ -105,6 +119,11 @@ void loop() {
         DBG_LN(F("=*=*=*= START =*=*=*="));
         DBG_LN(F("-*-*-*- Environment Stats -*-*-*-"));
         envMan.printEnvironmentStats(bmp, environmentSensor, eeprom, rtc, td, tl, hd, hl);
+        DBG_LN(F("-*-*-*- Weather Prediction -*-*-*-"));
+        Serial.print("Forecast: ");
+        Serial.println(predictor.getForecastString(forecast));
+        Serial.print("Timeframe: ");
+        Serial.println(predictor.getTimeframeString(timeframe));
         DBG_LN(F("-*-*-*- System Stats -*-*-*-"));
         printSystemStats(battery, acs712, ram, therm);
         DBG(F("=*=*=*= END =*=*=*=\n"));
@@ -121,6 +140,10 @@ void navigate(Page page, bool forceRender) {
     switch (page) {
         case PAGE_CURRENT_STATS:
             display.showCurrentStats(envMan.getCurrentTemp(), envMan.getCurrentHum(), envMan.getCurrentPres());
+            break;
+
+        case PAGE_WEATHER_PREDICTION:
+            display.showWeatherPrediction(predictor.getForecastString(forecast), predictor.getTimeframeString(timeframe));
             break;
 
         case PAGE_DAILY_TEMPERATURE_STATS:

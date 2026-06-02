@@ -24,4 +24,5 @@ public:
     uint8_t  getHour();
     uint8_t  getMinute();
     uint8_t  getSecond();
+    time_t getTimestamp();
 };

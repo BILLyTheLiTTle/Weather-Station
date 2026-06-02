@@ -61,6 +61,19 @@ void SSD1306::showCurrentStats(int16_t temp, uint16_t hum, uint32_t pres) {
     _oled.println(F(" hPa"));
 }
 
+void SSD1306::showWeatherPrediction(const char* forecast, const char* timeframe) {
+    _oled.setCursor(10, 0);
+    _oled.println(F("WEATHER PREDICTION"));
+    _oled.println();
+
+    _oled.println(F("Forecast: "));
+    _oled.println(forecast);
+    // _oled.println();
+
+    _oled.println(F("Timeframe: "));
+    _oled.print(timeframe);
+}
+
 void SSD1306::showDailyTemperatureStats(TemperatureDailyStats &stats) {
     _oled.setCursor(0, 0);
     _oled.print(F("DAY TEMPERATURE STATS"));

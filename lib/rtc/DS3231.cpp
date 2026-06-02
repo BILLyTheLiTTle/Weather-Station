@@ -107,3 +107,4 @@ uint8_t DS3231::getSecond() { return second(rtc.get()); }
 uint8_t DS3231::getDay()    { return day(rtc.get()); }
 uint8_t DS3231::getMonth()  { return month(rtc.get()); }
 uint16_t DS3231::getYear()  { return year(rtc.get()); }
+time_t DS3231::getTimestamp()  { return rtc.get(); }

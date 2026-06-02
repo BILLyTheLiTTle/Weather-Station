@@ -17,12 +17,13 @@
 
 enum Page : uint8_t {
     PAGE_CURRENT_STATS = 0,
+    PAGE_WEATHER_PREDICTION,
     PAGE_DAILY_TEMPERATURE_STATS,
     PAGE_DAILY_HUMIDITY_STATS,
     PAGE_LIFETIME_TEMPERATURE_STATS,
     PAGE_LIFETIME_HUMIDITY_STATS,
     PAGE_SYSTEM_STATS,
-    PAGE_COUNT // This will have value of 6, which represents the number of available Pages!
+    PAGE_COUNT // This will have value of 7, which represents the number of available Pages!
 };
 
 class SSD1306 {
@@ -45,6 +46,7 @@ public:
     void showDailyHumidityStats(HumidityDailyStats &stats);
     void showLifetimeTemperatureStats(TemperatureLifetimeStats &stats);
     void showLifetimeHumidityStats(HumidityLifetimeStats &stats);
+    void showWeatherPrediction(const char* forecast, const char* timeframe);
     void showSystemStats(Battery &battery, ACS712 &acs712, MemoryProfiler &ram, Thermistor &therm);
 
     void clear();
