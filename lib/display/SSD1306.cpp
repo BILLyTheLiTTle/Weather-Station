@@ -64,10 +64,11 @@ void SSD1306::showCurrentStats(int16_t temp, uint16_t hum, uint32_t pres) {
 void SSD1306::showWeatherPrediction(const char* forecast, const char* wind, const char* timeframe) {
     _oled.setCursor(10, 0);
     _oled.println(F("WEATHER PREDICTION"));
-    _oled.println();
+    // _oled.println();
 
     _oled.println(F("Forecast: "));
     _oled.println(forecast);
+    _oled.println(wind);
     // _oled.println();
 
     _oled.println(F("Timeframe: "));

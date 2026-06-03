@@ -91,7 +91,7 @@ ForecastTimeframe WeatherPredictor::getTimeframe() {
 
 WindForecast WeatherPredictor::getWindPrediction() {
     // Περιμένουμε να γεμίσει ο 6άρης πίνακας (1.5 ώρα δεδομένων)
-    if (_historyCount < 6) {
+    if (_historyCount < 3) {
         return WIND_UNKNOWN;
     }
 
@@ -131,8 +131,8 @@ const char* WeatherPredictor::getForecastString(WeatherForecast forecast) {
 
 const char* WeatherPredictor::getWindString(WindForecast forecast) {
     switch (forecast) {
-        case GALE_STORMY_WIND:  return "Gale / Stormy Winds!";
-        case STRONG_WINDS:      return "Strong Winds Expected";
+        case GALE_STORMY_WIND:  return "Gale / Stormy Winds";
+        case STRONG_WINDS:      return "Strong Winds";
         case MODERATE_BREEZES:  return "Moderate Breezes";
         case CALM_LIGHT_WIND:   return "Calm / Light Wind";
         default:                return "Calculating...";
