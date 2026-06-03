@@ -109,7 +109,7 @@ void loop() {
         uint8_t currentMonth = rtc.getMonth();
         bool winterFlag = (currentMonth >= 10 || currentMonth <= 3);
         forecast = predictor.addReading(currentPres, rtc.getTimestamp(), winterFlag);
-        wind = predictor.getWindPrediction(forecast);
+        wind = predictor.getWindPrediction();
         timeframe = predictor.getTimeframe();
         
         bmp.update();
@@ -122,6 +122,8 @@ void loop() {
         DBG_LN(F("-*-*-*- Weather Prediction -*-*-*-"));
         Serial.print("Forecast: ");
         Serial.println(predictor.getForecastString(forecast));
+        Serial.print("Wind: ");
+        Serial.println(predictor.getWindString(wind));
         Serial.print("Timeframe: ");
         Serial.println(predictor.getTimeframeString(timeframe));
         DBG_LN(F("-*-*-*- System Stats -*-*-*-"));
