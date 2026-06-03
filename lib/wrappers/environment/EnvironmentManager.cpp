@@ -271,4 +271,4 @@ void EnvironmentManager::printHumidityStats(DHT_Sensor &dht, EEPROM_25LC040A &ee
 
 int16_t EnvironmentManager::getCurrentTemp() {return _currentTemp; }
 uint16_t EnvironmentManager::getCurrentHum() {return _currentHumidity; }
-uint32_t EnvironmentManager::getCurrentPres() {return _currentPressure + (uint32_t)(ALTITUDE * 12); }
+uint32_t EnvironmentManager::getCurrentPres() {return _currentPressure; }

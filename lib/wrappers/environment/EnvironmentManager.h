@@ -59,5 +59,5 @@ private:
     static const uint8_t RESET_HOUR = 0;
     static const uint8_t RESET_MINUTE_LOWER_BOUND = 5;
     static const uint8_t RESET_MINUTE_UPPER_BOUND = 25;
-    static const uint32_t ALTITUDE = 350; //m (Αργυρά is on 350m altitude)
+    
 };

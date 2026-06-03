@@ -27,6 +27,8 @@ private:
     uint32_t compensatePressure(int32_t adc_P);
     uint32_t compensateHumidity(int32_t adc_H);
 
+    static const uint32_t ALTITUDE = 350; //m (Αργυρά is on 350m altitude)
+
 public:
     BME280Sensor();
     bool begin(uint8_t i2cAddress = 0x76);

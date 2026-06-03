@@ -90,7 +90,7 @@ void BME280Sensor::update() {
 
     // Υπολογισμός και αποθήκευση εσωτερικά
     _lastTemperature = compensateTemperature(adc_T);
-    _lastPressure = compensatePressure(adc_P);
+    _lastPressure = compensatePressure(adc_P) + (uint32_t)(ALTITUDE * 12);
     _lastHumidity = compensateHumidity(adc_H);
 }
 
