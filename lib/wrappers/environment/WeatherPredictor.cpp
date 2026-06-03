@@ -9,7 +9,7 @@ int8_t WeatherPredictor::calculateTrend(uint32_t currentPres, uint32_t oldPres) 
     int32_t curHpa = currentPres / 100;
     int32_t oldHpa = oldPres / 100;
     
-    // Κρατάμε την ακριβή διαφορά hPa στο ιστορικό (συνήθως εύρος 3 ωρών)
+    // Κρατάμε την ακριβή διαφορά hPa στο ιστορικό των 6 θέσεων
     _currentTrendVal = curHpa - oldHpa; 
 
     if (_currentTrendVal >= 1)  return 1;  // Rising
@@ -20,20 +20,22 @@ int8_t WeatherPredictor::calculateTrend(uint32_t currentPres, uint32_t oldPres) 
 WeatherForecast WeatherPredictor::addReading(uint32_t currentPressurePascal, uint32_t currentTime, bool isWinter) {
     
     if (_historyCount == 0 || (currentTime - _lastUpdateTime >= _updateInterval)) {
-        DBG(F("CURRENT TIME: "));
-        DBG_LN(currentTime);
-        DBG(F("LAST TIME: "));
-        DBG_LN(_lastUpdateTime);
-        DBG(F("WINTER: "));
-        DBG_LN(isWinter);
+        DBG(F("CURRENT TIME: ")); DBG_LN(currentTime);
+        DBG(F("LAST TIME: "));    DBG_LN(_lastUpdateTime);
+        DBG(F("WINTER: "));       DBG_LN(isWinter);
+        
+        // Ολίσθηση (Shift) για τον πίνακα 6 θέσεων (0 έως 5)
         for (uint8_t i = 0; i < 5; i++) _history[i] = _history[i+1];
         _history[5] = currentPressurePascal;
+        
         if (_historyCount < 6) _historyCount++;
         _lastUpdateTime = currentTime;
     }
 
+    // Χρειαζόμαστε τουλάχιστον 3 μετρήσεις για μια πρώτη ασφαλή πρόβλεψη
     if (_historyCount < 3) return FORECAST_UNKNOWN;
 
+    // Παίρνουμε την παλαιότερη διαθέσιμη μέτρηση ανάλογα με το πόσες έχουμε μαζέψει
     uint32_t oldPressure = _history[6 - _historyCount];
     int8_t trend = calculateTrend(currentPressurePascal, oldPressure);
     
@@ -75,52 +77,41 @@ WeatherForecast WeatherPredictor::addReading(uint32_t currentPressurePascal, uin
     return FORECAST_STORMY;
 }
 
-// Υπολογισμός του ΠΟΤΕ
 ForecastTimeframe WeatherPredictor::getTimeframe() {
     if (_historyCount < 3) return TIME_UNKNOWN;
 
     int32_t absDiff = abs(_currentTrendVal);
 
-    // Αν η πίεση είναι σταθερή (μεταβολή μικρότερη από 1 hPa στο ιστορικό)
-    if (absDiff <= 1) {
-        return TIME_STABLE;
-    }
-    
-    // Ραγδαία μεταβολή (πάνω από 3 hPa διαφορά) -> Έρχεται άμεσα!
-    if (absDiff >= 3) {
-        return TIME_IMMINENT;
-    }
-    
-    // Μέτρια μεταβολή (2 hPa διαφορά) -> Έρχεται σύντομα
-    if (absDiff == 2) {
-        return TIME_SOON;
-    }
+    if (absDiff <= 1) return TIME_STABLE;
+    if (absDiff >= 3) return TIME_IMMINENT;
+    if (absDiff == 2) return TIME_SOON;
 
     return TIME_LATER;
 }
 
 WindForecast WeatherPredictor::getWindPrediction() {
-    if (_historyCount < 12) {
+    // Περιμένουμε να γεμίσει ο 6άρης πίνακας (1.5 ώρα δεδομένων)
+    if (_historyCount < 6) {
         return WIND_UNKNOWN;
     }
 
-    // Παίρνουμε την απόλυτη διαφορά πίεσης σε hPa ανάμεσα στο τώρα και πριν 3 ώρες
-    float currentHpa = _history[11] / 100.0;
+    // _history[5] είναι το τώρα, _history[0] είναι η μέτρηση πριν 1.5 ώρα
+    float currentHpa = _history[5] / 100.0;
     float oldHpa = _history[0] / 100.0;
     float pressureChange = abs(currentHpa - oldHpa);
 
-    // Έλεγχος της μεταβολής για την πρόβλεψη ανέμου
-    if (pressureChange >= 6.0) {
+    // Προσαρμοσμένα όρια ευαισθησίας για το παράθυρο της 1.5 ώρας
+    if (pressureChange >= 4.0) {
         return GALE_STORMY_WIND;
     } 
-    else if (pressureChange >= 3.5) {
+    else if (pressureChange >= 2.5) {
         return STRONG_WINDS;
     } 
-    else if (pressureChange >= 1.5) {
+    else if (pressureChange >= 1.0) {
         return MODERATE_BREEZES;
     } 
     else {
-        return CALM_LIGHT_WIND;//;     
+        return CALM_LIGHT_WIND;     
     }
 }
 
@@ -140,10 +131,10 @@ const char* WeatherPredictor::getForecastString(WeatherForecast forecast) {
 
 const char* WeatherPredictor::getWindString(WindForecast forecast) {
     switch (forecast) {
-        case GALE_STORMY_WIND:  return "Gale / Stormy Winds!";  // Πολύ ισχυροί άνεμοι / Θύελλα
-        case STRONG_WINDS:      return "Strong Winds Expected"; // Ισχυροί άνεμοι
-        case MODERATE_BREEZES:  return "Moderate Breezes";      // Μέτριος αέρας / Αγέρας
-        case CALM_LIGHT_WIND:   return "Calm / Light Wind";     // Άπνοια / Ασθενής άνεμος
+        case GALE_STORMY_WIND:  return "Gale / Stormy Winds!";
+        case STRONG_WINDS:      return "Strong Winds Expected";
+        case MODERATE_BREEZES:  return "Moderate Breezes";
+        case CALM_LIGHT_WIND:   return "Calm / Light Wind";
         default:                return "Calculating...";
     }
 }
@@ -153,7 +144,7 @@ const char* WeatherPredictor::getTimeframeString(ForecastTimeframe timeframe) {
         case TIME_IMMINENT: return "IMMINENT!\n(Next 1-3 hours)";
         case TIME_SOON:     return "Soon\n(Next 3-6 hours)";
         case TIME_LATER:    return "Later\n(Next 6-12 hours)";
-        case TIME_STABLE:   return "Stable weather\n(No change expected)";
+        case TIME_STABLE:   return "Stable weather\n(No change)";
         default:            return "Waiting for data...";
     }
 }
