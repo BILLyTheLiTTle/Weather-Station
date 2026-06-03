@@ -19,4 +19,5 @@ class ACS712 {
     void     calibrate();
     uint32_t getCurrentMA();    
     uint32_t getRemainingMinutes();
+    uint16_t getFullCapacityMAH() const;
 };

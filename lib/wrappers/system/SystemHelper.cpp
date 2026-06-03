@@ -4,7 +4,7 @@
 void printBatteryStats(Battery &battery, ACS712 &acs712) {
     uint16_t voltage = battery.readVoltage();
     uint32_t ma = acs712.getCurrentMA();
-    uint32_t tMin = acs712.getRemainingMinutes();
+    uint32_t tMin = getBatteryRemainingMinutes(battery, acs712);
 
     if (battery.isUsbPowered()) {
         DBG_LN(F("Running on USB power"));
@@ -86,4 +86,24 @@ void printSystemStats(Battery &battery, ACS712 &acs712, MemoryProfiler &ram, The
     printBatteryStats(battery, acs712);
     printSystemTemperature(therm);
     printRamStats(ram);
+}
+
+uint32_t getBatteryRemainingMinutes(Battery &battery, ACS712 &acs712) {
+    uint32_t currentMA = acs712.getCurrentMA();
+    
+    // Ασφάλεια: Αν το ρεύμα είναι μηδέν ή υπερβολικά χαμηλό (θόρυβος),
+    // επιστρέφουμε 0 ή έναν τεράστιο αριθμό, αποφεύγοντας τη διαίρεση με το μηδέν.
+    if (currentMA < 5) { 
+        return 999999; // Ή επέστρεψε 0, ανάλογα πώς θέλεις να το διαχειριστείς στην οθόνη
+    }
+
+    uint8_t percent = battery.readPercent();
+    
+    // Υπολογισμός εναπομένουσας χωρητικότητας (mAh)
+    uint32_t remainingMAH = ((uint32_t)acs712.getFullCapacityMAH() * percent) / 100;
+    
+    // Υπολογισμός λεπτών
+    uint32_t tMin = (remainingMAH * 60UL) / currentMA;
+
+    return tMin;
 }

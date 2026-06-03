@@ -1,4 +1,5 @@
 #include "SSD1306.h"
+#include "../../lib/wrappers/system/SystemHelper.h"
 
 SSD1306 display(8);
 
@@ -189,7 +190,7 @@ void SSD1306::showSystemStats(Battery &battery, ACS712 &acs712, MemoryProfiler &
     _oled.println();
 
     _oled.println(F("Remaining Time"));
-    uint32_t tMin = acs712.getRemainingMinutes();
+    uint32_t tMin = getBatteryRemainingMinutes(battery, acs712);
     if(tMin > 90000 || isUsbPowered) {
         _oled.print(F("Unknown"));
     } else {

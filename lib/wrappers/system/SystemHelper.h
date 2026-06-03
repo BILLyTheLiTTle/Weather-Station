@@ -12,3 +12,5 @@ void printRamStats(MemoryProfiler &ram);
 void printSystemStats(Battery &battery, ACS712 &acs712, MemoryProfiler &ram, Thermistor &therm);
 
 void printSystemTemperature(Thermistor &therm);
+
+uint32_t getBatteryRemainingMinutes(Battery &battery, ACS712 &acs712);

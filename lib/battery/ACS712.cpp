@@ -49,3 +49,7 @@ uint32_t ACS712::getRemainingMinutes() {
 
     return (_capacityMAH * 60UL) / currentMA;
 }
+
+uint16_t ACS712::getFullCapacityMAH() const {
+    return _capacityMAH;
+}
