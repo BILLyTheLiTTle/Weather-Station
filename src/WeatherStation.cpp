@@ -91,7 +91,11 @@ void loop() {
     // 2. IMMEDIATE EXECUTION
     // ==========================================
     Page screen = display.readControls();
-    navigate(screen, false);
+    if (!battery.isUsbPowered() && battery.readVoltage() <= Battery::LOWER_BOUND_VOLTAGE) {
+        navigate(PAGE_SYSTEM_STATS, false);
+    } else {
+        navigate(screen, false);
+    }
 
     if (rtc.alarmFired()) {
         rtc.clearAlarm();
@@ -129,6 +133,8 @@ void loop() {
         DBG_LN(F("-*-*-*- System Stats -*-*-*-"));
         printSystemStats(battery, acs712, ram, therm);
         DBG(F("=*=*=*= END =*=*=*=\n"));
+
+        
     }
 }
 

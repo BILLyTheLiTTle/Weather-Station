@@ -25,7 +25,7 @@ public:
     bool isUsbPowered();
 
     static constexpr uint16_t UPPER_BOUND_VOLTAGE = 8400; //mV
-    static constexpr uint16_t LOWER_BOUND_VOLTAGE = 6000; //mV
+    static constexpr uint16_t LOWER_BOUND_VOLTAGE = 6600; //mV
 
 private:
     uint8_t  _pin;
