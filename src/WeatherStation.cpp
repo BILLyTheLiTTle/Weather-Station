@@ -34,6 +34,7 @@ DHT_Sensor environmentSensor(9, DHT_Sensor::DHT22);
 BME280Sensor bmp;
 WeatherPredictor predictor;
 WeatherForecast forecast;
+WindForecast wind;
 ForecastTimeframe timeframe;
 
 DS3231 rtc;
@@ -108,8 +109,7 @@ void loop() {
         uint8_t currentMonth = rtc.getMonth();
         bool winterFlag = (currentMonth >= 10 || currentMonth <= 3);
         forecast = predictor.addReading(currentPres, rtc.getTimestamp(), winterFlag);
-        
-        // 2. Παίρνουμε την εκτίμηση του χρόνου
+        wind = predictor.getWindPrediction(forecast);
         timeframe = predictor.getTimeframe();
         
         bmp.update();
@@ -143,7 +143,11 @@ void navigate(Page page, bool forceRender) {
             break;
 
         case PAGE_WEATHER_PREDICTION:
-            display.showWeatherPrediction(predictor.getForecastString(forecast), predictor.getTimeframeString(timeframe));
+            display.showWeatherPrediction(
+                predictor.getForecastString(forecast),
+                predictor.getWindString(wind),
+                predictor.getTimeframeString(timeframe)
+            );
             break;
 
         case PAGE_DAILY_TEMPERATURE_STATS:

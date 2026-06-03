@@ -99,6 +99,31 @@ ForecastTimeframe WeatherPredictor::getTimeframe() {
     return TIME_LATER;
 }
 
+WindForecast WeatherPredictor::getWindPrediction() {
+    if (_historyCount < 12) {
+        return WIND_UNKNOWN;
+    }
+
+    // Παίρνουμε την απόλυτη διαφορά πίεσης σε hPa ανάμεσα στο τώρα και πριν 3 ώρες
+    float currentHpa = _history[11] / 100.0;
+    float oldHpa = _history[0] / 100.0;
+    float pressureChange = abs(currentHpa - oldHpa);
+
+    // Έλεγχος της μεταβολής για την πρόβλεψη ανέμου
+    if (pressureChange >= 6.0) {
+        return GALE_STORMY_WIND;
+    } 
+    else if (pressureChange >= 3.5) {
+        return STRONG_WINDS;
+    } 
+    else if (pressureChange >= 1.5) {
+        return MODERATE_BREEZES;
+    } 
+    else {
+        return CALM_LIGHT_WIND;//;     
+    }
+}
+
 const char* WeatherPredictor::getForecastString(WeatherForecast forecast) {
     switch (forecast) {
         case FORECAST_GOOD:          return "Good Weather\n(Stable)";
@@ -110,6 +135,16 @@ const char* WeatherPredictor::getForecastString(WeatherForecast forecast) {
         case FORECAST_RAIN:          return "Rainy";
         case FORECAST_STORMY:        return "Stormy / Gale";
         default:                     return "Calculating...";
+    }
+}
+
+const char* WeatherPredictor::getWindString(WindForecast forecast) {
+    switch (forecast) {
+        case GALE_STORMY_WIND:  return "Gale / Stormy Winds!";  // Πολύ ισχυροί άνεμοι / Θύελλα
+        case STRONG_WINDS:      return "Strong Winds Expected"; // Ισχυροί άνεμοι
+        case MODERATE_BREEZES:  return "Moderate Breezes";      // Μέτριος αέρας / Αγέρας
+        case CALM_LIGHT_WIND:   return "Calm / Light Wind";     // Άπνοια / Ασθενής άνεμος
+        default:                return "Calculating...";
     }
 }
 

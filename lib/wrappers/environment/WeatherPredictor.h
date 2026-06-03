@@ -5,9 +5,23 @@
 #include <stdint.h>
 
 enum WeatherForecast {
-    FORECAST_GOOD = 0, FORECAST_SETTLED, FORECAST_FINE,
-    FORECAST_BECOMING_FINE, FORECAST_CHANGEABLE,
-    FORECAST_UNSETTLED, FORECAST_RAIN, FORECAST_STORMY, FORECAST_UNKNOWN
+    FORECAST_GOOD = 0,
+    FORECAST_SETTLED,
+    FORECAST_FINE,
+    FORECAST_BECOMING_FINE,
+    FORECAST_CHANGEABLE,
+    FORECAST_UNSETTLED,
+    FORECAST_RAIN,
+    FORECAST_STORMY,
+    FORECAST_UNKNOWN
+};
+
+enum WindForecast {
+    GALE_STORMY_WIND = 0,
+    STRONG_WINDS,
+    MODERATE_BREEZES,
+    CALM_LIGHT_WIND,
+    WIND_UNKNOWN
 };
 
 // Νέο Enum για το πότε θα γίνει η αλλαγή
@@ -34,10 +48,12 @@ public:
     WeatherPredictor();
     WeatherForecast addReading(uint32_t currentPressurePascal, uint32_t currentTime, bool isWinter);
     
-    // Νέα συνάρτηση που σου επιστρέφει το πότε
-    ForecastTimeframe getTimeframe(); 
+    ForecastTimeframe getTimeframe();
+
+    WindForecast getWindPrediction();
     
     const char* getForecastString(WeatherForecast forecast);
+    const char* getWindString(WindForecast forecast);
     const char* getTimeframeString(ForecastTimeframe timeframe); // Text για το χρόνο
 };
 
