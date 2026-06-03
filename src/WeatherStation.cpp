@@ -15,7 +15,10 @@ Thermistor therm(
     ThermistorConstants::BETA_4250   // Beta coefficient (β) of the thermistor
 );
 
+SleepMode sleepSwitch(3, 2);
 Battery battery(A1, 9810, 14830);
+ACS712 acs712(A2, ACS712_05B, 2200);
+bool shouldStickToSystemStats = false;
 
 EnvironmentManager envMan;
 EEPROM_25LC040A eeprom(10);
@@ -25,10 +28,6 @@ HumidityDailyStats hd;
 HumidityLifetimeStats hl;
 
 MemoryProfiler ram(2048);
-
-SleepMode sleepSwitch(3, 2);
-
-ACS712 acs712(A2, ACS712_05B, 2200);
 
 DHT_Sensor environmentSensor(9, DHT_Sensor::DHT22);
 BME280Sensor bmp;
@@ -91,11 +90,10 @@ void loop() {
     // 2. IMMEDIATE EXECUTION
     // ==========================================
     Page screen = display.readControls();
-    if (!battery.isUsbPowered() && battery.readVoltage() <= Battery::LOWER_BOUND_VOLTAGE) {
-        navigate(PAGE_SYSTEM_STATS, false);
-    } else {
-        navigate(screen, false);
+    if (shouldStickToSystemStats) {
+        screen = PAGE_SYSTEM_STATS;
     }
+    navigate(screen, false);
 
     if (rtc.alarmFired()) {
         rtc.clearAlarm();
@@ -107,6 +105,9 @@ void loop() {
     // 3. DELAYED EXECUTION
     // ==========================================
     if (isIntervalElapsed() && sleepSwitch.getState() != SystemState::SLEEP) {
+        
+        shouldStickToSystemStats = !battery.isUsbPowered() && battery.readVoltage() <= Battery::LOWER_BOUND_VOLTAGE;
+
         uint32_t currentPres = envMan.getCurrentPres(); 
     
         // 1. Δίνουμε τη μέτρηση
@@ -118,6 +119,9 @@ void loop() {
         
         bmp.update();
 
+        if (shouldStickToSystemStats) {
+            screen = PAGE_SYSTEM_STATS;
+        }
         navigate(screen, true); 
 
         DBG_LN(F("=*=*=*= START =*=*=*="));
