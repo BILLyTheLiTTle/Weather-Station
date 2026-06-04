@@ -117,9 +117,7 @@ void loop() {
         bool winterFlag = (currentMonth >= 10 || currentMonth <= 3);
         forecast = predictor.addReading(currentPres, rtc.getTimestamp(), winterFlag);
         wind = predictor.getWindPrediction();
-        timeframe = predictor.getTimeframe();
-        
-        bmp.update();
+        timeframe = predictor.getTimeframe(envMan.getCurrentHum());
 
         if (shouldStickToSystemStats) {
             screen = PAGE_SYSTEM_STATS;

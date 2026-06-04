@@ -48,7 +48,7 @@ public:
     WeatherPredictor();
     WeatherForecast addReading(uint32_t currentPressurePascal, uint32_t currentTime, bool isWinter);
     
-    ForecastTimeframe getTimeframe();
+    ForecastTimeframe getTimeframe(uint16_t humidity);
     WindForecast getWindPrediction();
     
     const char* getForecastString(WeatherForecast forecast);

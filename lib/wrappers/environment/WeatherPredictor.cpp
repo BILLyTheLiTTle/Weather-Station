@@ -2,7 +2,7 @@
 #include "Debugger.h"
 
 WeatherPredictor::WeatherPredictor() : _historyCount(0), _lastUpdateTime(0), _currentTrendVal(0) {
-    for(int i = 0; i < 12; i++) _history[i] = 0; // 👈 Αρχικοποίηση 12 θέσεων
+    for(int i = 0; i < 12; i++) _history[i] = 0; // Αρχικοποίηση 12 θέσεων
 }
 
 int8_t WeatherPredictor::calculateTrend(uint32_t currentPres, uint32_t oldPres) {
@@ -82,18 +82,34 @@ WeatherForecast WeatherPredictor::addReading(uint32_t currentPressurePascal, uin
     return FORECAST_STORMY;
 }
 
-ForecastTimeframe WeatherPredictor::getTimeframe() {
+ForecastTimeframe WeatherPredictor::getTimeframe(uint16_t humidity) {
     // Περιμένουμε να γεμίσει πλήρως ο 12άρης πίνακας για ακρίβεια χρόνου (2.8 ώρες)
     if (_historyCount < 12) return TIME_UNKNOWN;
 
     int32_t absDiff = abs(_currentTrendVal);
+    uint32_t currentHpa = _history[11] / 100; // Η τρέχουσα πίεση (π.χ. 999)
 
-    // Επίσημα μετεωρολογικά κριτήρια τάσης για παράθυρο ~3 ωρών
-    if (absDiff <= 1) return TIME_STABLE;   // Μεταβολή 0-1 hPa -> Σταθερός καιρός
-    if (absDiff >= 4) return TIME_IMMINENT; // Μεταβολή >= 4 hPa -> Ραγδαία αλλαγή (Άμεσα)
-    if (absDiff >= 2) return TIME_SOON;     // Μεταβολή 2-3 hPa -> Κανονική αλλαγή (Σύντομα)
+    // --- ΕΞΥΠΝΟΣ ΕΛΕΓΧΟΣ ΥΓΡΑΣΙΑΣ ΓΙΑ ΧΑΜΗΛΗ ΠΙΕΣΗ (Κλίμακα x100) ---
+    // Αν έχουμε χαμηλό βαρομετρικό (< 1005 hPa) και το βαρόμετρο έχει κολλήσει (absDiff <= 1)
+    if (currentHpa < 1005 && absDiff <= 1) {
+        
+        if (humidity < 5000) {          // Κάτω από 50.00%
+            return TIME_LATER;          // Θέλει χρόνο ακόμα (6-12 ώρες)
+        } 
+        else if (humidity < 6500) {     // Από 50.00% έως 64.99%
+            return TIME_SOON;           // Έρχεται το απόγευμα (3-5 ώρες)
+        } 
+        else {                          // Από 65.00% και πάνω
+            return TIME_IMMINENT;       // Ο αέρας πότισε, έρχεται άμεσα (1-2 ώρες)
+        }
+    }
 
-    return TIME_LATER;                      // Μεταβολή 1.5 hPa (Αργότερα)
+    // --- Ο ΠΑΛΙΟΣ ΚΛΑΣΙΚΟΣ ΑΛΓΟΡΙΘΜΟΣ (Αν η πίεση κινείται κανονικά) ---
+    if (absDiff >= 4) return TIME_IMMINENT; // Μεταβολή >= 4 hPa -> Άμεσα
+    if (absDiff >= 2) return TIME_SOON;     // Μεταβολή 2-3 hPa -> Σύντομα
+    if (absDiff == 1) return TIME_LATER;    // Μεταβολή 1 hPa -> Αργότερα
+
+    return TIME_STABLE;                     // Απόλυτη ησυχία σε υψηλή πίεση
 }
 
 WindForecast WeatherPredictor::getWindPrediction() {
@@ -101,15 +117,19 @@ WindForecast WeatherPredictor::getWindPrediction() {
         return WIND_UNKNOWN;
     }
 
-    // Υπολογισμός άνεμου στο πλήρες τρίωρο παράθυρο πλέον
-    float currentHpa = _history[11] / 100.0;
-    float oldHpa = _history[0] / 100.0;
-    float pressureChange = abs(currentHpa - oldHpa);
+    // Υπολογισμός διαφοράς απευθείας σε Pascal (Ακέραιες πράξεις, ταχύτατο!)
+    uint32_t currentPresPascal = _history[11];
+    uint32_t oldPresPascal = _history[0];
+    
+    uint32_t pressureChangePascal = (currentPresPascal > oldPresPascal) ? 
+                                    (currentPresPascal - oldPresPascal) : 
+                                    (oldPresPascal - currentPresPascal);
 
-    if (pressureChange >= 5.0)      return GALE_STORMY_WIND;
-    else if (pressureChange >= 3.0) return STRONG_WINDS;
-    else if (pressureChange >= 1.5) return MODERATE_BREEZES;
-    else                            return CALM_LIGHT_WIND;     
+    // Συγκρίσεις με τα αντίστοιχα Pascal (500 Pa = 5 hPa, 300 Pa = 3 hPa, 150 Pa = 1.5 hPa)
+    if (pressureChangePascal >= 500)      return GALE_STORMY_WIND;
+    else if (pressureChangePascal >= 300) return STRONG_WINDS;
+    else if (pressureChangePascal >= 150) return MODERATE_BREEZES;
+    else                                  return CALM_LIGHT_WIND;     
 }
 
 const char* WeatherPredictor::getForecastString(WeatherForecast forecast) {
