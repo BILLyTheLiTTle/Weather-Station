@@ -27,7 +27,7 @@ private:
     uint32_t compensatePressure(int32_t adc_P);
     uint32_t compensateHumidity(int32_t adc_H);
 
-    static const uint32_t ALTITUDE = 350; //m (Αργυρά is on 350m altitude)
+    static const float ALTITUDE = 350.0; //m (Αργυρά is on 350m altitude)
 
 public:
     BME280Sensor();

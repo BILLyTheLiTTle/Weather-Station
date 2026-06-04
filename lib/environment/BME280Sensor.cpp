@@ -1,4 +1,5 @@
 #include "BME280Sensor.h"
+#include <math.h>
 
 BME280Sensor::BME280Sensor() : _addr(0x76), t_fine(0), _lastTemperature(0), _lastPressure(0), _lastHumidity(0) {}
 
@@ -79,7 +80,6 @@ void BME280Sensor::update() {
     Wire.write(0xF7); 
     Wire.endTransmission();
     
-    // Διάβασμα και των 8 registers (Pressure, Temperature, Humidity)
     Wire.requestFrom(_addr, (uint8_t)8);
     uint8_t data[8];
     for(int i=0; i<8; i++) data[i] = Wire.read();
@@ -88,9 +88,20 @@ void BME280Sensor::update() {
     int32_t adc_T = ((int32_t)data[3] << 12) | ((int32_t)data[4] << 4) | (data[5] >> 4);
     int32_t adc_H = ((int32_t)data[6] << 8) | data[7];
 
-    // Υπολογισμός και αποθήκευση εσωτερικά
+    // 1. Υπολογισμός πραγματικής θερμοκρασίας (σε °C)
     _lastTemperature = compensateTemperature(adc_T);
-    _lastPressure = compensatePressure(adc_P) + (uint32_t)(ALTITUDE * 12);
+    float currentTempC = _lastTemperature / 100.0; // Ο αλγόριθμος της Bosch επιστρέφει π.χ. 2500 για 25.00°C
+
+    // 2. Υπολογισμός ωμής πίεσης (σε Pa) από τον αλγόριθμο Bosch
+    uint32_t rawPressurePa = compensatePressure(adc_P); 
+
+    // 3. 🔥 ΕΠΙΣΗΜΗ ΔΙΟΡΘΩΣΗ ΓΙΑ ΤΑ 350 ΜΕΤΡΑ (Αναγωγή στη θάλασσα)
+    float factor = 1.0 - ((0.0065 * ALTITUDE) / (currentTempC + (0.0065 * ALTITUDE) + 273.15));
+    
+    // Μετατροπή της ωμής πίεσης και αποθήκευση
+    _lastPressure = (uint32_t)((float)rawPressurePa * pow(factor, -5.257));
+
+    // 4. Υπολογισμός υγρασίας
     _lastHumidity = compensateHumidity(adc_H);
 }
 
