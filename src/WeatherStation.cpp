@@ -105,7 +105,9 @@ void loop() {
     // 3. DELAYED EXECUTION
     // ==========================================
     if (isIntervalElapsed() && sleepSwitch.getState() != SystemState::SLEEP) {
-        
+
+        bmp.update();
+
         shouldStickToSystemStats = !battery.isUsbPowered() && battery.readVoltage() <= Battery::LOWER_BOUND_VOLTAGE;
 
         uint32_t currentPres = envMan.getCurrentPres(); 
