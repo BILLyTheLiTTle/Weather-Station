@@ -2,18 +2,23 @@
 #include "Debugger.h"
 
 WeatherPredictor::WeatherPredictor() : _historyCount(0), _lastUpdateTime(0), _currentTrendVal(0) {
-    for(int i = 0; i < 6; i++) _history[i] = 0;
+    for(int i = 0; i < 12; i++) _history[i] = 0; // 👈 Αρχικοποίηση 12 θέσεων
 }
 
 int8_t WeatherPredictor::calculateTrend(uint32_t currentPres, uint32_t oldPres) {
     int32_t curHpa = currentPres / 100;
     int32_t oldHpa = oldPres / 100;
     
-    // Κρατάμε την ακριβή διαφορά hPa στο ιστορικό των 6 θέσεων
-    _currentTrendVal = curHpa - oldHpa; 
+    // Όταν γεμίσει ο πίνακας (12 θέσεις), η πραγματική τάση χρόνου υπολογίζεται 
+    // ανάμεσα στο Τώρα (_history[11]) και πριν 2.8 ώρες (_history[0])
+    if (_historyCount == 12) {
+        _currentTrendVal = (int32_t)(_history[11] / 100) - (int32_t)(_history[0] / 100);
+    } else {
+        _currentTrendVal = curHpa - oldHpa; 
+    }
 
-    if (_currentTrendVal >= 1)  return 1;  // Rising
-    if (_currentTrendVal <= -1) return -1; // Falling
+    if (curHpa - oldHpa >= 1)  return 1;  // Rising
+    if (curHpa - oldHpa <= -1) return -1; // Falling
     return 0;                              // Steady
 }
 
@@ -24,19 +29,19 @@ WeatherForecast WeatherPredictor::addReading(uint32_t currentPressurePascal, uin
         DBG(F("LAST TIME: "));    DBG_LN(_lastUpdateTime);
         DBG(F("WINTER: "));       DBG_LN(isWinter);
         
-        // Ολίσθηση (Shift) για τον πίνακα 6 θέσεων (0 έως 5)
-        for (uint8_t i = 0; i < 5; i++) _history[i] = _history[i+1];
-        _history[5] = currentPressurePascal;
+        // Ολίσθηση (Shift) για τον νέο πίνακα 12 θέσεων (0 έως 11)
+        for (uint8_t i = 0; i < 11; i++) _history[i] = _history[i+1];
+        _history[11] = currentPressurePascal; // Το "τώρα" μπαίνει στην τελευταία θέση
         
-        if (_historyCount < 6) _historyCount++;
+        if (_historyCount < 12) _historyCount++;
         _lastUpdateTime = currentTime;
     }
 
-    // Χρειαζόμαστε τουλάχιστον 3 μετρήσεις για μια πρώτη ασφαλή πρόβλεψη
+    // Χρειαζόμαστε τουλάχιστον 3 μετρήσεις (42 λεπτά) για μια πρώτη πρόχειρη πρόβλεψη
     if (_historyCount < 3) return FORECAST_UNKNOWN;
 
     // Παίρνουμε την παλαιότερη διαθέσιμη μέτρηση ανάλογα με το πόσες έχουμε μαζέψει
-    uint32_t oldPressure = _history[6 - _historyCount];
+    uint32_t oldPressure = _history[12 - _historyCount];
     int8_t trend = calculateTrend(currentPressurePascal, oldPressure);
     
     uint32_t hpa = currentPressurePascal / 100;
@@ -78,41 +83,33 @@ WeatherForecast WeatherPredictor::addReading(uint32_t currentPressurePascal, uin
 }
 
 ForecastTimeframe WeatherPredictor::getTimeframe() {
-    if (_historyCount < 3) return TIME_UNKNOWN;
+    // Περιμένουμε να γεμίσει πλήρως ο 12άρης πίνακας για ακρίβεια χρόνου (2.8 ώρες)
+    if (_historyCount < 12) return TIME_UNKNOWN;
 
     int32_t absDiff = abs(_currentTrendVal);
 
-    if (absDiff <= 1) return TIME_STABLE;
-    if (absDiff >= 3) return TIME_IMMINENT;
-    if (absDiff == 2) return TIME_SOON;
+    // Επίσημα μετεωρολογικά κριτήρια τάσης για παράθυρο ~3 ωρών
+    if (absDiff <= 1) return TIME_STABLE;   // Μεταβολή 0-1 hPa -> Σταθερός καιρός
+    if (absDiff >= 4) return TIME_IMMINENT; // Μεταβολή >= 4 hPa -> Ραγδαία αλλαγή (Άμεσα)
+    if (absDiff >= 2) return TIME_SOON;     // Μεταβολή 2-3 hPa -> Κανονική αλλαγή (Σύντομα)
 
-    return TIME_LATER;
+    return TIME_LATER;                      // Μεταβολή 1.5 hPa (Αργότερα)
 }
 
 WindForecast WeatherPredictor::getWindPrediction() {
-    // Περιμένουμε να γεμίσει ο 6άρης πίνακας (1.5 ώρα δεδομένων)
-    if (_historyCount < 3) {
+    if (_historyCount < 12) {
         return WIND_UNKNOWN;
     }
 
-    // _history[5] είναι το τώρα, _history[0] είναι η μέτρηση πριν 1.5 ώρα
-    float currentHpa = _history[5] / 100.0;
+    // Υπολογισμός άνεμου στο πλήρες τρίωρο παράθυρο πλέον
+    float currentHpa = _history[11] / 100.0;
     float oldHpa = _history[0] / 100.0;
     float pressureChange = abs(currentHpa - oldHpa);
 
-    // Προσαρμοσμένα όρια ευαισθησίας για το παράθυρο της 1.5 ώρας
-    if (pressureChange >= 4.0) {
-        return GALE_STORMY_WIND;
-    } 
-    else if (pressureChange >= 2.5) {
-        return STRONG_WINDS;
-    } 
-    else if (pressureChange >= 1.0) {
-        return MODERATE_BREEZES;
-    } 
-    else {
-        return CALM_LIGHT_WIND;     
-    }
+    if (pressureChange >= 5.0)      return GALE_STORMY_WIND;
+    else if (pressureChange >= 3.0) return STRONG_WINDS;
+    else if (pressureChange >= 1.5) return MODERATE_BREEZES;
+    else                            return CALM_LIGHT_WIND;     
 }
 
 const char* WeatherPredictor::getForecastString(WeatherForecast forecast) {
@@ -141,10 +138,10 @@ const char* WeatherPredictor::getWindString(WindForecast forecast) {
 
 const char* WeatherPredictor::getTimeframeString(ForecastTimeframe timeframe) {
     switch (timeframe) {
-        case TIME_IMMINENT: return "IMMINENT!\n(Next 1-3 hours)";
-        case TIME_SOON:     return "Soon\n(Next 3-6 hours)";
-        case TIME_LATER:    return "Later\n(Next 6-12 hours)";
+        case TIME_IMMINENT: return "In 1 to 2 HOURS!\n(Rapid Change)";
+        case TIME_SOON:     return "In 3 to 5 HOURS\n(Normal Change)";
+        case TIME_LATER:    return "In 6 to 12 HOURS\n(Slow Change)";
         case TIME_STABLE:   return "Stable weather\n(No change)";
-        default:            return "Waiting for data...";
+        default:            return "Analyzing trend..."; // Μέχρι να γεμίσει το 3ωρο
     }
 }

@@ -24,18 +24,18 @@ enum WindForecast {
     WIND_UNKNOWN
 };
 
-// Νέο Enum για το πότε θα γίνει η αλλαγή
+// Εμπλουτισμένο Enum για σαφείς χρόνους αλλαγής
 enum ForecastTimeframe {
-    TIME_IMMINENT = 0, // Άμεσα (Επόμενες 1-3 ώρες)
-    TIME_SOON,         // Σύντομα (Επόμενες 3-6 ώρες)
+    TIME_IMMINENT = 0, // Άμεσα (Επόμενες 1-2 ώρες)
+    TIME_SOON,         // Σύντομα (Επόμενες 3-5 ώρες)
     TIME_LATER,        // Αργότερα (Επόμενες 6-12 ώρες)
     TIME_STABLE,       // Δεν αναμένεται αλλαγή / Σταθερός καιρός
-    TIME_UNKNOWN       // Αναμονή ιστορικού
+    TIME_UNKNOWN       // Αναμονή ιστορικού (Γέμισμα πίνακα)
 };
 
 class WeatherPredictor {
 private:
-    uint32_t _history[6];
+    uint32_t _history[12];
     uint8_t  _historyCount;
     uint32_t _lastUpdateTime;
     const uint32_t _updateInterval = 840; // 14 minutes
@@ -49,12 +49,11 @@ public:
     WeatherForecast addReading(uint32_t currentPressurePascal, uint32_t currentTime, bool isWinter);
     
     ForecastTimeframe getTimeframe();
-
     WindForecast getWindPrediction();
     
     const char* getForecastString(WeatherForecast forecast);
     const char* getWindString(WindForecast forecast);
-    const char* getTimeframeString(ForecastTimeframe timeframe); // Text για το χρόνο
+    const char* getTimeframeString(ForecastTimeframe timeframe);
 };
 
 #endif
