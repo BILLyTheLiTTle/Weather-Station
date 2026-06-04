@@ -134,34 +134,34 @@ WindForecast WeatherPredictor::getWindPrediction() {
 
 const char* WeatherPredictor::getForecastString(WeatherForecast forecast) {
     switch (forecast) {
-        case FORECAST_GOOD:          return "Good Weather\n(Stable)";
-        case FORECAST_SETTLED:       return "Settled Weather";
-        case FORECAST_FINE:          return "Fine / Clear";
-        case FORECAST_BECOMING_FINE: return "Becoming Fine";
-        case FORECAST_CHANGEABLE:    return "Changeable\nPartly Cloudy";
-        case FORECAST_UNSETTLED:     return "Unsettled Weather";
-        case FORECAST_RAIN:          return "Rainy";
-        case FORECAST_STORMY:        return "Stormy / Gale";
+        case FORECAST_GOOD:          return "Good \n(Fair/Mild Sky)";       // ΚΑΛΟΣ ΚΑΙΡΟΣ: Μια χαρά μέρα, ήπιος ουρανός, φυσιολογική πίεση
+        case FORECAST_SETTLED:       return "Settled\n(Stable/Durable)";    // ΣΤΑΘΕΡΟΣ ΚΑΙΡΟΣ: Κλειδωμένη καλοκαιρία μεγάλης διάρκειας, ακλόνητος
+        case FORECAST_FINE:          return "Fine/Clear\n(Totally Clear)";  // Ο ΠΙΟ ΚΑΘΑΡΟΣ ΚΑΙΡΟΣ: Απόλυτη, κρυστάλλινη ηλιοφάνεια & υψηλή πίεση
+        case FORECAST_BECOMING_FINE: return "Becoming Fine\n(Improving)";   // Βελτίωση: Ο καιρός καθαρίζει και πηγαίνει προς το Fine
+        case FORECAST_CHANGEABLE:    return "Changeable\n(Partly Cloudy)";  // Μεταβατικός: Άστατος καιρός, μισός ήλιος / μισή συννεφιά
+        case FORECAST_UNSETTLED:     return "Unsettled\n(Variable/Spells)"; // Άστατος: Κακός καιρός, αλλά με διαστήματα βελτίωσης
+        case FORECAST_RAIN:          return "Rainy\n(Wet/Overcast)";        // Βροχή: Κλειστός, γκρίζος και βρεγμένος καιρός
+        case FORECAST_STORMY:        return "Stormy/Gale\n(Severe Storm)";  // Καταιγίδα: Έντονα φαινόμενα, θύελλα
         default:                     return "Calculating...";
     }
 }
 
 const char* WeatherPredictor::getWindString(WindForecast forecast) {
     switch (forecast) {
-        case GALE_STORMY_WIND:  return "Gale / Stormy Winds";
-        case STRONG_WINDS:      return "Strong Winds";
-        case MODERATE_BREEZES:  return "Moderate Breezes";
-        case CALM_LIGHT_WIND:   return "Calm / Light Wind";
+        case GALE_STORMY_WIND:  return "Gale / Stormy Winds";   // ΘΥΕΛΛΩΔΗΣ ΑΝΕΜΟΣ: Πολύ επικίνδυνος άνεμος, καταιγίδα/μπουρίνι (8+ Bft)
+        case STRONG_WINDS:      return "Strong Winds";          // ΙΣΧΥΡΟΣ ΑΝΕΜΟΣ: Δυνατό αγιάζι, χρειάζεται προσοχή (6-7 Bft)
+        case MODERATE_BREEZES:  return "Moderate Breezes";      // ΜΕΤΡΙΟΣ ΑΝΕΜΟΣ: Σχετικά αισθητό αεράκι, φυσιολογικές συνθήκες (4-5 Bft)
+        case CALM_LIGHT_WIND:   return "Calm / Light Wind";     // Ο ΠΙΟ ΗΣΥΧΟΣ ΑΝΕΜΟΣ: Άπνοια ή ελαφρύ αεράκι, ιδανικές συνθήκες (0-3 Bft)
         default:                return "Calculating...";
     }
 }
 
 const char* WeatherPredictor::getTimeframeString(ForecastTimeframe timeframe) {
     switch (timeframe) {
-        case TIME_IMMINENT: return "In 1 to 2 HOURS!\n(Rapid Change)";
-        case TIME_SOON:     return "In 3 to 5 HOURS\n(Normal Change)";
-        case TIME_LATER:    return "In 6 to 12 HOURS\n(Slow Change)";
-        case TIME_STABLE:   return "Stable weather\n(No change)";
-        default:            return "Analyzing trend..."; // Μέχρι να γεμίσει το 3ωρο
+        case TIME_IMMINENT: return "In 1 to 2 HOURS!\n(Prob: IMMINENT)";    // Η ΠΙΟ ΚΟΝΤΙΝΗ/ΣΙΓΟΥΡΗ ΑΛΛΑΓΗ: Ραγδαία πτώση, έρχεται άμεσα
+        case TIME_SOON:     return "In 3 to 5 HOURS\n(Prob: HIGH)";         // ΥΨΗΛΗ ΕΤΟΙΜΟΤΗΤΑ: Η υγρασία ανέβηκε, ο καιρός κλειδώνει για βροχή
+        case TIME_LATER:    return "In 6 to 12 HOURS\n(Prob: LOW)";         // ΜΑΚΡΙΝΗ ΕΚΤΙΜΗΣΗ: Μικρή πιθανότητα για τώρα, ο καιρός θέλει χρόνο ακόμα
+        case TIME_STABLE:   return "Stable weather\n(No change)";           // Σταθερότητα: Καμία αλλαγή στον ορίζοντα
+        default:            return "Analyzing trend...";                    // Μέχρι να γεμίσει το 3ωρο
     }
 }
