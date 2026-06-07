@@ -13,6 +13,7 @@ enum WeatherForecast {
     FORECAST_UNSETTLED,
     FORECAST_RAIN,
     FORECAST_STORMY,
+    FORECAST_SNOW,
     FORECAST_UNKNOWN
 };
 
@@ -46,10 +47,11 @@ private:
 
 public:
     WeatherPredictor();
-    WeatherForecast addReading(uint32_t currentPressurePascal, uint32_t currentTime, bool isWinter);
+    WeatherForecast addReading(uint32_t currentPressurePascal, uint32_t currentTime, bool isWinter, int16_t temperature, uint32_t humidity);
     
     ForecastTimeframe getTimeframe(uint16_t humidity);
     WindForecast getWindPrediction();
+    bool checkIceWarning(int16_t temperature, uint32_t humidity);
     
     const char* getForecastString(WeatherForecast forecast);
     const char* getWindString(WindForecast forecast);

@@ -22,7 +22,8 @@ int8_t WeatherPredictor::calculateTrend(uint32_t currentPres, uint32_t oldPres) 
     return 0;                              // Steady
 }
 
-WeatherForecast WeatherPredictor::addReading(uint32_t currentPressurePascal, uint32_t currentTime, bool isWinter) {
+// ΠΡΟΣΟΧΗ: Προσθέσαμε float temperature και float humidity στις παραμέτρους για να ελέγχει το χιόνι
+WeatherForecast WeatherPredictor::addReading(uint32_t currentPressurePascal, uint32_t currentTime, bool isWinter, int16_t temperature, uint32_t humidity) {
     
     if (_historyCount == 0 || (currentTime - _lastUpdateTime >= _updateInterval)) {
         DBG(F("CURRENT TIME: ")); DBG_LN(currentTime);
@@ -72,14 +73,23 @@ WeatherForecast WeatherPredictor::addReading(uint32_t currentPressurePascal, uin
         else zambrettiZ = 13;
     }
 
-    if (zambrettiZ <= 2)  return FORECAST_GOOD;
-    if (zambrettiZ <= 4)  return FORECAST_SETTLED;
-    if (zambrettiZ <= 10) return FORECAST_FINE;
-    if (zambrettiZ <= 12) return FORECAST_BECOMING_FINE;
-    if (zambrettiZ <= 19) return FORECAST_CHANGEABLE;
-    if (zambrettiZ <= 22) return FORECAST_UNSETTLED;
-    if (zambrettiZ <= 24) return FORECAST_RAIN;
-    return FORECAST_STORMY;
+    WeatherForecast finalForecast;
+    if (zambrettiZ <= 2)       finalForecast = FORECAST_GOOD;
+    else if (zambrettiZ <= 4)  finalForecast = FORECAST_SETTLED;
+    else if (zambrettiZ <= 10) finalForecast = FORECAST_FINE;
+    else if (zambrettiZ <= 12) finalForecast = FORECAST_BECOMING_FINE;
+    else if (zambrettiZ <= 19) finalForecast = FORECAST_CHANGEABLE;
+    else if (zambrettiZ <= 22) finalForecast = FORECAST_UNSETTLED;
+    else if (zambrettiZ <= 24) finalForecast = FORECAST_RAIN;
+    else                       finalForecast = FORECAST_STORMY;
+
+    if (finalForecast == FORECAST_RAIN || finalForecast == FORECAST_STORMY) {
+        if (temperature <= 150 && humidity >= 7500) {
+            finalForecast = FORECAST_SNOW;
+        }
+    }
+
+    return finalForecast;
 }
 
 ForecastTimeframe WeatherPredictor::getTimeframe(uint16_t humidity) {
@@ -142,16 +152,17 @@ const char* WeatherPredictor::getForecastString(WeatherForecast forecast) {
         case FORECAST_UNSETTLED:     return "Unsettled\n(Variable/Spells)"; // Άστατος: Κακός καιρός, αλλά με διαστήματα βελτίωσης
         case FORECAST_RAIN:          return "Rainy\n(Wet/Overcast)";        // Βροχή: Κλειστός, γκρίζος και βρεγμένος καιρός
         case FORECAST_STORMY:        return "Stormy/Gale\n(Severe Storm)";  // Καταιγίδα: Έντονα φαινόμενα, θύελλα
+        case FORECAST_SNOW:          return "Snow\n(Heavy/White)";          // ΧΙΟΝΙ: Υετός με θερμοκρασία <= 1.5°C
         default:                     return "Calculating...";
     }
 }
 
 const char* WeatherPredictor::getWindString(WindForecast forecast) {
     switch (forecast) {
-        case GALE_STORMY_WIND:  return "Gale / Stormy Winds";   // ΘΥΕΛΛΩΔΗΣ ΑΝΕΜΟΣ: Πολύ επικίνδυνος άνεμος, καταιγίδα/μπουρίνι (8+ Bft)
-        case STRONG_WINDS:      return "Strong Winds";          // ΙΣΧΥΡΟΣ ΑΝΕΜΟΣ: Δυνατό αγιάζι, χρειάζεται προσοχή (6-7 Bft)
-        case MODERATE_BREEZES:  return "Moderate Breezes";      // ΜΕΤΡΙΟΣ ΑΝΕΜΟΣ: Σχετικά αισθητό αεράκι, φυσιολογικές συνθήκες (4-5 Bft)
-        case CALM_LIGHT_WIND:   return "Calm / Light Wind";     // Ο ΠΙΟ ΗΣΥΧΟΣ ΑΝΕΜΟΣ: Άπνοια ή ελαφρύ αεράκι, ιδανικές συνθήκες (0-3 Bft)
+        case GALE_STORMY_WIND:  return "Stormy (8+)";       // ΘΥΕΛΛΩΔΗΣ ΑΝΕΜΟΣ: Πολύ επικίνδυνος άνεμος, καταιγίδα/μπουρίνι (8+ Bft)
+        case STRONG_WINDS:      return "Strong (6-7)";      // ΙΣΧΥΡΟΣ ΑΝΕΜΟΣ: Δυνατό αγιάζι, χρειάζεται προσοχή (6-7 Bft)
+        case MODERATE_BREEZES:  return "Moderate (4-5)";    // ΜΕΤΡΙΟΣ ΑΝΕΜΟΣ: Σχετικά αισθητό αεράκι, φυσιολογικές συνθήκες (4-5 Bft)
+        case CALM_LIGHT_WIND:   return "Calm (0-3)";        // Ο ΠΙΟ ΗΣΥΧΟΣ ΑΝΕΜΟΣ: Άπνοια ή ελαφρύ αεράκι, ιδανικές συνθήκες (0-3 Bft)
         default:                return "Calculating...";
     }
 }
@@ -164,4 +175,11 @@ const char* WeatherPredictor::getTimeframeString(ForecastTimeframe timeframe) {
         case TIME_STABLE:   return "Stable weather\n(No change)";           // Σταθερότητα: Καμία αλλαγή στον ορίζοντα
         default:            return "Analyzing trend...";                    // Μέχρι να γεμίσει το 3ωρο
     }
+}
+
+bool WeatherPredictor::checkIceWarning(int16_t temperature, uint32_t humidity) {
+    if (temperature <= 200 && humidity >= 8000) {
+        return true;
+    }
+    return false;
 }

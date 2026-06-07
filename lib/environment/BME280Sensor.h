@@ -18,16 +18,16 @@ private:
     int32_t t_fine;
 
     // Εσωτερικές μεταβλητές αποθήκευσης
-    int32_t _lastTemperature;
-    uint32_t _lastPressure;
-    uint32_t _lastHumidity;
+    int32_t _lastTemperature;   // Not used
+    uint32_t _lastPressure;     // Σε Pascal
+    uint32_t _lastHumidity;     // Not working
 
     void readCalibrationData();
     int32_t compensateTemperature(int32_t adc_T);
     uint32_t compensatePressure(int32_t adc_P);
     uint32_t compensateHumidity(int32_t adc_H);
 
-    static const float ALTITUDE = 350.0; //m (Αργυρά is on 350m altitude)
+    static constexpr float ALTITUDE = 350.0; //m (Αργυρά is on 350m altitude)
 
 public:
     BME280Sensor();
@@ -37,9 +37,9 @@ public:
     void update(); 
 
     // Οι get συναρτήσεις
-    int32_t getTemperature();     // Σε 0.01 °C
-    uint32_t getPressure();       // Σε Pascal
-    uint32_t getHumidity();       // Σε 0.01 %
+    int32_t getTemperature();   // Not used
+    uint32_t getPressure();     // Σε Pascal
+    uint32_t getHumidity();     // Not working
 };
 
 #endif

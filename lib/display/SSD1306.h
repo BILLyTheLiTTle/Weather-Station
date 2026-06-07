@@ -46,7 +46,7 @@ public:
     void showDailyHumidityStats(HumidityDailyStats &stats);
     void showLifetimeTemperatureStats(TemperatureLifetimeStats &stats);
     void showLifetimeHumidityStats(HumidityLifetimeStats &stats);
-    void showWeatherPrediction(const char* forecast, const char* wind, const char* timeframe);
+    void showWeatherPrediction(const char* forecast, const char* wind, const char* timeframe, bool isIcy);
     void showSystemStats(Battery &battery, ACS712 &acs712, MemoryProfiler &ram, Thermistor &therm);
 
     void clear();

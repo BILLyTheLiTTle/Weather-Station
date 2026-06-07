@@ -35,6 +35,7 @@ WeatherPredictor predictor;
 WeatherForecast forecast;
 WindForecast wind;
 ForecastTimeframe timeframe;
+bool isIcy;
 
 DS3231 rtc;
 
@@ -66,7 +67,7 @@ void setup() {
     display.showBootMessage();
 
     while (!bmp.begin(0x76)) {
-        Serial.println("Pressure sensor error!");
+        DBG_LN(F("Pressure sensor error!"));
         delay(1000);
     }
 }
@@ -110,14 +111,22 @@ void loop() {
 
         shouldStickToSystemStats = !battery.isUsbPowered() && battery.readVoltage() <= Battery::LOWER_BOUND_VOLTAGE;
 
-        uint32_t currentPres = envMan.getCurrentPres(); 
-    
-        // 1. Δίνουμε τη μέτρηση
+        uint32_t currentPres = envMan.getCurrentPres();
+        int16_t currentTemp = envMan.getCurrentTemp();
+        uint16_t currentHum = envMan.getCurrentHum();
+
         uint8_t currentMonth = rtc.getMonth();
         bool winterFlag = (currentMonth >= 10 || currentMonth <= 3);
-        forecast = predictor.addReading(currentPres, rtc.getTimestamp(), winterFlag);
+        
+        forecast = predictor.addReading(currentPres, rtc.getTimestamp(), winterFlag, currentTemp, currentHum);
         wind = predictor.getWindPrediction();
-        timeframe = predictor.getTimeframe(envMan.getCurrentHum());
+        timeframe = predictor.getTimeframe(currentHum);
+
+        // --- 3. ΠΡΟΣΘΗΚΗ ΓΙΑ ΤΟΝ ΠΑΓΟ (ICE WARNING) ---
+        isIcy = predictor.checkIceWarning(currentTemp, currentHum);
+        if (isIcy) {
+            DBG_LN(F("!!!! WARNING: ICY ROADS !!!!"));
+        }
 
         if (shouldStickToSystemStats) {
             screen = PAGE_SYSTEM_STATS;
@@ -128,17 +137,20 @@ void loop() {
         DBG_LN(F("-*-*-*- Environment Stats -*-*-*-"));
         envMan.printEnvironmentStats(bmp, environmentSensor, eeprom, rtc, td, tl, hd, hl);
         DBG_LN(F("-*-*-*- Weather Prediction -*-*-*-"));
-        Serial.print("Forecast: ");
-        Serial.println(predictor.getForecastString(forecast));
-        Serial.print("Wind: ");
-        Serial.println(predictor.getWindString(wind));
-        Serial.print("Timeframe: ");
-        Serial.println(predictor.getTimeframeString(timeframe));
+        DBG("Forecast: ");
+        DBG_LN(predictor.getForecastString(forecast));
+        DBG("Wind: ");
+        DBG_LN(predictor.getWindString(wind));
+        DBG("Timeframe: ");
+        DBG_LN(predictor.getTimeframeString(timeframe));
+        
+        // Εκτύπωση αν έχει πάγο στο Serial Monitor
+        DBG("Road Ice Warning: ");
+        DBG_LN(isIcy ? "YES" : "NO");
+
         DBG_LN(F("-*-*-*- System Stats -*-*-*-"));
         printSystemStats(battery, acs712, ram, therm);
         DBG(F("=*=*=*= END =*=*=*=\n"));
-
-        
     }
 }
 
@@ -158,7 +170,8 @@ void navigate(Page page, bool forceRender) {
             display.showWeatherPrediction(
                 predictor.getForecastString(forecast),
                 predictor.getWindString(wind),
-                predictor.getTimeframeString(timeframe)
+                predictor.getTimeframeString(timeframe),
+                isIcy
             );
             break;
 
