@@ -38,12 +38,16 @@ class WeatherPredictor {
 private:
     uint32_t _history[12];
     uint8_t  _historyCount;
+    uint16_t _humidityHistory[12];
+
     uint32_t _lastUpdateTime;
     const uint32_t _updateInterval = 840; // 14 minutes
 
-    int32_t _currentTrendVal; // Αποθήκευση της διαφοράς σε hPa
+    int32_t _currentTrendVal;
+    int16_t _currentHumTrendVal;
 
     int8_t calculateTrend(uint32_t currentPres, uint32_t oldPres);
+    int8_t calculateHumidityTrend(uint16_t currentHum, uint16_t oldHum);
 
 public:
     WeatherPredictor();
@@ -51,7 +55,7 @@ public:
     
     ForecastTimeframe getTimeframe(uint16_t humidity);
     WindForecast getWindPrediction();
-    bool checkIceWarning(int16_t temperature, uint32_t humidity);
+    bool checkIceWarning(int16_t temperature, uint16_t humidity);
     
     const char* getForecastString(WeatherForecast forecast);
     const char* getWindString(WindForecast forecast);
