@@ -38,10 +38,16 @@ void SSD1306::showError(const __FlashStringHelper* msg) {
     _oled.println(msg);
 }
 
-void SSD1306::showCurrentStats(int16_t temp, uint16_t hum, uint32_t pres) {
+void SSD1306::showCurrentStats(int16_t temp, uint16_t hum, uint32_t pres, bool isIcy) {
     _oled.setCursor(20, 0);
     _oled.println(F("CURRENT STATS"));
-    _oled.println();
+
+    if (isIcy) {
+        _oled.setCursor(25, 1);
+        _oled.println(F("!!! ICE !!!"));
+    } else {
+        _oled.println();
+    }
 
     _oled.println(F("Temperature: "));
     formatNumber(bufferedValue, temp);
@@ -62,16 +68,12 @@ void SSD1306::showCurrentStats(int16_t temp, uint16_t hum, uint32_t pres) {
     _oled.println(F(" hPa"));
 }
 
-void SSD1306::showWeatherPrediction(const char* forecast, const char* wind, const char* timeframe, bool isIcy) {
+void SSD1306::showWeatherPrediction(const char* forecast, const char* wind, const char* timeframe) {
     _oled.setCursor(10, 0);
     _oled.println(F("WEATHER PREDICTION"));
     // _oled.println();
 
-    _oled.print(F("Forecast: "));
-    if (isIcy) {
-        _oled.print(F("!! ICE !!"));
-    }
-    _oled.println();
+    _oled.println(F("Forecast: "));
     _oled.println(forecast);
     _oled.println(wind);
     // _oled.println();

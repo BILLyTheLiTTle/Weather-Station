@@ -163,15 +163,14 @@ void navigate(Page page, bool forceRender) {
     display.clear();
     switch (page) {
         case PAGE_CURRENT_STATS:
-            display.showCurrentStats(envMan.getCurrentTemp(), envMan.getCurrentHum(), envMan.getCurrentPres());
+            display.showCurrentStats(envMan.getCurrentTemp(), envMan.getCurrentHum(), envMan.getCurrentPres(), isIcy);
             break;
 
         case PAGE_WEATHER_PREDICTION:
             display.showWeatherPrediction(
                 predictor.getForecastString(forecast),
                 predictor.getWindString(wind),
-                predictor.getTimeframeString(timeframe),
-                isIcy
+                predictor.getTimeframeString(timeframe)
             );
             break;
 

@@ -41,12 +41,12 @@ public:
     void showBootMessage();
     void updateTime(int hours, int minutes, int seconds);
     void showError(const __FlashStringHelper* msg);
-    void showCurrentStats(int16_t temp, uint16_t hum, uint32_t pres);
+    void showCurrentStats(int16_t temp, uint16_t hum, uint32_t pres, bool isIcy);
     void showDailyTemperatureStats(TemperatureDailyStats &stats);
     void showDailyHumidityStats(HumidityDailyStats &stats);
     void showLifetimeTemperatureStats(TemperatureLifetimeStats &stats);
     void showLifetimeHumidityStats(HumidityLifetimeStats &stats);
-    void showWeatherPrediction(const char* forecast, const char* wind, const char* timeframe, bool isIcy);
+    void showWeatherPrediction(const char* forecast, const char* wind, const char* timeframe);
     void showSystemStats(Battery &battery, ACS712 &acs712, MemoryProfiler &ram, Thermistor &therm);
 
     void clear();
