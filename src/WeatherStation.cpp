@@ -118,7 +118,7 @@ void loop() {
         uint8_t currentMonth = rtc.getMonth();
         bool winterFlag = (currentMonth >= 10 || currentMonth <= 3);
         
-        forecast = predictor.addReading(currentPres, rtc.getTimestamp(), winterFlag, currentTemp, currentHum);
+        forecast = predictor.addReading(currentPres, rtc.getTimestamp(), winterFlag, currentTemp, currentHum, rtc.getHour());
         wind = predictor.getWindPrediction();
         timeframe = predictor.getTimeframe(currentHum);
 

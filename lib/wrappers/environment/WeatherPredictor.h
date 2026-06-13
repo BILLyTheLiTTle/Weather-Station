@@ -41,7 +41,7 @@ private:
     uint16_t _humidityHistory[12];
 
     uint32_t _lastUpdateTime;
-    const uint32_t _updateInterval = 840; // 14 minutes
+    const uint32_t _updateInterval = 540; // 9 minutes
 
     int32_t _currentTrendVal;
     int16_t _currentHumTrendVal;
@@ -51,7 +51,7 @@ private:
 
 public:
     WeatherPredictor();
-    WeatherForecast addReading(uint32_t currentPressurePascal, uint32_t currentTime, bool isWinter, int16_t temperature, uint32_t humidity);
+    WeatherForecast addReading(uint32_t currentPressurePascal, uint32_t currentTime, bool isWinter, int16_t temperature, uint32_t humidity, uint8_t currentHour);
     
     ForecastTimeframe getTimeframe(uint16_t humidity);
     WindForecast getWindPrediction();

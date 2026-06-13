@@ -4,7 +4,7 @@
 WeatherPredictor::WeatherPredictor() : _historyCount(0), _lastUpdateTime(0), _currentTrendVal(0), _currentHumTrendVal(0) {
     for(int i = 0; i < 12; i++) {
         _history[i] = 0;
-        _humidityHistory[i] = 0; // Αρχικοποίηση ιστορικού υγρασίας 12 θέσεων
+        _humidityHistory[i] = 0;
     }
 }
 
@@ -12,62 +12,53 @@ int8_t WeatherPredictor::calculateTrend(uint32_t currentPres, uint32_t oldPres) 
     int32_t curHpa = currentPres / 100;
     int32_t oldHpa = oldPres / 100;
     
-    // Όταν γεμίσει ο πίνακας (12 θέσεις), η πραγματική τάση χρόνου υπολογίζεται 
-    // ανάμεσα στο Τώρα (_history[11]) και πριν 2.8 ώρες (_history[0])
     if (_historyCount == 12) {
         _currentTrendVal = (int32_t)(_history[11] / 100) - (int32_t)(_history[0] / 100);
     } else {
         _currentTrendVal = curHpa - oldHpa; 
     }
 
-    if (curHpa - oldHpa >= 1)  return 1;  // Rising
-    if (curHpa - oldHpa <= -1) return -1; // Falling
-    return 0;                              // Steady
+    if (curHpa - oldHpa >= 1)  return 1;  
+    if (curHpa - oldHpa <= -1) return -1; 
+    return 0;                             
 }
 
 int8_t WeatherPredictor::calculateHumidityTrend(uint16_t currentHum, uint16_t oldHum) {
-    // Όταν γεμίσει ο πίνακας, η τάση υπολογίζεται μεταξύ του Τώρα και πριν 2.8 ώρες
     if (_historyCount == 12) {
         _currentHumTrendVal = (int16_t)_humidityHistory[11] - (int16_t)_humidityHistory[0];
     } else {
         _currentHumTrendVal = (int16_t)currentHum - (int16_t)oldHum;
     }
 
-    // Αν η υγρασία άλλαξε πάνω από 1.00% (δηλαδή 100 μονάδες στην κλίμακα x100)
-    if (_currentHumTrendVal >= 100)  return 1;  // Rising (Αυξάνεται)
-    if (_currentHumTrendVal <= -100) return -1; // Falling (Μειώνεται)
-    return 0;                                   // Steady (Σταθερή)
+    if (_currentHumTrendVal >= 100)  return 1;  
+    if (_currentHumTrendVal <= -100) return -1; 
+    return 0;                                   
 }
 
-WeatherForecast WeatherPredictor::addReading(uint32_t currentPressurePascal, uint32_t currentTime, bool isWinter, int16_t temperature, uint32_t humidity) {
+WeatherForecast WeatherPredictor::addReading(uint32_t currentPressurePascal, uint32_t currentTime, bool isWinter, int16_t temperature, uint32_t humidity, uint8_t currentHour) {
     
     if (_historyCount == 0 || (currentTime - _lastUpdateTime >= _updateInterval)) {
-        DBG(F("CURRENT TIME: ")); DBG_LN(currentTime);
-        DBG(F("LAST TIME: "));    DBG_LN(_lastUpdateTime);
-        DBG(F("WINTER: "));       DBG_LN(isWinter);
-        
-        // Ολίσθηση (Shift) για τον νέο πίνακα 12 θέσεων (0 έως 11) για πίεση και υγρασία
         for (uint8_t i = 0; i < 11; i++) {
             _history[i] = _history[i+1];
-            _humidityHistory[i] = _humidityHistory[i+1]; // Shift υγρασίας
+            _humidityHistory[i] = _humidityHistory[i+1];
         }
-        _history[11] = currentPressurePascal; // Το "τώρα" της πίεσης στην τελευταία θέση
-        _humidityHistory[11] = humidity;      // Το "τώρα" της υγρασίας στην τελευταία θέση
+        _history[11] = currentPressurePascal; 
+        _humidityHistory[11] = humidity;      
         
         if (_historyCount < 12) _historyCount++;
         _lastUpdateTime = currentTime;
     }
 
-    // Χρειαζόμαστε τουλάχιστον 3 μετρήσεις (42 λεπτά) για μια πρώτη πρόχειρη πρόβλεψη
     if (_historyCount < 3) return FORECAST_UNKNOWN;
 
-    // Παίρνουμε την παλαιότερη διαθέσιμη μέτρηση ανάλογα με το πόσες έχουμε μαζέψει
+    // =================================================================
+    // 1. ΜΑΚΡΟΠΡΟΘΕΣΜΗ ΠΡΟΓΝΩΣΗ (ZAMBRETTI - 2 ώρες ιστορικό)
+    // =================================================================
     uint32_t oldPressure = _history[12 - _historyCount];
     int8_t trend = calculateTrend(currentPressurePascal, oldPressure);
     
-    // Υπολογισμός τάσης της υγρασίας
     uint16_t oldHumidity = _humidityHistory[12 - _historyCount];
-    calculateHumidityTrend(humidity, oldHumidity);
+    calculateHumidityTrend(humidity, oldHumidity); 
     
     uint32_t hpa = currentPressurePascal / 100;
     uint8_t zambrettiZ = 32;
@@ -107,6 +98,38 @@ WeatherForecast WeatherPredictor::addReading(uint32_t currentPressurePascal, uin
     else if (zambrettiZ <= 24) finalForecast = FORECAST_RAIN;
     else                       finalForecast = FORECAST_STORMY;
 
+    // =================================================================
+    // 2. ΒΡΑΧΥΠΡΟΘΕΣΜΟ ΡΑΝΤΑΡ (Short-term Override - 30 λεπτά / Θέση 8)
+    // =================================================================
+    if (_historyCount == 12) {
+        // 3 θέσεις πίσω * 10 λεπτά = 30 λεπτά ακριβώς
+        int32_t shortPressTrend = (int32_t)(_history[11] / 100) - (int32_t)(_history[8] / 100);
+        int16_t shortHumTrend = (int16_t)_humidityHistory[11] - (int16_t)_humidityHistory[8];
+
+        if (shortPressTrend <= -1 && shortHumTrend >= 150) { 
+            finalForecast = FORECAST_RAIN; 
+        }
+        else if (shortPressTrend <= -2) {
+            finalForecast = FORECAST_STORMY; 
+        }
+    }
+
+    // =================================================================
+    // 3. ΔΥΝΑΜΙΚΑ ΟΡΙΑ ΒΑΣΕΙ ΩΡΑΣ
+    // =================================================================
+    uint16_t rainHumidityThreshold = 8000; 
+    if (currentHour >= 21 || currentHour <= 7) {
+        rainHumidityThreshold = 9000; 
+    }
+
+    if (finalForecast <= FORECAST_BECOMING_FINE) {
+        if (humidity >= rainHumidityThreshold) { 
+            finalForecast = FORECAST_RAIN; 
+        } else if (humidity >= (rainHumidityThreshold - 1000) && _currentHumTrendVal > 0) {
+            finalForecast = FORECAST_UNSETTLED; 
+        }
+    }
+
     if (finalForecast == FORECAST_RAIN || finalForecast == FORECAST_STORMY) {
         if (temperature <= 150 && humidity >= 7500) {
             finalForecast = FORECAST_SNOW;
@@ -119,48 +142,26 @@ WeatherForecast WeatherPredictor::addReading(uint32_t currentPressurePascal, uin
 ForecastTimeframe WeatherPredictor::getTimeframe(uint16_t humidity) {
     if (_historyCount < 12) return TIME_UNKNOWN;
 
-    int32_t pressTrend = _currentTrendVal;  // Τάση πίεσης (hPa)
-    int16_t humTrend = _currentHumTrendVal; // Τάση υγρασίας (x100)
+    int32_t pressTrend = _currentTrendVal;  
+    int16_t humTrend = _currentHumTrendVal; 
     uint32_t currentHpa = _history[11] / 100;
 
-    // =================================================================
-    // ΣΥΝΔΥΑΣΜΟΣ 1: ΠΙΕΣΗ ΠΕΦΤΕΙ + ΥΓΡΑΣΙΑ ΑΝΕΒΑΙΝΕΙ -> ΕΡΧΕΤΑΙ ΚΑΚΟΚΑΙΡΙΑ
-    // =================================================================
     if (pressTrend <= -1) { 
-        if (humTrend >= 100) {
-            return TIME_IMMINENT; // 1-2 ώρες (Κλειδώνει η βροχή άμεσα)
-        } else {
-            return TIME_LATER;    // 6-12 ώρες (Ξερή πτώση, θα αργήσει)
-        }
+        if (humTrend >= 100) return TIME_IMMINENT; 
+        else return TIME_LATER;    
     }
-
-    // =================================================================
-    // ΣΥΝΔΥΑΣΜΟΣ 2: ΠΙΕΣΗ ΑΝΕΒΑΙΝΕΙ + ΥΓΡΑΣΙΑ ΠΕΦΤΕΙ -> ΕΡΧΕΤΑΙ ΒΕΛΤΙΩΣΗ
-    // =================================================================
     if (pressTrend >= 1) {
-        if (humTrend <= -100) {
-            return TIME_IMMINENT; // 1-2 ώρες (Καθαρίζει γρήγορα ο τόπος)
-        } else {
-            return TIME_LATER;    // 6-12 ώρες (Ανεβαίνει η πίεση αλλά έχει μουντάδα)
-        }
+        if (humTrend <= -100) return TIME_IMMINENT; 
+        else return TIME_LATER;    
     }
-
-    // =================================================================
-    // ΣΥΝΔΥΑΣΜΟΣ 3: Η ΠΙΕΣΗ ΕΙΝΑΙ ΚΟΛΛΗΜΕΝΗ ΧΑΜΗΛΑ
-    // =================================================================
     if (currentHpa < 1005) {
-        if (humTrend >= 100 || humidity >= 6500) {
-            return TIME_SOON;     // 3-5 ώρες (Το χαμηλό είναι εδώ, η υγρασία πιέζει)
-        }
+        if (humTrend >= 100 || humidity >= 6500) return TIME_SOON;     
     }
-
-    return TIME_STABLE; // Σταθερός καιρός
+    return TIME_STABLE; 
 }
 
 WindForecast WeatherPredictor::getWindPrediction() {
-    if (_historyCount < 12) {
-        return WIND_UNKNOWN;
-    }
+    if (_historyCount < 12) return WIND_UNKNOWN;
 
     uint32_t currentPresPascal = _history[11];
     uint32_t oldPresPascal = _history[0];
@@ -176,16 +177,38 @@ WindForecast WeatherPredictor::getWindPrediction() {
 }
 
 const char* WeatherPredictor::getForecastString(WeatherForecast forecast) {
+    // --- ΠΑΤΕΝΤΑ ΜΝΗΜΗΣ ΠΡΟΣΦΑΤΗΣ ΜΠΟΡΑΣ (ΔΙΟΡΘΩΜΕΝΗ) ---
+    // Ελέγχουμε αν την τελευταία 1.5 ώρα υπήρξε πτώση >= 2 hPa σε παράθυρο 1 ώρας (6 θέσεις)
+    bool recentStormAlert = false;
+    if (_historyCount == 12) {
+        for(uint8_t i = 0; i < 6; i++) {
+            if ((int32_t)(_history[i+6]/100) - (int32_t)(_history[i]/100) <= -2) {
+                recentStormAlert = true;
+                break;
+            }
+        }
+    }
+
+    // Προσθήκη του χαρακτήρα '*' στα switch cases για να ξέρεις ότι υπήρξε πρόσφατο alert
     switch (forecast) {
-        case FORECAST_GOOD:          return "Good \n(Fair/Mild Sky)";       // ΚΑΛΟΣ ΚΑΙΡΟΣ: Μια χαρά μέρα, ήπιος ουρανός, φυσιολογική πίεση
-        case FORECAST_SETTLED:       return "Settled\n(Stable/Durable)";    // ΣΤΑΘΕΡΟΣ ΚΑΙΡΟΣ: Κλειδωμένη καλοκαιρία μεγάλης διάρκειας, ακλόνητος
-        case FORECAST_FINE:          return "Fine/Clear\n(Totally Clear)";  // Ο ΠΙΟ ΚΑΘΑΡΟΣ ΚΑΙΡΟΣ: Απόλυτη, κρυστάλλινη ηλιοφάνεια & υψηλή πίεση
-        case FORECAST_BECOMING_FINE: return "Becoming Fine\n(Improving)";   // Βελτίωση: Ο καιρός καθαρίζει και πηγαίνει προς το Fine
-        case FORECAST_CHANGEABLE:    return "Changeable\n(Partly Cloudy)";  // Μεταβατικός: Άστατος καιρός, μισός ήλιος / μισή συννεφιά
-        case FORECAST_UNSETTLED:     return "Unsettled\n(Variable/Spells)"; // Άστατος: Κακός καιρός, αλλά με διαστήματα βελτίωσης
-        case FORECAST_RAIN:          return "Rainy\n(Wet/Overcast)";        // Βροχή: Κλειστός, γκρίζος και βρεγμένος καιρός
-        case FORECAST_STORMY:        return "Stormy/Gale\n(Severe Storm)";  // Καταιγίδα: Έντονα φαινόμενα, θύελλα
-        case FORECAST_SNOW:          return "Snow\n(Heavy/White)";          // ΧΙΟΝΙ: Υετός με θερμοκρασία <= 1.5°C
+        // ΚΑΛΟΣ ΚΑΙΡΟΣ: Μια χαρά μέρα, ήπιος ουρανός, φυσιολογική πίεση
+        case FORECAST_GOOD:          return recentStormAlert ? "Good *\n(Fair/Mild Sky)" : "Good \n(Fair/Mild Sky)";
+        // ΣΤΑΘΕΡΟΣ ΚΑΙΡΟΣ: Κλειδωμένη καλοκαιρία μεγάλης διάρκειας, ακλόνητος
+        case FORECAST_SETTLED:       return recentStormAlert ? "Settled *\n(Stable)"     : "Settled\n(Stable/Durable)";
+        // Ο ΠΙΟ ΚΑΘΑΡΟΣ ΚΑΙΡΟΣ: Απόλυτη, κρυστάλλινη ηλιοφάνεια & υψηλή πίεση
+        case FORECAST_FINE:          return recentStormAlert ? "Fine/Clear *\n(Totally Clear)"         : "Fine/Clear\n(Totally Clear)";
+        // Βελτίωση: Ο καιρός καθαρίζει και πηγαίνει προς το Fine
+        case FORECAST_BECOMING_FINE: return recentStormAlert ? "Becomoming Fine *\n(Improving)"     : "Becoming Fine\n(Improving)";
+        // Μεταβατικός: Άστατος καιρός, μισός ήλιος / μισή συννεφιά
+        case FORECAST_CHANGEABLE:    return "Changeable\n(Partly Cloudy)";
+        // Άστατος: Κακός καιρός, αλλά με διαστήματα βελτίωσης
+        case FORECAST_UNSETTLED:     return "Unsettled\n(Variable/Spells)";
+        // Βροχή: Κλειστός, γκρίζος και βρεγμένος καιρός
+        case FORECAST_RAIN:          return "Rainy\n(Wet/Overcast)";
+        // Καταιγίδα: Έντονα φαινόμενα, θύελλα
+        case FORECAST_STORMY:        return "Stormy/Gale\n(Severe Storm)";
+        // ΧΙΟΝΙ: Υετός με θερμοκρασία <= 1.5°C
+        case FORECAST_SNOW:          return "Snow\n(Heavy/White)";
         default:                     return "Calculating...";
     }
 }
