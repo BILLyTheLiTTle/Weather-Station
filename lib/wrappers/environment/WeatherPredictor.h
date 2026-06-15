@@ -4,6 +4,12 @@
 #include <Arduino.h>
 #include <stdint.h>
 
+#define ICE_TEMPERATURE_THRESHOLD 150
+#define ICE_HUMIDITY_THRESHOLD 7500
+#define SHORT_TERM_PRESSURE_CHANGE_RAIN_THRESHOLD -2
+#define SHORT_TERM_PRESSURE_CHANGE_STORM_THRESHOLD -3
+#define SHORT_TERM_HUMIDITY_CHANGE_THRESHOLD 300
+
 enum WeatherForecast {
     FORECAST_GOOD = 0,
     FORECAST_SETTLED,
@@ -41,7 +47,7 @@ private:
     uint16_t _humidityHistory[12];
 
     uint32_t _lastUpdateTime;
-    const uint32_t _updateInterval = 540; // 9 minutes
+    const uint32_t _updateInterval = 600; // 10 minutes
 
     int32_t _currentTrendVal;
     int16_t _currentHumTrendVal;

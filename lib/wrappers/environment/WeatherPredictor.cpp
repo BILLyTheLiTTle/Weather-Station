@@ -106,10 +106,10 @@ WeatherForecast WeatherPredictor::addReading(uint32_t currentPressurePascal, uin
         int32_t shortPressTrend = (int32_t)(_history[11] / 100) - (int32_t)(_history[8] / 100);
         int16_t shortHumTrend = (int16_t)_humidityHistory[11] - (int16_t)_humidityHistory[8];
 
-        if (shortPressTrend <= -1 && shortHumTrend >= 150) { 
+        if (shortPressTrend <= SHORT_TERM_PRESSURE_CHANGE_RAIN_THRESHOLD && shortHumTrend >= SHORT_TERM_HUMIDITY_CHANGE_THRESHOLD) { 
             finalForecast = FORECAST_RAIN; 
         }
-        else if (shortPressTrend <= -2) {
+        else if (shortPressTrend <= SHORT_TERM_PRESSURE_CHANGE_STORM_THRESHOLD) {
             finalForecast = FORECAST_STORMY; 
         }
     }
@@ -131,7 +131,7 @@ WeatherForecast WeatherPredictor::addReading(uint32_t currentPressurePascal, uin
     }
 
     if (finalForecast == FORECAST_RAIN || finalForecast == FORECAST_STORMY) {
-        if (temperature <= 150 && humidity >= 7500) {
+        if (temperature <= ICE_TEMPERATURE_THRESHOLD && humidity >= ICE_HUMIDITY_THRESHOLD) {
             finalForecast = FORECAST_SNOW;
         }
     }
