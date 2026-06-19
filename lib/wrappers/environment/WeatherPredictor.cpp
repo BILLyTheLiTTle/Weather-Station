@@ -102,14 +102,16 @@ WeatherForecast WeatherPredictor::addReading(uint32_t currentPressurePascal, uin
     // 2. ΒΡΑΧΥΠΡΟΘΕΣΜΟ ΡΑΝΤΑΡ (Short-term Override - 30 λεπτά / Θέση 8)
     // =================================================================
     if (_historyCount == 12) {
-        // 3 θέσεις πίσω * 10 λεπτά = 30 λεπτά ακριβώς
-        int32_t shortPressTrend = (int32_t)(_history[11] / 100) - (int32_t)(_history[8] / 100);
-        int16_t shortHumTrend = (int16_t)_humidityHistory[11] - (int16_t)_humidityHistory[8];
+        // 6 θέσεις πίσω * 10 λεπτά = 60 λεπτά (1 ώρα) ιστορικό
+        // Αφαιρούμε την τρέχουσα (11) από την παλιά (5). 
+        // Αν το αποτέλεσμα είναι θετικό, σημαίνει ότι η πίεση ΕΠΕΣΕ.
+        int32_t shortPressDrop = (int32_t)(_history[5] / 100) - (int32_t)(_history[11] / 100);
+        int16_t shortHumRise = (int16_t)_humidityHistory[11] - (int16_t)_humidityHistory[5];
 
-        if (shortPressTrend <= SHORT_TERM_PRESSURE_CHANGE_RAIN_THRESHOLD && shortHumTrend >= SHORT_TERM_HUMIDITY_CHANGE_THRESHOLD) { 
+        if (shortPressDrop >= SHORT_TERM_PRESSURE_CHANGE_RAIN_THRESHOLD && shortHumRise >= SHORT_TERM_HUMIDITY_CHANGE_THRESHOLD) { 
             finalForecast = FORECAST_RAIN; 
         }
-        else if (shortPressTrend <= SHORT_TERM_PRESSURE_CHANGE_STORM_THRESHOLD) {
+        else if (shortPressDrop >= SHORT_TERM_PRESSURE_CHANGE_STORM_THRESHOLD) {
             finalForecast = FORECAST_STORMY; 
         }
     }
