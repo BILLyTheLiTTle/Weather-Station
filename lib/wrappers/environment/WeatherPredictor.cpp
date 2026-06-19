@@ -102,17 +102,14 @@ WeatherForecast WeatherPredictor::addReading(uint32_t currentPressurePascal, uin
     // 2. ΒΡΑΧΥΠΡΟΘΕΣΜΟ ΡΑΝΤΑΡ (Short-term Override - 30 λεπτά / Θέση 8)
     // =================================================================
     if (_historyCount == 12) {
-        // 6 θέσεις πίσω * 10 λεπτά = 60 λεπτά (1 ώρα) ιστορικό
-        // Αφαιρούμε την τρέχουσα (11) από την παλιά (5). 
-        // Αν το αποτέλεσμα είναι θετικό, σημαίνει ότι η πίεση ΕΠΕΣΕ.
         int32_t shortPressDrop = (int32_t)(_history[5] / 100) - (int32_t)(_history[11] / 100);
         int16_t shortHumRise = (int16_t)_humidityHistory[11] - (int16_t)_humidityHistory[5];
 
         if (shortPressDrop >= SHORT_TERM_PRESSURE_CHANGE_RAIN_THRESHOLD && shortHumRise >= SHORT_TERM_HUMIDITY_CHANGE_THRESHOLD) { 
-            finalForecast = FORECAST_RAIN; 
+            finalForecast = FORECAST_SUDDEN_RAIN; 
         }
         else if (shortPressDrop >= SHORT_TERM_PRESSURE_CHANGE_STORM_THRESHOLD) {
-            finalForecast = FORECAST_STORMY; 
+            finalForecast = FORECAST_SUDDEN_STORM; 
         }
     }
 
@@ -132,7 +129,8 @@ WeatherForecast WeatherPredictor::addReading(uint32_t currentPressurePascal, uin
         }
     }
 
-    if (finalForecast == FORECAST_RAIN || finalForecast == FORECAST_STORMY) {
+    if (finalForecast == FORECAST_RAIN || finalForecast == FORECAST_STORMY || 
+        finalForecast == FORECAST_SUDDEN_RAIN || finalForecast == FORECAST_SUDDEN_STORM) {
         if (temperature <= ICE_TEMPERATURE_THRESHOLD && humidity >= ICE_HUMIDITY_THRESHOLD) {
             finalForecast = FORECAST_SNOW;
         }
@@ -209,6 +207,10 @@ const char* WeatherPredictor::getForecastString(WeatherForecast forecast) {
         case FORECAST_RAIN:          return "Rainy\n(Wet/Overcast)";
         // Καταιγίδα: Έντονα φαινόμενα, θύελλα
         case FORECAST_STORMY:        return "Stormy/Gale\n(Severe Storm)";
+        // Ξαφνική Βροχή: Ραγδαία πτώση πίεσης, βροχή πιθανον αμεσα
+        case FORECAST_SUDDEN_RAIN:    return "Sudden Rain";
+        // Ξαφνική Καταιγίδα: Ραγδαία πτώση πίεσης, καταιγίδα πιθανον αμεσα
+        case FORECAST_SUDDEN_STORM:   return "Sudden Storm";
         // ΧΙΟΝΙ: Υετός με θερμοκρασία <= 1.5°C
         case FORECAST_SNOW:          return "Snow\n(Heavy/White)";
         default:                     return "Calculating...";
