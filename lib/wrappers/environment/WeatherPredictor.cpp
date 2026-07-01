@@ -18,8 +18,8 @@ int8_t WeatherPredictor::calculateTrend(uint32_t currentPres, uint32_t oldPres) 
         _currentTrendVal = curHpa - oldHpa; 
     }
 
-    if (curHpa - oldHpa >= 1)  return 1;  
-    if (curHpa - oldHpa <= -1) return -1; 
+    if (_currentTrendVal >= 1)  return 1;  
+    if (_currentTrendVal <= -1) return -1; 
     return 0;                             
 }
 
@@ -30,6 +30,7 @@ int8_t WeatherPredictor::calculateHumidityTrend(uint16_t currentHum, uint16_t ol
         _currentHumTrendVal = (int16_t)currentHum - (int16_t)oldHum;
     }
 
+    // Κρατάμε το 100 γιατί ο DHT επιστρέφεται scaled τιμή (π.χ. 4150 για 41.5% υγρασία)
     if (_currentHumTrendVal >= 100)  return 1;  
     if (_currentHumTrendVal <= -100) return -1; 
     return 0;                                   
@@ -54,10 +55,11 @@ WeatherForecast WeatherPredictor::addReading(uint32_t currentPressurePascal, uin
     // =================================================================
     // 1. ΜΑΚΡΟΠΡΟΘΕΣΜΗ ΠΡΟΓΝΩΣΗ (ZAMBRETTI - 2 ώρες ιστορικό)
     // =================================================================
-    uint32_t oldPressure = _history[12 - _historyCount];
+    uint8_t oldIndex = (_historyCount >= 12) ? 0 : (12 - _historyCount);
+    uint32_t oldPressure = _history[oldIndex];
     int8_t trend = calculateTrend(currentPressurePascal, oldPressure);
     
-    uint16_t oldHumidity = _humidityHistory[12 - _historyCount];
+    uint16_t oldHumidity = _humidityHistory[oldIndex];
     calculateHumidityTrend(humidity, oldHumidity); 
     
     uint32_t hpa = currentPressurePascal / 100;
@@ -102,13 +104,14 @@ WeatherForecast WeatherPredictor::addReading(uint32_t currentPressurePascal, uin
     // 2. ΒΡΑΧΥΠΡΟΘΕΣΜΟ ΡΑΝΤΑΡ (Short-term Override - 30 λεπτά / Θέση 8)
     // =================================================================
     if (_historyCount == 12) {
-        int32_t shortPressDrop = (int32_t)(_history[5] / 100) - (int32_t)(_history[11] / 100);
-        int16_t shortHumRise = (int16_t)_humidityHistory[11] - (int16_t)_humidityHistory[5];
+        int32_t shortPressChange = (int32_t)(_history[11] / 100) - (int32_t)(_history[8] / 100);
+        int16_t shortHumChange = (int16_t)_humidityHistory[11] - (int16_t)_humidityHistory[8];
 
-        if (shortPressDrop >= SHORT_TERM_PRESSURE_CHANGE_RAIN_THRESHOLD && shortHumRise >= SHORT_TERM_HUMIDITY_CHANGE_THRESHOLD) { 
+        // Εφαρμογή των σωστών προσήμων (-) και των δικών σου καθορισμένων define thresholds
+        if (shortPressChange <= -SHORT_TERM_PRESSURE_CHANGE_RAIN_THRESHOLD && shortHumChange >= SHORT_TERM_HUMIDITY_CHANGE_THRESHOLD) { 
             finalForecast = FORECAST_SUDDEN_RAIN; 
         }
-        else if (shortPressDrop >= SHORT_TERM_PRESSURE_CHANGE_STORM_THRESHOLD) {
+        else if (shortPressChange <= -SHORT_TERM_PRESSURE_CHANGE_STORM_THRESHOLD) {
             finalForecast = FORECAST_SUDDEN_STORM; 
         }
     }
@@ -181,8 +184,8 @@ const char* WeatherPredictor::getForecastString(WeatherForecast forecast) {
         case FORECAST_SETTLED:       return recentStormAlert ? "Settled *\n(Stable)"     : "Settled\n(Stable/Durable)";
         // Ο ΠΙΟ ΚΑΘΑΡΟΣ ΚΑΙΡΟΣ: Απόλυτη, κρυστάλλινη ηλιοφάνεια & υψηλή πίεση
         case FORECAST_FINE:          return recentStormAlert ? "Fine/Clear *\n(Totally Clear)"         : "Fine/Clear\n(Totally Clear)";
-        // Βελτίωση: Ο καιρός καθαρίζει και πηγαίνει προς το Fine
-        case FORECAST_BECOMING_FINE: return recentStormAlert ? "Becomoming Fine *\n(Improving)"     : "Becoming Fine\n(Improving)";
+        // Βελτίωση: Ο καιρός καθαρίζει και πηγαίνει προς το Fine (Διορθώθηκε το typo)
+        case FORECAST_BECOMING_FINE: return recentStormAlert ? "Becoming Fine *\n(Improving)"     : "Becoming Fine\n(Improving)";
         // Μεταβατικός: Άστατος καιρός, μισός ήλιος / μισή συννεφιά
         case FORECAST_CHANGEABLE:    return "Changeable\n(Partly Cloudy)";
         // Άστατος: Κακός καιρός, αλλά με διαστήματα βελτίωσης
