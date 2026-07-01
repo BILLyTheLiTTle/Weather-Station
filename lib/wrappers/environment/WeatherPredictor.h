@@ -25,14 +25,6 @@ enum WeatherForecast {
     FORECAST_UNKNOWN
 };
 
-enum WindForecast {
-    GALE_STORMY_WIND = 0,
-    STRONG_WINDS,
-    MODERATE_BREEZES,
-    CALM_LIGHT_WIND,
-    WIND_UNKNOWN
-};
-
 // Εμπλουτισμένο Enum για σαφείς χρόνους αλλαγής
 enum ForecastTimeframe {
     TIME_IMMINENT = 0, // Άμεσα (Επόμενες 1-2 ώρες)
@@ -62,11 +54,9 @@ public:
     WeatherForecast addReading(uint32_t currentPressurePascal, uint32_t currentTime, bool isWinter, int16_t temperature, uint32_t humidity, uint8_t currentHour);
     
     ForecastTimeframe getTimeframe(uint16_t humidity);
-    WindForecast getWindPrediction();
     bool checkIceWarning(int16_t temperature, uint16_t humidity);
     
     const char* getForecastString(WeatherForecast forecast);
-    const char* getWindString(WindForecast forecast);
     const char* getTimeframeString(ForecastTimeframe timeframe);
 };
 

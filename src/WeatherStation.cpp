@@ -33,7 +33,6 @@ DHT_Sensor environmentSensor(9, DHT_Sensor::DHT22);
 BME280Sensor bmp;
 WeatherPredictor predictor;
 WeatherForecast forecast;
-WindForecast wind;
 ForecastTimeframe timeframe;
 bool isIcy;
 
@@ -119,7 +118,6 @@ void loop() {
         bool winterFlag = (currentMonth >= 10 || currentMonth <= 3);
         
         forecast = predictor.addReading(currentPres, rtc.getTimestamp(), winterFlag, currentTemp, currentHum, rtc.getHour());
-        wind = predictor.getWindPrediction();
         timeframe = predictor.getTimeframe(currentHum);
 
         // --- 3. ΠΡΟΣΘΗΚΗ ΓΙΑ ΤΟΝ ΠΑΓΟ (ICE WARNING) ---
@@ -139,8 +137,6 @@ void loop() {
         DBG_LN(F("-*-*-*- Weather Prediction -*-*-*-"));
         DBG("Forecast: ");
         DBG_LN(predictor.getForecastString(forecast));
-        DBG("Wind: ");
-        DBG_LN(predictor.getWindString(wind));
         DBG("Timeframe: ");
         DBG_LN(predictor.getTimeframeString(timeframe));
         
@@ -169,7 +165,6 @@ void navigate(Page page, bool forceRender) {
         case PAGE_WEATHER_PREDICTION:
             display.showWeatherPrediction(
                 predictor.getForecastString(forecast),
-                predictor.getWindString(wind),
                 predictor.getTimeframeString(timeframe)
             );
             break;

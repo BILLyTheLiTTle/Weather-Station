@@ -160,22 +160,6 @@ ForecastTimeframe WeatherPredictor::getTimeframe(uint16_t humidity) {
     return TIME_STABLE; 
 }
 
-WindForecast WeatherPredictor::getWindPrediction() {
-    if (_historyCount < 12) return WIND_UNKNOWN;
-
-    uint32_t currentPresPascal = _history[11];
-    uint32_t oldPresPascal = _history[0];
-    
-    uint32_t pressureChangePascal = (currentPresPascal > oldPresPascal) ? 
-                                    (currentPresPascal - oldPresPascal) : 
-                                    (oldPresPascal - currentPresPascal);
-
-    if (pressureChangePascal >= 500)      return GALE_STORMY_WIND;
-    else if (pressureChangePascal >= 300) return STRONG_WINDS;
-    else if (pressureChangePascal >= 150) return MODERATE_BREEZES;
-    else                                  return CALM_LIGHT_WIND;     
-}
-
 const char* WeatherPredictor::getForecastString(WeatherForecast forecast) {
     // --- ΠΑΤΕΝΤΑ ΜΝΗΜΗΣ ΠΡΟΣΦΑΤΗΣ ΜΠΟΡΑΣ (ΔΙΟΡΘΩΜΕΝΗ) ---
     // Ελέγχουμε αν την τελευταία 1.5 ώρα υπήρξε πτώση >= 2 hPa σε παράθυρο 1 ώρας (6 θέσεις)
@@ -214,16 +198,6 @@ const char* WeatherPredictor::getForecastString(WeatherForecast forecast) {
         // ΧΙΟΝΙ: Υετός με θερμοκρασία <= 1.5°C
         case FORECAST_SNOW:          return "Snow\n(Heavy/White)";
         default:                     return "Calculating...";
-    }
-}
-
-const char* WeatherPredictor::getWindString(WindForecast forecast) {
-    switch (forecast) {
-        case GALE_STORMY_WIND:  return "Stormy (8+)";       // ΘΥΕΛΛΩΔΗΣ ΑΝΕΜΟΣ: Πολύ επικίνδυνος άνεμος, καταιγίδα/μπουρίνι (8+ Bft)
-        case STRONG_WINDS:      return "Strong (6-7)";      // ΙΣΧΥΡΟΣ ΑΝΕΜΟΣ: Δυνατό αγιάζι, χρειάζεται προσοχή (6-7 Bft)
-        case MODERATE_BREEZES:  return "Moderate (4-5)";    // ΜΕΤΡΙΟΣ ΑΝΕΜΟΣ: Σχετικά αισθητό αεράκι, φυσιολογικές συνθήκες (4-5 Bft)
-        case CALM_LIGHT_WIND:   return "Calm (0-3)";        // Ο ΠΙΟ ΗΣΥΧΟΣ ΑΝΕΜΟΣ: Άπνοια ή ελαφρύ αεράκι, ιδανικές συνθήκες (0-3 Bft)
-        default:                return "Calculating...";
     }
 }
 
