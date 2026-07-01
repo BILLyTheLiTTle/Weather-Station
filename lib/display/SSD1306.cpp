@@ -214,7 +214,9 @@ void SSD1306::showSystemStats(Battery &battery, ACS712 &acs712, MemoryProfiler &
     int8_t decimals = roundedTemp % 100;
     if (decimals < 10) _oled.print(F("0"));
     _oled.print(decimals);
-    _oled.print(F(" C"));
+    _oled.println(F(" C"));
+
+    _oled.println(F("Version: 1.0"));
 }
 
 void SSD1306::clear() {
