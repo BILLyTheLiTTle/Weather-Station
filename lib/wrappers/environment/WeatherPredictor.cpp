@@ -206,11 +206,11 @@ const char* WeatherPredictor::getForecastString(WeatherForecast forecast) {
 
 const char* WeatherPredictor::getTimeframeString(ForecastTimeframe timeframe) {
     switch (timeframe) {
-        case TIME_IMMINENT: return "In 1 to 2 HOURS!\n(Prob: IMMINENT)";    // Η ΠΙΟ ΚΟΝΤΙΝΗ/ΣΙΓΟΥΡΗ ΑΛΛΑΓΗ: Ραγδαία πτώση, έρχεται άμεσα
-        case TIME_SOON:     return "In 3 to 5 HOURS\n(Prob: HIGH)";         // ΥΨΗΛΗ ΕΤΟΙΜΟΤΗΤΑ: Η υγρασία ανέβηκε, ο καιρός κλειδώνει για βροχή
-        case TIME_LATER:    return "In 6 to 12 HOURS\n(Prob: LOW)";         // ΜΑΚΡΙΝΗ ΕΚΤΙΜΗΣΗ: Μικρή πιθανότητα για τώρα, ο καιρός θέλει χρόνο ακόμα
-        case TIME_STABLE:   return "Stable weather\n(No change)";           // Σταθερότητα: Καμία αλλαγή στον ορίζοντα
-        default:            return "Analyzing trend...";                    // Μέχρι να γεμίσει το 3ωρο
+        case TIME_IMMINENT: return "In 1-2 HOURS!\n[Fast Shift/Sure]";    // Η ΠΙΟ ΚΟΝΤΙΝΗ/ΣΙΓΟΥΡΗ ΑΛΛΑΓΗ: Ραγδαία πτώση, έρχεται άμεσα
+        case TIME_SOON:     return "In 3-5 HOURS\n[Almost ready/High Prob]";   // ΥΨΗΛΗ ΕΤΟΙΜΟΤΗΤΑ: Η υγρασία ανέβηκε, ο καιρός κλειδώνει για βροχή
+        case TIME_LATER:    return "In 6-12 HOURS\n[Slow Move/Low Prob]"; // ΜΑΚΡΙΝΗ ΕΚΤΙΜΗΣΗ: Μικρή πιθανότητα για τώρα, ο καιρός θέλει χρόνο ακόμα
+        case TIME_STABLE:   return "Stable Weather\n[No Change Ahead]";   // Σταθερότητα: Καμία αλλαγή στον ορίζοντα
+        default:            return "Analyzing trend...";                  // Μέχρι να γεμίσει το 3ωρο
     }
 }
 
