@@ -179,27 +179,27 @@ const char* WeatherPredictor::getForecastString(WeatherForecast forecast) {
     // Προσθήκη του χαρακτήρα '*' στα switch cases για να ξέρεις ότι υπήρξε πρόσφατο alert
     switch (forecast) {
         // ΚΑΛΟΣ ΚΑΙΡΟΣ: Μια χαρά μέρα, ήπιος ουρανός, φυσιολογική πίεση
-        case FORECAST_GOOD:          return recentStormAlert ? "Good *\n(Fair/Mild Sky)" : "Good \n(Fair/Mild Sky)";
+        case FORECAST_GOOD:          return recentStormAlert ? "Mild/Fair *\n[Open Sky]" : "Mild/Fair\n[Open Sky]";
         // ΣΤΑΘΕΡΟΣ ΚΑΙΡΟΣ: Κλειδωμένη καλοκαιρία μεγάλης διάρκειας, ακλόνητος
-        case FORECAST_SETTLED:       return recentStormAlert ? "Settled *\n(Stable)"     : "Settled\n(Stable/Durable)";
+        case FORECAST_SETTLED:       return recentStormAlert ? "Stable Fair *\n[Clear/Dry Air]" : "Stable Fair\n[Clear/Dry Air]";
         // Ο ΠΙΟ ΚΑΘΑΡΟΣ ΚΑΙΡΟΣ: Απόλυτη, κρυστάλλινη ηλιοφάνεια & υψηλή πίεση
-        case FORECAST_FINE:          return recentStormAlert ? "Fine/Clear *\n(Totally Clear)"         : "Fine/Clear\n(Totally Clear)";
+        case FORECAST_FINE:          return recentStormAlert ? "Clear Sky *\n[High Pressure]" : "Clear Sky\n[High Pressure]";
         // Βελτίωση: Ο καιρός καθαρίζει και πηγαίνει προς το Fine (Διορθώθηκε το typo)
-        case FORECAST_BECOMING_FINE: return recentStormAlert ? "Becoming Fine *\n(Improving)"     : "Becoming Fine\n(Improving)";
+        case FORECAST_BECOMING_FINE: return recentStormAlert ? "Improving *\n[Clearing Up]" : "Improving\n[Clearing Up]";
         // Μεταβατικός: Άστατος καιρός, μισός ήλιος / μισή συννεφιά
-        case FORECAST_CHANGEABLE:    return "Changeable\n(Partly Cloudy)";
+        case FORECAST_CHANGEABLE:    return "Cloudy/Stable\n[No Rain Expected]";
         // Άστατος: Κακός καιρός, αλλά με διαστήματα βελτίωσης
-        case FORECAST_UNSETTLED:     return "Unsettled\n(Variable/Spells)";
+        case FORECAST_UNSETTLED:     return "Unsettled\n[Variable/Changes]";
         // Βροχή: Κλειστός, γκρίζος και βρεγμένος καιρός
-        case FORECAST_RAIN:          return "Rainy\n(Wet/Overcast)";
+        case FORECAST_RAIN:          return "Rainy\n[Wet/Overcast]";
         // Καταιγίδα: Έντονα φαινόμενα, θύελλα
-        case FORECAST_STORMY:        return "Stormy/Gale\n(Severe Storm)";
+        case FORECAST_STORMY:        return "Stormy/Gale\n[Severe Storm]";
         // Ξαφνική Βροχή: Ραγδαία πτώση πίεσης, βροχή πιθανον αμεσα
-        case FORECAST_SUDDEN_RAIN:    return "Sudden Rain";
+        case FORECAST_SUDDEN_RAIN:    return "Sudden Rain\n[Radar Alert!]";
         // Ξαφνική Καταιγίδα: Ραγδαία πτώση πίεσης, καταιγίδα πιθανον αμεσα
-        case FORECAST_SUDDEN_STORM:   return "Sudden Storm";
+        case FORECAST_SUDDEN_STORM:   return "Sudden Storm\n[Severe Squall!]";
         // ΧΙΟΝΙ: Υετός με θερμοκρασία <= 1.5°C
-        case FORECAST_SNOW:          return "Snow\n(Heavy/White)";
+        case FORECAST_SNOW:          return "Snow\n[Heavy/Frost]";
         default:                     return "Calculating...";
     }
 }
