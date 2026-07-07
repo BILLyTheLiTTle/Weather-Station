@@ -43,6 +43,8 @@ private:
 
     bool shouldResetDailyMetrics(DS3231 &rtc);
 
+    bool _dailyResetDone;
+
     int16_t _currentTemp;
     uint16_t _currentHumidity;
     uint32_t _currentPressure;

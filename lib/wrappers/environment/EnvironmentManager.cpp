@@ -5,6 +5,34 @@ void EnvironmentManager::printEnvironmentStats(BME280Sensor &bme, DHT_Sensor &dh
     TemperatureDailyStats &td, TemperatureLifetimeStats &tl, 
     HumidityDailyStats &hd, HumidityLifetimeStats &hl) {
 
+    // -------------------------------------------------------------------------
+    // EDGE TRIGGER RESET LOGIC
+    // -------------------------------------------------------------------------
+    // Ελέγχει αν είμαστε μέσα στο παράθυρο (00:05 - 00:25)
+    if (shouldResetDailyMetrics(rtc)) {
+        if (!_dailyResetDone) {
+            // 1. Καθαρισμός των εσωτερικών μετρητών της κλάσης
+            _maxMeasuredTemp = INT16_MIN;
+            _minMeasuredTemp = INT16_MAX;
+            _maxMeasuredHum = 0;
+            _minMeasuredHum = UINT16_MAX;
+
+            // 2. Καθαρισμός των structs (RAM) για τη νέα ημέρα
+            td.maxTemp = INT16_MIN;
+            td.minTemp = INT16_MAX;
+            hd.maxHum = 0;
+            hd.minHum = UINT16_MAX;
+
+            // 3. Κλείδωμα: Μην ξαναμπείς σε αυτό το loop μέχρι να βγούμε από το παράθυρο
+            _dailyResetDone = true; 
+            DBG_LN(F(" [RESET] Daily metrics cleared for the new day."));
+        }
+    } else {
+        // Μόλις η ώρα πάει 00:30, το shouldReset γίνεται false και ξεκλειδώνουμε για την επόμενη μέρα
+        _dailyResetDone = false; 
+    }
+
+    // Κλήση των επιμέρους συναρτήσεων μέτρησης και εκτύπωσης
     printTemperatureStats(dht, eeprom, rtc, td, tl);
     printPressureStats(bme);
     printHumidityStats(dht, eeprom, rtc, hd, hl);
@@ -83,8 +111,7 @@ bool EnvironmentManager::saveTemperatureLifetimeRecord(EEPROM_25LC040A &eeprom, 
 bool EnvironmentManager::rememberTemperatureDailyRecord(DS3231 &rtc, int16_t maxTemp, int16_t minTemp, TemperatureDailyStats &day) {
     bool dailyChanged = false;
     
-    // Check for NEW MAX: If current is NaN (after reset) OR new temp is higher
-    if (maxTemp > day.maxTemp || shouldResetDailyMetrics(rtc)) {
+    if (maxTemp > day.maxTemp) {
         day.maxTemp = maxTemp;
         day.maxYear = rtc.getYear();
         day.maxMonth = rtc.getMonth();
@@ -94,8 +121,7 @@ bool EnvironmentManager::rememberTemperatureDailyRecord(DS3231 &rtc, int16_t max
         dailyChanged = true;
     }
 
-    // Check for NEW MIN: If current is NaN (after reset) OR new temp is lower
-    if (minTemp < day.minTemp || shouldResetDailyMetrics(rtc)) {
+    if (minTemp < day.minTemp) {
         day.minTemp = minTemp;
         day.minYear = rtc.getYear();
         day.minMonth = rtc.getMonth();
@@ -111,8 +137,7 @@ bool EnvironmentManager::rememberTemperatureDailyRecord(DS3231 &rtc, int16_t max
 bool EnvironmentManager::rememberHumidityDailyRecord(DS3231 &rtc, uint16_t maxHum, uint16_t minHum, HumidityDailyStats &day) {
     bool dailyChanged = false;
     
-    // Check for NEW MAX: If current is NaN (after reset) OR new humidity is higher
-    if (maxHum > day.maxHum || shouldResetDailyMetrics(rtc)) {
+    if (maxHum > day.maxHum) {
         day.maxHum = maxHum;
         day.maxYear = rtc.getYear();
         day.maxMonth = rtc.getMonth();
@@ -122,8 +147,7 @@ bool EnvironmentManager::rememberHumidityDailyRecord(DS3231 &rtc, uint16_t maxHu
         dailyChanged = true;
     }
 
-    // Check for NEW MIN: If current is NaN (after reset) OR new humidity is lower
-    if (minHum < day.minHum || shouldResetDailyMetrics(rtc)) {
+    if (minHum < day.minHum) {
         day.minHum = minHum;
         day.minYear = rtc.getYear();
         day.minMonth = rtc.getMonth();
@@ -174,11 +198,6 @@ void EnvironmentManager::printLine(const __FlashStringHelper* label, int16_t val
 }
 
 void EnvironmentManager::printTemperatureStats(DHT_Sensor &dht, EEPROM_25LC040A &eeprom, DS3231 &rtc, TemperatureDailyStats &td, TemperatureLifetimeStats &tl) {
-    if (shouldResetDailyMetrics(rtc)) {
-        _maxMeasuredTemp = INT16_MIN;
-        _minMeasuredTemp = INT16_MAX;
-    }
-
     int16_t temp = dht.getTemperature();
 
     if (temp != dht.INVALID_TEMPERATURE) {
@@ -198,9 +217,11 @@ void EnvironmentManager::printTemperatureStats(DHT_Sensor &dht, EEPROM_25LC040A 
             _minMeasuredTemp = _currentTemp;
         }
 
+        // 2. Επεξεργασία και αποθήκευση στα structs (RAM / EEPROM)
         bool lifetimeTemperatureRecordExists = saveTemperatureLifetimeRecord(eeprom, rtc, _maxMeasuredTemp, _minMeasuredTemp, tl);
         bool dailyTemperatureRecordExists = rememberTemperatureDailyRecord(rtc, _maxMeasuredTemp, _minMeasuredTemp, td);
 
+        // 3. Εκτύπωση αποτελεσμάτων
         eeprom.loadLifetimeTemperature(tl);
         DBG(F("  Lifetime Stats "));
         if (lifetimeTemperatureRecordExists) DBG(F("(*)"));
@@ -228,11 +249,6 @@ void EnvironmentManager::printPressureStats(BME280Sensor &bmp) {
 }
 
 void EnvironmentManager::printHumidityStats(DHT_Sensor &dht, EEPROM_25LC040A &eeprom, DS3231 &rtc, HumidityDailyStats &hd, HumidityLifetimeStats &hl) {
-    if (shouldResetDailyMetrics(rtc)) {
-        _maxMeasuredHum = 0;
-        _minMeasuredHum = UINT16_MAX;
-    }
-
     uint16_t hum = dht.getHumidity();
 
     if (hum != dht.INVALID_HUMIDITY) {
@@ -251,9 +267,11 @@ void EnvironmentManager::printHumidityStats(DHT_Sensor &dht, EEPROM_25LC040A &ee
             _minMeasuredHum = _currentHumidity;
         }
 
+        // 2. Επεξεργασία και αποθήκευση στα structs (RAM / EEPROM)
         bool lifetimeHumidityRecordExists = saveHumidityLifetimeRecord(eeprom, rtc, _maxMeasuredHum, _minMeasuredHum, hl);
         bool dailyHumidityRecordExists = rememberHumidityDailyRecord(rtc, _maxMeasuredHum, _minMeasuredHum, hd);
 
+        // 3. Εκτύπωση αποτελεσμάτων
         eeprom.loadLifetimeHumidity(hl);
         DBG(F("  Lifetime Stats "));
         if (lifetimeHumidityRecordExists) DBG(F("(*)"));
@@ -269,6 +287,6 @@ void EnvironmentManager::printHumidityStats(DHT_Sensor &dht, EEPROM_25LC040A &ee
     }
 }
 
-int16_t EnvironmentManager::getCurrentTemp() {return _currentTemp; }
-uint16_t EnvironmentManager::getCurrentHum() {return _currentHumidity; }
-uint32_t EnvironmentManager::getCurrentPres() {return _currentPressure; }
+int16_t EnvironmentManager::getCurrentTemp() { return _currentTemp; }
+uint16_t EnvironmentManager::getCurrentHum() { return _currentHumidity; }
+uint32_t EnvironmentManager::getCurrentPres() { return _currentPressure; }
