@@ -26,7 +26,7 @@ void DS3231::updateWithSystemTime() {
     if (__DATE__[4] == ' ') {
         d = __DATE__[5] - '0';
     } else {
-        d = ((__DATE__[4] - '0') * 10) + (__DATE__[5] - '0');
+        d = (uint8_t)((__DATE__[4] - '0') * 10) + (__DATE__[5] - '0');
     }
 
     const char *months = "JanFebMarAprMayJunJulAugSepOctNovDec";
