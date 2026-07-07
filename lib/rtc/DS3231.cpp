@@ -49,7 +49,9 @@ void DS3231::updateWithSystemTime() {
     rtc.write(tm);
     
     DBG(F("RTC Successfully Calibrated: "));
-    DBG_LN(__TIME__);
+    DBG(__TIME__);
+    DBG(F(" @ "));
+    DBG_LN(__DATE__);
 }
 
 void DS3231::reset() {
