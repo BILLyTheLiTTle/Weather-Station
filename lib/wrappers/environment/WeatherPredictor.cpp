@@ -30,7 +30,7 @@ int8_t WeatherPredictor::calculateHumidityTrend(uint16_t currentHum, uint16_t ol
         _currentHumTrendVal = (int16_t)currentHum - (int16_t)oldHum;
     }
 
-    // Κρατάμε το 100 γιατί ο DHT επιστρέφεται scaled τιμή (π.χ. 4150 για 41.5% υγρασία)
+    // Κρατάμε το 100 γιατί ο DHT επιστρέφει scaled τιμή (π.χ. 4150 για 41.5% υγρασία)
     if (_currentHumTrendVal >= 100)  return 1;  
     if (_currentHumTrendVal <= -100) return -1; 
     return 0;                                   
@@ -53,7 +53,7 @@ WeatherForecast WeatherPredictor::addReading(uint32_t currentPressurePascal, uin
     if (_historyCount < 3) return FORECAST_UNKNOWN;
 
     // =================================================================
-    // 1. ΜΑΚΡΟΠΡΟΘΕΣΜΗ ΠΡΟΓΝΩΣΗ (ZAMBRETTI - 2 ώρες ιστορικό)
+    // 1. ΜΑΚΡΟΠΡΟΘΕΣΜΗ ΠΡΟΓΝΩΣΗ (ZAMBRETTI)
     // =================================================================
     uint8_t oldIndex = (_historyCount >= 12) ? 0 : (12 - _historyCount);
     uint32_t oldPressure = _history[oldIndex];
@@ -63,10 +63,19 @@ WeatherForecast WeatherPredictor::addReading(uint32_t currentPressurePascal, uin
     calculateHumidityTrend(humidity, oldHumidity); 
     
     uint32_t hpa = currentPressurePascal / 100;
+
+    // ΕΠΙΣΤΗΜΟΝΙΚΗ ΔΙΟΡΘΩΣΗ ΕΠΟΧΗΣ (Zambretti Baseline Adjustment)
+    // Αν είναι Καλοκαίρι (!isWinter), προσθέτουμε offset γιατί η ζέστη ρίχνει την πίεση χωρίς βροχή.
+    // Αν είναι Χειμώνας (isWinter), αφαιρούμε offset.
+    if (!isWinter) {
+        hpa += 2; 
+    } else {
+        hpa -= 2; 
+    }
+
     uint8_t zambrettiZ = 32;
 
-    if (trend == 1) {
-        if (isWinter) hpa += 2;
+    if (trend == 1) { // Πίεση Ανεβαίνει
         if (hpa >= 1030) zambrettiZ = 1;
         else if (hpa >= 1020) zambrettiZ = 2;
         else if (hpa >= 1010) zambrettiZ = 3;
@@ -74,8 +83,7 @@ WeatherForecast WeatherPredictor::addReading(uint32_t currentPressurePascal, uin
         else if (hpa >= 990)  zambrettiZ = 5;
         else zambrettiZ = 6;
     } 
-    else if (trend == -1) {
-        if (isWinter) hpa -= 2;
+    else if (trend == -1) { // Πίεση Πέφτει
         if (hpa >= 1030) zambrettiZ = 20;
         else if (hpa >= 1020) zambrettiZ = 21;
         else if (hpa >= 1010) zambrettiZ = 22;
@@ -83,10 +91,10 @@ WeatherForecast WeatherPredictor::addReading(uint32_t currentPressurePascal, uin
         else if (hpa >= 990)  zambrettiZ = 24;
         else zambrettiZ = 25;
     } 
-    else {
-        if (hpa >= 1020) zambrettiZ = 10;
+    else { // Σταθερή Πίεση
+        if (hpa >= 1016)      zambrettiZ = 10; 
         else if (hpa >= 1010) zambrettiZ = 11;
-        else if (hpa >= 1000) zambrettiZ = 12;
+        else if (hpa >= 1002) zambrettiZ = 12;
         else zambrettiZ = 13;
     }
 
@@ -206,11 +214,11 @@ const char* WeatherPredictor::getForecastString(WeatherForecast forecast) {
 
 const char* WeatherPredictor::getTimeframeString(ForecastTimeframe timeframe) {
     switch (timeframe) {
-        case TIME_IMMINENT: return "In 1-2 HOURS!\n[Fast Shift/Sure]";    // Η ΠΙΟ ΚΟΝΤΙΝΗ/ΣΙΓΟΥΡΗ ΑΛΛΑΓΗ: Ραγδαία πτώση, έρχεται άμεσα
-        case TIME_SOON:     return "In 3-5 HOURS\n[Almost ready/High Prob]";   // ΥΨΗΛΗ ΕΤΟΙΜΟΤΗΤΑ: Η υγρασία ανέβηκε, ο καιρός κλειδώνει για βροχή
-        case TIME_LATER:    return "In 6-12 HOURS\n[Slow Move/Low Prob]"; // ΜΑΚΡΙΝΗ ΕΚΤΙΜΗΣΗ: Μικρή πιθανότητα για τώρα, ο καιρός θέλει χρόνο ακόμα
-        case TIME_STABLE:   return "Stable Weather\n[No Change Ahead]";   // Σταθερότητα: Καμία αλλαγή στον ορίζοντα
-        default:            return "Analyzing trend...";                  // Μέχρι να γεμίσει το 3ωρο
+        case TIME_IMMINENT: return "In 1-2 HOURS!\n[Fast Shift/Sure]";          // Η ΠΙΟ ΚΟΝΤΙΝΗ/ΣΙΓΟΥΡΗ ΑΛΛΑΓΗ: Ραγδαία πτώση, έρχεται άμεσα
+        case TIME_SOON:     return "In 3-5 HOURS\n[Almost ready/High Prob]";    // ΥΨΗΛΗ ΕΤΟΙΜΟΤΗΤΑ: Η υγρασία ανέβηκε, ο καιρός κλειδώνει για βροχή
+        case TIME_LATER:    return "In 6-12 HOURS\n[Slow Move/Low Prob]";       // ΜΑΚΡΙΝΗ ΕΚΤΙΜΗΣΗ: Μικρή πιθανότητα για τώρα, ο καιρός θέλει χρόνο ακόμα
+        case TIME_STABLE:   return "Stable Weather\n[No Change Ahead]";         // Σταθερότητα: Καμία αλλαγή στον ορίζοντα
+        default:            return "Analyzing trend...";                        // Μέχρι να γεμίσει το 3ωρο
     }
 }
 
