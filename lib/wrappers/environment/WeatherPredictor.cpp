@@ -109,13 +109,12 @@ WeatherForecast WeatherPredictor::addReading(uint32_t currentPressurePascal, uin
     else                       finalForecast = FORECAST_STORMY;
 
     // =================================================================
-    // 2. ΒΡΑΧΥΠΡΟΘΕΣΜΟ ΡΑΝΤΑΡ (Short-term Override - 30 λεπτά / Θέση 8)
+    // 2. ΒΡΑΧΥΠΡΟΘΕΣΜΟ ΡΑΝΤΑΡ (Short-term Override - ~30-45 λεπτά πριν)
     // =================================================================
     if (_historyCount == 12) {
         int32_t shortPressChange = (int32_t)(_history[11] / 100) - (int32_t)(_history[8] / 100);
         int16_t shortHumChange = (int16_t)_humidityHistory[11] - (int16_t)_humidityHistory[8];
 
-        // Εφαρμογή των σωστών προσήμων (-) και των δικών σου καθορισμένων define thresholds
         if (shortPressChange <= -SHORT_TERM_PRESSURE_CHANGE_RAIN_THRESHOLD && shortHumChange >= SHORT_TERM_HUMIDITY_CHANGE_THRESHOLD) { 
             finalForecast = FORECAST_SUDDEN_RAIN; 
         }
@@ -127,9 +126,9 @@ WeatherForecast WeatherPredictor::addReading(uint32_t currentPressurePascal, uin
     // =================================================================
     // 3. ΔΥΝΑΜΙΚΑ ΟΡΙΑ ΒΑΣΕΙ ΩΡΑΣ
     // =================================================================
-    uint16_t rainHumidityThreshold = 7500; // 75% την ημέρα (αντί για 80%)
+    uint16_t rainHumidityThreshold = 7500; // 75% την ημέρα
     if (currentHour >= 21 || currentHour <= 7) {
-        rainHumidityThreshold = 8500;      // 85% τη νύχτα (αντί για 90%)
+        rainHumidityThreshold = 8500;      // 85% τη νύχτα
     }
 
     if (finalForecast <= FORECAST_BECOMING_FINE) {
@@ -173,8 +172,7 @@ ForecastTimeframe WeatherPredictor::getTimeframe(uint16_t humidity) {
 }
 
 const char* WeatherPredictor::getForecastString(WeatherForecast forecast) {
-    // --- ΠΑΤΕΝΤΑ ΜΝΗΜΗΣ ΠΡΟΣΦΑΤΗΣ ΜΠΟΡΑΣ (ΔΙΟΡΘΩΜΕΝΗ) ---
-    // Ελέγχουμε αν την τελευταία 1.5 ώρα υπήρξε πτώση >= 2 hPa σε παράθυρο 1 ώρας (6 θέσεις)
+    // --- ΠΑΤΕΝΤΑ ΜΝΗΜΗΣ ΠΡΟΣΦΑΤΗΣ ΜΠΟΡΑΣ ---
     bool recentStormAlert = false;
     if (_historyCount == 12) {
         for(uint8_t i = 0; i < 6; i++) {
