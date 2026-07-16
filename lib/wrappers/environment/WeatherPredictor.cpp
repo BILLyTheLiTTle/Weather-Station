@@ -127,15 +127,16 @@ WeatherForecast WeatherPredictor::addReading(uint32_t currentPressurePascal, uin
     // =================================================================
     // 3. ΔΥΝΑΜΙΚΑ ΟΡΙΑ ΒΑΣΕΙ ΩΡΑΣ
     // =================================================================
-    uint16_t rainHumidityThreshold = 8000; 
+    uint16_t rainHumidityThreshold = 7500; // 75% την ημέρα (αντί για 80%)
     if (currentHour >= 21 || currentHour <= 7) {
-        rainHumidityThreshold = 9000; 
+        rainHumidityThreshold = 8500;      // 85% τη νύχτα (αντί για 90%)
     }
 
     if (finalForecast <= FORECAST_BECOMING_FINE) {
         if (humidity >= rainHumidityThreshold) { 
             finalForecast = FORECAST_RAIN; 
-        } else if (humidity >= (rainHumidityThreshold - 1000) && _currentHumTrendVal > 0) {
+        }
+        else if (humidity >= (rainHumidityThreshold - 1000) && _currentHumTrendVal > 0) {
             finalForecast = FORECAST_UNSETTLED; 
         }
     }
