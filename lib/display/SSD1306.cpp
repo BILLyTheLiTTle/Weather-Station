@@ -216,7 +216,7 @@ void SSD1306::showSystemStats(Battery &battery, ACS712 &acs712, MemoryProfiler &
     _oled.print(decimals);
     _oled.println(F(" C"));
 
-    _oled.println(F("Version: 1.1"));
+    _oled.println(F("Version: 1.2"));
 }
 
 void SSD1306::clear() {
