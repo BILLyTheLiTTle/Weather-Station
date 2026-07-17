@@ -171,7 +171,8 @@ void SSD1306::showSystemStats(Battery &battery, ACS712 &acs712, MemoryProfiler &
     _oled.println();
 
     uint16_t voltage = battery.readVoltage();
-    bool isUsbPowered = battery.isUsbPowered();
+    //Disable USB power detection
+    bool isUsbPowered = false;//battery.isUsbPowered();
     _oled.print(F("Battery "));
     if(voltage <= Battery::LOWER_BOUND_VOLTAGE && !isUsbPowered) {
         _oled.print(F(" (Recharge)"));
