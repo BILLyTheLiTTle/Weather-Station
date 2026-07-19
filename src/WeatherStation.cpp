@@ -108,8 +108,7 @@ void loop() {
 
         bmp.update();
 
-        // Disable force show of power stats
-        shouldStickToSystemStats = false;//!battery.isUsbPowered() && battery.readVoltage() <= Battery::LOWER_BOUND_VOLTAGE;
+        shouldStickToSystemStats = !battery.isUsbPowered() && battery.readVoltage() <= Battery::LOWER_BOUND_VOLTAGE;
 
         uint32_t currentPres = envMan.getCurrentPres();
         int16_t currentTemp = envMan.getCurrentTemp();

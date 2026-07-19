@@ -171,8 +171,7 @@ void SSD1306::showSystemStats(Battery &battery, ACS712 &acs712, MemoryProfiler &
     _oled.println();
 
     uint16_t voltage = battery.readVoltage();
-    //Disable USB power detection
-    bool isUsbPowered = false;//battery.isUsbPowered();
+    bool isUsbPowered = battery.isUsbPowered();
     _oled.print(F("Battery "));
     if(voltage <= Battery::LOWER_BOUND_VOLTAGE && !isUsbPowered) {
         _oled.print(F(" (Recharge)"));
@@ -217,7 +216,7 @@ void SSD1306::showSystemStats(Battery &battery, ACS712 &acs712, MemoryProfiler &
     _oled.print(decimals);
     _oled.println(F(" C"));
 
-    _oled.println(F("Version: 1.2"));
+    _oled.println(F("Version: 1.1"));
 }
 
 void SSD1306::clear() {
